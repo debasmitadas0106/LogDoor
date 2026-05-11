@@ -36,4 +36,21 @@ const findAllUserService = async (condition, dbUrl = "LogDoor") => {
     throw error;
   }
 };
-module.exports = { createUserService, findUserService, findAllUserService };
+
+const updateUserService = async (condition, data, dbUrl = "LogDoor") => {
+  try {
+    const conn = await dbConnect(dbUrl);
+    const userDetails = await conn.model("Users", userSchema, "Users");
+    const userDetailsUpdate = await userDetails.updateOne(condition, data);
+    return userDetailsUpdate;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+module.exports = {
+  createUserService,
+  findUserService,
+  findAllUserService,
+  updateUserService,
+};

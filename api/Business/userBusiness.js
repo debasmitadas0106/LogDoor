@@ -3,6 +3,7 @@ const {
   findUserService,
   findAllUserService,
 } = require("../Service/userService");
+const { v4: uuidv4 } = require("uuid");
 
 const createUserBusiness = async (payload) => {
   try {
@@ -11,6 +12,8 @@ const createUserBusiness = async (payload) => {
     if (findUserDetails) {
       return "user already exists";
     }
+    payload.token = uuidv4();
+    payload.verified = false
     const userDetails = await createUserService(payload);
     return userDetails;
   } catch (error) {

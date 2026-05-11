@@ -1,7 +1,7 @@
 const userSchema = require("../../Schema/users");
 const dbConnect = require("../../utils/connectionSetup");
 
-const createUserService = async (data, dbUrl = "ChatterBot") => {
+const createUserService = async (data, dbUrl = "LogDoor") => {
   try {
     const conn = await dbConnect(dbUrl);
     const userDetails = await conn.model("Users", userSchema, "Users");
@@ -13,7 +13,7 @@ const createUserService = async (data, dbUrl = "ChatterBot") => {
   }
 };
 
-const findUserService = async (condition, dbUrl = "ChatterBot") => {
+const findUserService = async (condition, dbUrl = "LogDoor") => {
   try {
     const conn = await dbConnect(dbUrl);
     const userDetails = await conn.model("Users", userSchema, "Users");
@@ -24,4 +24,16 @@ const findUserService = async (condition, dbUrl = "ChatterBot") => {
     throw error;
   }
 };
-module.exports = { createUserService, findUserService };
+
+const findAllUserService = async (condition, dbUrl = "LogDoor") => {
+  try {
+    const conn = await dbConnect(dbUrl);
+    const userDetails = await conn.model("Users", userSchema, "Users");
+    const userDetailsCreate = await userDetails.find(condition);
+    return userDetailsCreate;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+module.exports = { createUserService, findUserService, findAllUserService };

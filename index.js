@@ -11,6 +11,7 @@ const { findUserBusiness } = require("./api/Business/userBusiness");
 const {
   verifyEmailController,
 } = require("./api/Controller/verifyEmailController");
+const { loginUserController } = require("./api/Controller/loginController");
 const port = process.env.PORT || 5000;
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.post("/create-user", createUserController);
 app.get("/find-user", findUserController);
 app.get("/find-all-user", findAllUserController);
 
+app.post("/login", loginUserController);
 app.post("/verify-user", verifyEmailController);
 
 app.listen(port, () => {

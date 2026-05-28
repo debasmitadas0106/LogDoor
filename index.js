@@ -14,6 +14,7 @@ const {
 const { loginUserController } = require("./api/Controller/loginController");
 const { verifyDatabase } = require("./middleware/verifyDb");
 const { verifyToken } = require("./middleware/verifyToken");
+const { createProjectController } = require("./api/Controller/projectController");
 const port = process.env.PORT || 5000;
 
 dotenv.config();
@@ -38,6 +39,7 @@ app.get("/find-all-user", findAllUserController);
 
 app.post("/login", loginUserController);
 app.post("/verify-user", verifyEmailController);
+app.post('/create-project',createProjectController);
 
 app.listen(port, () => {
   console.log(`app is listening at port ${port}`);

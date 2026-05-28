@@ -4,10 +4,10 @@ const { VERIFY_BLACKLIST_URLS } = require("./constants");
 
 const verifyToken = async (req, res, next) => {
   try {
-    console.log(req.url,"reqqqqqq")
+    //console.log(req.url,"reqqqqqq")
     if(VERIFY_BLACKLIST_URLS.includes(req.url)){
         console.log("authorization bypassed")
-        return next();
+      return next();
     }
     const authHeader = req?.headers?.authorization;
 

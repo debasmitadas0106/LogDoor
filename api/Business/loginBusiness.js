@@ -34,6 +34,7 @@ const loginBusiness = async (payload) => {
     return {
       token: token,
       userId: getUserDetails?._id,
+      dbName: getUserDetails?.dbName
     };
   } catch (error) {
     console.log(error);

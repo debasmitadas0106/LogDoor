@@ -12,6 +12,8 @@ const {
   verifyEmailController,
 } = require("./api/Controller/verifyEmailController");
 const { loginUserController } = require("./api/Controller/loginController");
+const { verifyDatabase } = require("./middleware/verifyDb");
+const { verifyToken } = require("./middleware/verifyToken");
 const port = process.env.PORT || 5000;
 
 dotenv.config();
@@ -27,6 +29,8 @@ app.get("/api-check", (req, res) => {
   console.log("Jay shree ram");
   res.send("LogDoor has started well");
 });
+app.use(verifyToken);
+app.use(verifyDatabase);
 
 app.post("/create-user", createUserController);
 app.get("/find-user", findUserController);

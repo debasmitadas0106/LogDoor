@@ -15,8 +15,9 @@ const verifyEmailBusiness = async (payload) => {
       token: "",
       verified: true,
     };
-    const userDetails = await updateUserService({ token: token }, dbPayload);
     const dbName = `LogDoor_${findUserDetails._id}`;
+    dbPayload.dbName = dbName;
+    const userDetails = await updateUserService({ token: token }, dbPayload);
     const userDbpayload = {
       email: findUserDetails?.email,
       userId: findUserDetails?._id,

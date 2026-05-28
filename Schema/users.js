@@ -10,6 +10,7 @@ const userSchema = new Schema(
     phone: String,
     firstName: String,
     lastName: String,
+    dbName: String,
     interests: { type: Array, required: false },
     token: String,
     verified: { type: Boolean, default: false },

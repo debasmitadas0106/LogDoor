@@ -1,38 +1,40 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-let connections = {};
-let clusterConnection = {};
-async function ClusterConnection() {
-  try {
-    clusterConnection = await mongoose.createConnection(
-      process.env.MONGODB_URI,
-    );
-    console.log("Connected to MongoDB Cluster");
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-  }
-}
-// Connect to MongoDB cluster
-ClusterConnection();
+// One connection to the cluster, shared by everyone.
+// Each account gets its own database on it via useDb(dbName),
+// the same idea LogDoor used with dbName per user.
+// On Netlify a warm function container reuses this cached connection.
+let base = null;
+let connecting = null;
 
-async function dbConnect(databaseName) {
-  // Wait until the cluster connection is established
-  if (!clusterConnection) {
-    console.error("Cluster connection is not initialized. Reconnecting...");
-    await ClusterConnection(); // Establish connection if it's not available
+async function getBase() {
+  if (base && base.readyState === 1) return base;
+  if (!connecting) {
+    connecting = mongoose
+      .createConnection(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
+      .asPromise()
+      .then((conn) => {
+        base = conn;
+        console.log("Connected to MongoDB cluster");
+        return conn;
+      })
+      .catch((error) => {
+        connecting = null; // let the next request retry
+        throw error;
+      });
   }
-
-  try {
-    const db = clusterConnection.useDb(databaseName);
-    console.log(`Connected to database: ${databaseName}`);
-
-    return db;
-  } catch (error) {
-    console.error("Error switching to database:", error);
-    return null;
-  }
+  return connecting;
 }
 
-// Export the function to use it elsewhere
+// Database holding the list of accounts (Users collection)
+const ACCOUNTS_DB = () => process.env.ACCOUNTS_DB || "StudyTrackerAccounts";
+
+async function dbConnect(dbName) {
+  if (!dbName) throw new Error("dbConnect needs a database name");
+  const conn = await getBase();
+  return conn.useDb(dbName, { useCache: true });
+}
+
 module.exports = dbConnect;
+module.exports.ACCOUNTS_DB = ACCOUNTS_DB;

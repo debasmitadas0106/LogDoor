@@ -1,0 +1,542 @@
+[
+  {
+    "id": "bits-01",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "What is a bit?",
+    "answer": "A bit is the smallest piece of data a computer can store. It has only two possible values: 0 or 1. Think of it like a light switch that is either off (0) or on (1). Everything in a computer (numbers, text, images, your JS code) is finally stored as long rows of bits.",
+    "example": "1 bit  -> 0 or 1\n2 bits -> 00, 01, 10, 11"
+  },
+  {
+    "id": "bits-02",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "What is a byte?",
+    "answer": "A byte is a group of 8 bits. It is the basic unit computers use to measure memory and file sizes. One byte can hold 256 different patterns, enough for one English letter in ASCII. In Node.js, a Buffer is simply a list of bytes, each a number from 0 to 255.",
+    "example": "const buf = Buffer.from('A');\nconsole.log(buf);      // <Buffer 41>\nconsole.log(buf[0]);   // 65 (one byte)"
+  },
+  {
+    "id": "bits-03",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "Why do computers use binary (base 2) instead of decimal?",
+    "answer": "Computer chips are made of tiny switches called transistors. A switch is easiest to build and read reliably when it has only two states: on or off. Two states map perfectly to the two digits 0 and 1. Using 10 voltage levels for decimal would be much harder to tell apart and more error-prone.",
+    "example": ""
+  },
+  {
+    "id": "bits-04",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "How does place value work in base 10 compared with base 2?",
+    "answer": "In base 10, each place is worth 10 times the place to its right: 1, 10, 100, 1000. In base 2, each place is worth 2 times the place to its right: 1, 2, 4, 8, 16. The digit tells you how many of that place value you have. In binary each digit is only 0 or 1, so a place is either counted or not.",
+    "example": "Base 10: 345 = 3x100 + 4x10 + 5x1\nBase 2: 1011 = 1x8 + 0x4 + 1x2 + 1x1 = 11"
+  },
+  {
+    "id": "bits-05",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert binary 1011 to decimal.",
+    "answer": "11.\nStep 1: Write place values from the right: 8, 4, 2, 1.\nStep 2: Match digits: 1x8, 0x4, 1x2, 1x1.\nStep 3: Add the places that have a 1: 8 + 2 + 1 = 11.",
+    "example": "parseInt('1011', 2); // 11"
+  },
+  {
+    "id": "bits-06",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert binary 110010 to decimal.",
+    "answer": "50.\nStep 1: Place values (6 digits): 32, 16, 8, 4, 2, 1.\nStep 2: Digits 1 1 0 0 1 0 -> keep 32, 16 and 2.\nStep 3: 32 + 16 + 2 = 50.",
+    "example": "parseInt('110010', 2); // 50"
+  },
+  {
+    "id": "bits-07",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert binary 11111111 (eight 1s) to decimal.",
+    "answer": "255.\nStep 1: Place values: 128, 64, 32, 16, 8, 4, 2, 1.\nStep 2: All digits are 1, so add them all: 128+64+32+16+8+4+2+1 = 255.\nShortcut: n ones in a row = 2^n - 1, so 2^8 - 1 = 255. This is the biggest value one byte can hold.",
+    "example": "parseInt('11111111', 2); // 255\n2 ** 8 - 1;               // 255"
+  },
+  {
+    "id": "bits-08",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "How do you convert a decimal number to binary using repeated division?",
+    "answer": "Divide the number by 2 and write down the remainder (0 or 1). Keep dividing the quotient by 2 until the quotient becomes 0. Then read the remainders from bottom to top: that is the binary number. In JS, (n).toString(2) does this for you.",
+    "example": "13 / 2 = 6 r 1\n 6 / 2 = 3 r 0\n 3 / 2 = 1 r 1\n 1 / 2 = 0 r 1\nRead up: 1101"
+  },
+  {
+    "id": "bits-09",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert decimal 13 to binary.",
+    "answer": "1101.\nStep 1: 13 / 2 = 6 remainder 1.\nStep 2: 6 / 2 = 3 remainder 0.\nStep 3: 3 / 2 = 1 remainder 1.\nStep 4: 1 / 2 = 0 remainder 1.\nStep 5: Read remainders bottom to top: 1101.\nCheck: 8 + 4 + 1 = 13.",
+    "example": "(13).toString(2); // '1101'"
+  },
+  {
+    "id": "bits-10",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert decimal 100 to binary.",
+    "answer": "1100100.\nStep 1: 100/2 = 50 r 0\nStep 2: 50/2 = 25 r 0\nStep 3: 25/2 = 12 r 1\nStep 4: 12/2 = 6 r 0\nStep 5: 6/2 = 3 r 0\nStep 6: 3/2 = 1 r 1\nStep 7: 1/2 = 0 r 1\nRead bottom to top: 1100100. Check: 64 + 32 + 4 = 100.",
+    "example": "(100).toString(2); // '1100100'"
+  },
+  {
+    "id": "bits-11",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Count in binary from 0 to 8.",
+    "answer": "0, 1, 10, 11, 100, 101, 110, 111, 1000.\nStep 1: Like decimal, add 1 to the rightmost digit each time.\nStep 2: When a digit goes past 1, it becomes 0 and you carry 1 to the left (like 9 -> 10 in decimal).\nStep 3: So 1 + 1 = 10, 11 + 1 = 100, 111 + 1 = 1000.",
+    "example": "for (let i = 0; i <= 8; i++) console.log((i).toString(2));"
+  },
+  {
+    "id": "bits-12",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "How many different values can n bits hold?",
+    "answer": "Each bit has 2 choices, so n bits have 2 x 2 x ... (n times) = 2^n combinations. If you count from 0, the largest value is 2^n - 1. For example 8 bits give 256 values (0 to 255). Adding one more bit doubles the number of values.",
+    "example": "1 bit -> 2, 2 bits -> 4, 3 bits -> 8\n8 bits -> 256, 16 bits -> 65536"
+  },
+  {
+    "id": "bits-13",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "How many values can 4 bits hold? 10 bits? And how many bits do you need to give a unique ID to 300 users?",
+    "answer": "16 values; 1024 values; 9 bits.\nStep 1: 4 bits: 2^4 = 16 (0 to 15).\nStep 2: 10 bits: 2^10 = 1024.\nStep 3: For 300 IDs, find the smallest n with 2^n >= 300.\nStep 4: 2^8 = 256 is too small; 2^9 = 512 is enough. So 9 bits.",
+    "example": "2 ** 4;                    // 16\n2 ** 10;                   // 1024\nMath.ceil(Math.log2(300)); // 9"
+  },
+  {
+    "id": "bits-14",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "What is a nibble?",
+    "answer": "A nibble is 4 bits, which is half a byte. 4 bits can hold 16 values (0 to 15). This is exactly the range of one hexadecimal digit (0-F), so one hex digit = one nibble. A byte is therefore always written as exactly 2 hex digits.",
+    "example": "1101 0110  <- one byte = two nibbles\n  D    6   <- 0xD6"
+  },
+  {
+    "id": "bits-15",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "What is hexadecimal and why do programmers use it?",
+    "answer": "Hexadecimal is base 16. It uses digits 0-9 and then A=10, B=11, C=12, D=13, E=14, F=15. Each hex digit stands for exactly 4 bits, so long binary numbers become short and easy to read. You see hex in colors (#FF8800), memory addresses, Buffer output and hashes. In JS you write hex with 0x, like 0xFF.",
+    "example": "0xFF === 255;            // true\n(255).toString(16);      // 'ff'\nBuffer.from('Hi');       // <Buffer 48 69>"
+  },
+  {
+    "id": "bits-16",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert binary 11010110 to hexadecimal.",
+    "answer": "D6.\nStep 1: Split into nibbles from the right: 1101 | 0110.\nStep 2: 1101 = 8+4+1 = 13 = D.\nStep 3: 0110 = 4+2 = 6.\nStep 4: Put them together: D6 (0xD6).",
+    "example": "parseInt('11010110', 2).toString(16); // 'd6'"
+  },
+  {
+    "id": "bits-17",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert hexadecimal 3F to binary.",
+    "answer": "00111111 (or just 111111).\nStep 1: Turn each hex digit into 4 bits.\nStep 2: 3 = 0011.\nStep 3: F = 15 = 1111.\nStep 4: Join them: 0011 1111.",
+    "example": "parseInt('3F', 16).toString(2).padStart(8, '0'); // '00111111'"
+  },
+  {
+    "id": "bits-18",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "Convert hexadecimal 2A and FF to decimal.",
+    "answer": "2A = 42, FF = 255.\nStep 1: Hex place values from the right: 1, 16, 256...\nStep 2: 2A = 2x16 + A(10)x1 = 32 + 10 = 42.\nStep 3: FF = 15x16 + 15x1 = 240 + 15 = 255.",
+    "example": "parseInt('2A', 16); // 42\n0xFF;               // 255"
+  },
+  {
+    "id": "bits-19",
+    "topic": "bits",
+    "type": "concept",
+    "level": "basic",
+    "question": "What is octal, and what does it have to do with chmod 755?",
+    "answer": "Octal is base 8, using digits 0-7. Each octal digit stands for exactly 3 bits. Linux file permissions have 3 bits per group (read=4, write=2, execute=1), so octal fits them perfectly. In chmod 755, the three digits are the permissions for owner, group and others. In JS you write octal as 0o755.",
+    "example": "r w x\n4 2 1\n7 = 111 = rwx\n5 = 101 = r-x\n0o755 === 493; // true"
+  },
+  {
+    "id": "bits-20",
+    "topic": "bits",
+    "type": "practice",
+    "level": "basic",
+    "question": "What do chmod 755 and chmod 640 mean? Write each as rwx letters.",
+    "answer": "755 = rwxr-xr-x; 640 = rw-r-----.\nStep 1: Change each digit to 3 bits (r=4, w=2, x=1).\nStep 2: 7 = 111 = rwx, 5 = 101 = r-x, 5 = r-x.\nStep 3: 6 = 110 = rw-, 4 = 100 = r--, 0 = 000 = ---.\nSo 755: owner can do all, others can read and run. 640: owner reads/writes, group reads, others nothing.",
+    "example": "(0o755).toString(2); // '111101101'\n(0o640).toString(2); // '110100000'"
+  },
+  {
+    "id": "bits-21",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "How does binary addition with carries work?",
+    "answer": "Add column by column from the right, just like decimal. The rules are: 0+0=0, 0+1=1, 1+1=10 (write 0, carry 1), and 1+1+1=11 (write 1, carry 1). The carry moves to the next column on the left. If there is a carry at the very end, it becomes a new digit.",
+    "example": "  carry: 1 1 1\n      1 0 1 1   (11)\n    + 0 1 1 0   (6)\n    ---------\n    1 0 0 0 1   (17)"
+  },
+  {
+    "id": "bits-22",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Add binary 1011 + 0110.",
+    "answer": "10001 (which is 17).\nStep 1: Right column: 1+0 = 1.\nStep 2: Next: 1+1 = 10, write 0, carry 1.\nStep 3: Next: 0+1+carry 1 = 10, write 0, carry 1.\nStep 4: Next: 1+0+carry 1 = 10, write 0, carry 1.\nStep 5: Bring down the final carry: 10001.\nCheck: 11 + 6 = 17.",
+    "example": "(0b1011 + 0b0110).toString(2); // '10001'"
+  },
+  {
+    "id": "bits-23",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Add binary 01110101 + 00111011.",
+    "answer": "10110000 (which is 176).\nStep 1: Convert to check: 01110101 = 117, 00111011 = 59.\nStep 2: Add column by column from the right, carrying 1 whenever a column sums to 2 or 3.\nStep 3: Every one of the 7 right-hand columns sends a carry left; the leftmost column is 0+0+carry 1 = 1. Result: 10110000.\nStep 4: Check: 117 + 59 = 176 = 128 + 32 + 16.",
+    "example": "  01110101  (117)\n+ 00111011  (59)\n----------\n  10110000  (176)"
+  },
+  {
+    "id": "bits-24",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "How does binary subtraction (with borrowing) work?",
+    "answer": "Subtract column by column from the right. 1-0=1, 1-1=0, 0-0=0. For 0-1 you must borrow from the next column on the left. A borrowed 1 is worth 2 in the current column, so 0-1 becomes 10-1 = 1. Computers usually avoid borrowing by adding the two's complement instead.",
+    "example": "    1 1 0 1  (13)\n  - 0 1 1 0  (6)\n  ---------\n    0 1 1 1  (7)"
+  },
+  {
+    "id": "bits-25",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Subtract binary 1101 - 0110.",
+    "answer": "0111 (which is 7).\nStep 1: Right column: 1-0 = 1.\nStep 2: Next: 0-1, borrow from the left: 10-1 = 1. The left 1 becomes 0.\nStep 3: Next: (now 0)-1, borrow again from the leftmost 1: 10-1 = 1.\nStep 4: Leftmost: (now 0)-0 = 0.\nResult: 0111. Check: 13 - 6 = 7.",
+    "example": "(0b1101 - 0b0110).toString(2); // '111'"
+  },
+  {
+    "id": "bits-26",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "How are negative numbers stored using two's complement (8-bit)?",
+    "answer": "In two's complement the leftmost bit is the sign: 0 means positive, 1 means negative. To get -x: write x in binary, flip every bit, then add 1. With 8 bits the range is -128 to 127. The nice part: the same adding circuit works for both positive and negative numbers.",
+    "example": "+5      = 00000101\nflip    = 11111010\n+1      = 11111011  -> -5\n(-5 & 0xFF).toString(2); // '11111011'"
+  },
+  {
+    "id": "bits-27",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Write -5 as an 8-bit two's complement number.",
+    "answer": "11111011.\nStep 1: Write +5 in 8 bits: 00000101.\nStep 2: Flip every bit: 11111010.\nStep 3: Add 1: 11111011.\nCheck: as unsigned this is 251, and 256 - 5 = 251.",
+    "example": "(-5 & 0xFF).toString(2); // '11111011'"
+  },
+  {
+    "id": "bits-28",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "What decimal value is the 8-bit two's complement number 11110100?",
+    "answer": "-12.\nStep 1: Leftmost bit is 1, so it is negative.\nStep 2: Flip the bits: 00001011.\nStep 3: Add 1: 00001100 = 12.\nStep 4: So the value is -12.\nShortcut: unsigned value 244 minus 256 = -12.",
+    "example": "const u = parseInt('11110100', 2); // 244\nu - 256;                          // -12\nnew Int8Array([u])[0];            // -12"
+  },
+  {
+    "id": "bits-29",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Using 8-bit two's complement, calculate 5 + (-3).",
+    "answer": "2 (00000010).\nStep 1: 5 = 00000101.\nStep 2: -3: 3 = 00000011, flip = 11111100, add 1 = 11111101.\nStep 3: Add: 00000101 + 11111101 = 1 00000010 (9 bits).\nStep 4: Keep only 8 bits, drop the extra carry: 00000010 = 2.",
+    "example": "((5 + (-3 & 0xFF)) & 0xFF); // 2"
+  },
+  {
+    "id": "bits-30",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "What is overflow?",
+    "answer": "Overflow happens when a result is too big (or too small) to fit in the number of bits you have. The extra bits are lost, so the answer 'wraps around'. For 8-bit unsigned, 255 + 1 becomes 0. For 8-bit signed, 127 + 1 becomes -128. In JS, typed arrays like Uint8Array and the bitwise operators show this wrapping.",
+    "example": "const a = new Uint8Array(1);\na[0] = 255; a[0]++;\nconsole.log(a[0]); // 0\nnew Int8Array([128])[0]; // -128"
+  },
+  {
+    "id": "bits-31",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "In 8 bits, what is 200 + 100 (unsigned)? And 100 + 50 (signed)?",
+    "answer": "Unsigned: 44. Signed: -106.\nStep 1: 200 + 100 = 300, but 8-bit unsigned max is 255.\nStep 2: Wrap: 300 - 256 = 44.\nStep 3: 100 + 50 = 150, but 8-bit signed max is 127.\nStep 4: 150 has its top bit set (10010110), so it reads as 150 - 256 = -106.",
+    "example": "new Uint8Array([200 + 100])[0]; // 44\nnew Int8Array([100 + 50])[0];   // -106"
+  },
+  {
+    "id": "bits-32",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "How does multiplying by shifting work in binary?",
+    "answer": "Shifting a binary number one place left adds a 0 on the right, which doubles it (like adding a 0 in decimal multiplies by 10). Shifting left by k places multiplies by 2^k. To multiply by any number, shift for each 1 bit in the multiplier and add the results. This is how simple CPUs multiply.",
+    "example": "101   (5)\n1010  (10)  shift 1 = x2\n10100 (20)  shift 2 = x4\n5 << 2; // 20"
+  },
+  {
+    "id": "bits-33",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Multiply in binary: 101 x 100, and 1011 x 11.",
+    "answer": "101 x 100 = 10100 (20); 1011 x 11 = 100001 (33).\nStep 1: 100 is 4 = 2^2, so shift 101 left 2 places: 10100 (5 x 4 = 20).\nStep 2: 11 = 10 + 1, so 1011 x 11 = (1011 shifted 1) + 1011.\nStep 3: 10110 + 1011 = 100001.\nStep 4: Check: 11 x 3 = 33.",
+    "example": "(0b101 * 0b100).toString(2);  // '10100'\n((0b1011 << 1) + 0b1011).toString(2); // '100001'"
+  },
+  {
+    "id": "bits-34",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "What do the bitwise operators AND, OR, XOR and NOT do?",
+    "answer": "They work on each pair of bits separately. AND (&) gives 1 only if both bits are 1. OR (|) gives 1 if at least one bit is 1. XOR (^) gives 1 if the bits are different. NOT (~) flips every bit. In JS these turn numbers into 32-bit signed integers first, do the work, then give back a normal Number.",
+    "example": "a b | & | ^\n0 0 | 0 0 0\n0 1 | 0 1 1\n1 0 | 0 1 1\n1 1 | 1 1 0"
+  },
+  {
+    "id": "bits-35",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Calculate 12 & 10, 12 | 10 and 12 ^ 10.",
+    "answer": "12 & 10 = 8; 12 | 10 = 14; 12 ^ 10 = 6.\nStep 1: 12 = 1100, 10 = 1010.\nStep 2: AND (both 1): 1000 = 8.\nStep 3: OR (any 1): 1110 = 14.\nStep 4: XOR (different): 0110 = 6.",
+    "example": "12 & 10; // 8\n12 | 10; // 14\n12 ^ 10; // 6"
+  },
+  {
+    "id": "bits-36",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "What does ~5 give in JavaScript, and why?",
+    "answer": "-6.\nStep 1: JS turns 5 into a 32-bit int: 000...0101.\nStep 2: NOT flips all 32 bits: 111...1010.\nStep 3: The top bit is 1, so in two's complement it is negative.\nStep 4: Flip back and add 1: 000...0110 = 6, so the value is -6.\nRule: ~x always equals -(x + 1).",
+    "example": "~5;        // -6\n-(5 + 1);  // -6"
+  },
+  {
+    "id": "bits-37",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "What do the shift operators <<, >> and >>> do in JavaScript?",
+    "answer": "x << n moves bits left by n places, filling with 0s; this multiplies by 2^n. x >> n moves bits right and copies the sign bit into the left, so negative numbers stay negative (like dividing by 2^n and rounding down). x >>> n moves bits right but always fills with 0s, so the result is treated as unsigned. All three work on 32-bit integers.",
+    "example": "5 << 3;     // 40\n40 >> 2;    // 10\n-16 >> 2;   // -4\n-16 >>> 28; // 15\n-1 >>> 0;   // 4294967295"
+  },
+  {
+    "id": "bits-38",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Work out 5 << 3, 40 >> 2, -16 >> 2 and -16 >>> 28.",
+    "answer": "40, 10, -4, 15.\nStep 1: 5 << 3 = 5 x 2^3 = 40.\nStep 2: 40 >> 2 = 40 / 4 = 10.\nStep 3: -16 >> 2 keeps the sign: -16 / 4 = -4.\nStep 4: -16 as 32 bits is 0xFFFFFFF0. Shifting right 28 with zero fill leaves only the top nibble: 1111 = 15.",
+    "example": "5 << 3;     // 40\n40 >> 2;    // 10\n-16 >> 2;   // -4\n-16 >>> 28; // 15"
+  },
+  {
+    "id": "bits-39",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "What are bit masks and flags?",
+    "answer": "A flag is one bit that means yes/no, like 'can read'. You can pack many flags into one number, giving each flag its own power of 2. A mask is a number used with &, | or ^ to pick out, turn on, turn off or flip certain bits. This saves space and is very fast, which is why file permissions and many APIs use it.",
+    "example": "const READ = 4, WRITE = 2, EXEC = 1;\nlet p = READ | WRITE;   // turn on: 6\n(p & EXEC) !== 0;       // check: false\np &= ~WRITE;            // turn off: 4\np ^= EXEC;              // toggle: 5"
+  },
+  {
+    "id": "bits-40",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "With READ = 4, WRITE = 2, EXEC = 1: give READ+WRITE, check EXEC, then remove WRITE.",
+    "answer": "READ|WRITE = 6; EXEC check = 0 (not set); after removing WRITE = 4.\nStep 1: 4 | 2 = 100 | 010 = 110 = 6.\nStep 2: 6 & 1 = 110 & 001 = 000 = 0, so EXEC is off.\nStep 3: ~WRITE flips 010 into ...101.\nStep 4: 6 & ~2 = 110 & 101 = 100 = 4. Only READ is left.",
+    "example": "const READ = 4, WRITE = 2, EXEC = 1;\nlet p = READ | WRITE; // 6\np & EXEC;             // 0\np & ~WRITE;           // 4"
+  },
+  {
+    "id": "bits-41",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "Use bitwise AND to tell if 37 and 128 are odd or even. Then find bit 3 of 22.",
+    "answer": "37 is odd (37 & 1 = 1); 128 is even (128 & 1 = 0); bit 3 of 22 is 0.\nStep 1: The last bit of a binary number is 1 for odd, 0 for even.\nStep 2: 37 = 100101, last bit 1 -> odd. 128 = 10000000, last bit 0 -> even.\nStep 3: 22 = 10110. Bits from the right are numbered 0,1,2,3...\nStep 4: (22 >> 3) & 1 = 10 & 1 = 0.",
+    "example": "37 & 1;          // 1 -> odd\n128 & 1;         // 0 -> even\n(22 >> 3) & 1;   // 0"
+  },
+  {
+    "id": "bits-42",
+    "topic": "bits",
+    "type": "concept",
+    "level": "intermediate",
+    "question": "What is the difference between bit and byte units, and between KB and KiB?",
+    "answer": "A small b means bits and a big B means bytes; 1 byte = 8 bits. KB, MB, GB (SI units) go up in steps of 1000. KiB, MiB, GiB (binary units) go up in steps of 1024. Disk makers use 1000, while many operating systems and RAM use 1024, so a drive can look 'smaller' than the box says.",
+    "example": "1 KB  = 1000 bytes\n1 KiB = 1024 bytes\n1 MiB = 1024 KiB = 1,048,576 bytes\n1 GiB = 1,073,741,824 bytes"
+  },
+  {
+    "id": "bits-43",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "How many bytes are 5 KB and 5 KiB? How many GB and MB are 2.5 TB (decimal units)?",
+    "answer": "5 KB = 5000 bytes; 5 KiB = 5120 bytes; 2.5 TB = 2500 GB = 2,500,000 MB.\nStep 1: 5 x 1000 = 5000.\nStep 2: 5 x 1024 = 5120.\nStep 3: 1 TB = 1000 GB, so 2.5 x 1000 = 2500 GB.\nStep 4: 1 GB = 1000 MB, so 2500 x 1000 = 2,500,000 MB.",
+    "example": "5 * 1000;          // 5000\n5 * 1024;          // 5120\n2.5 * 1000 * 1000; // 2500000"
+  },
+  {
+    "id": "bits-44",
+    "topic": "bits",
+    "type": "practice",
+    "level": "intermediate",
+    "question": "A drive is sold as 500 GB. About how many GiB will the OS show?",
+    "answer": "About 465.66 GiB.\nStep 1: 500 GB = 500 x 1,000,000,000 = 500,000,000,000 bytes.\nStep 2: 1 GiB = 1024^3 = 1,073,741,824 bytes.\nStep 3: 500,000,000,000 / 1,073,741,824 = 465.66.\nNo space is missing; it is the same bytes counted with a bigger unit.",
+    "example": "(500e9 / 1024 ** 3).toFixed(2); // '465.66'"
+  },
+  {
+    "id": "bits-45",
+    "topic": "bits",
+    "type": "concept",
+    "level": "advanced",
+    "question": "What is the difference between Mbps and MB/s?",
+    "answer": "Mbps means megabits per second; network speeds are sold in bits. MB/s means megabytes per second; file sizes and download meters often use bytes. Since 1 byte = 8 bits, divide Mbps by 8 to get MB/s. So a '100 Mbps' internet plan downloads at most about 12.5 MB/s.",
+    "example": "MB/s = Mbps / 8\nMbps = MB/s x 8"
+  },
+  {
+    "id": "bits-46",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "Your internet plan is 100 Mbps. What is the maximum download speed in MB/s?",
+    "answer": "12.5 MB/s.\nStep 1: 100 Mbps = 100 megabits each second.\nStep 2: 8 bits = 1 byte, so divide by 8.\nStep 3: 100 / 8 = 12.5 MB/s.",
+    "example": "100 / 8; // 12.5"
+  },
+  {
+    "id": "bits-47",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "How long does it take to download a 1.5 GB file at 50 Mbps (ignore overhead, use decimal units)?",
+    "answer": "240 seconds (4 minutes).\nStep 1: File size in bits: 1.5 GB = 1500 MB = 1500 x 8 = 12,000 megabits.\nStep 2: Speed = 50 megabits per second.\nStep 3: Time = 12,000 / 50 = 240 seconds.\nStep 4: 240 / 60 = 4 minutes.",
+    "example": "const bits = 1.5e9 * 8;\nconst secs = bits / 50e6; // 240\nsecs / 60;                // 4"
+  },
+  {
+    "id": "bits-48",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "How much space do 1 million records of 200 bytes each take? Give MB and MiB.",
+    "answer": "200 MB (about 190.73 MiB).\nStep 1: 1,000,000 x 200 = 200,000,000 bytes.\nStep 2: In MB: 200,000,000 / 1,000,000 = 200 MB.\nStep 3: In MiB: 200,000,000 / 1,048,576 = 190.73 MiB.\nReal databases add indexes and overhead, so plan for more.",
+    "example": "const bytes = 1e6 * 200;          // 200000000\nbytes / 1e6;                       // 200\n(bytes / 1024 ** 2).toFixed(2);    // '190.73'"
+  },
+  {
+    "id": "bits-49",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "A service writes 10 million log lines a day, 512 bytes each. How much storage for 30 days (decimal GB)?",
+    "answer": "153.6 GB.\nStep 1: Per day: 10,000,000 x 512 = 5,120,000,000 bytes = 5.12 GB.\nStep 2: For 30 days: 5.12 x 30 = 153.6 GB.\nStep 3: In bytes: 153,600,000,000.",
+    "example": "const perDay = 1e7 * 512;   // 5.12e9 bytes\n(perDay * 30) / 1e9;        // 153.6"
+  },
+  {
+    "id": "bits-50",
+    "topic": "bits",
+    "type": "concept",
+    "level": "advanced",
+    "question": "What are ASCII and UTF-8, and how many bytes does each character take?",
+    "answer": "ASCII is an old code that maps 128 characters (English letters, digits, symbols) to numbers 0-127, so each fits in 1 byte. UTF-8 is the modern encoding that can store every Unicode character. It uses 1 byte for ASCII characters, 2 bytes for many accented letters, 3 bytes for most Asian scripts, and 4 bytes for emoji. Note: JS string .length counts UTF-16 units, not bytes.",
+    "example": "'A'.charCodeAt(0);         // 65\nBuffer.byteLength('A');    // 1\nBuffer.byteLength('é');    // 2\nBuffer.byteLength('😀');   // 4\n'😀'.length;               // 2"
+  },
+  {
+    "id": "bits-51",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "In UTF-8, how many bytes are 'Hello', 'héllo' and 'Hi😀'? What is 'Hi😀'.length in JS?",
+    "answer": "'Hello' = 5 bytes; 'héllo' = 6 bytes; 'Hi😀' = 6 bytes; 'Hi😀'.length = 4.\nStep 1: Each English letter is 1 byte, so 'Hello' = 5.\nStep 2: 'é' needs 2 bytes, so 'héllo' = 4 + 2 = 6.\nStep 3: The emoji needs 4 bytes, so 'Hi😀' = 2 + 4 = 6.\nStep 4: .length counts UTF-16 units; the emoji uses 2, so 2 + 2 = 4.",
+    "example": "Buffer.byteLength('Hello'); // 5\nBuffer.byteLength('héllo'); // 6\nBuffer.byteLength('Hi😀');  // 6\n'Hi😀'.length;              // 4"
+  },
+  {
+    "id": "bits-52",
+    "topic": "bits",
+    "type": "concept",
+    "level": "advanced",
+    "question": "How does a JavaScript Number store values, and why is 0.1 + 0.2 not 0.3?",
+    "answer": "Every JS Number is a 64-bit IEEE 754 double: 1 sign bit, 11 exponent bits and 52 fraction bits. It stores numbers like scientific notation in base 2. Many decimals, like 0.1, repeat forever in binary (as 1/3 does in decimal), so they are rounded. The tiny rounding errors add up, so 0.1 + 0.2 gives 0.30000000000000004. Compare with a small tolerance, or use integers (e.g. paise/cents).",
+    "example": "0.1 + 0.2;                 // 0.30000000000000004\n0.1 + 0.2 === 0.3;         // false\nMath.abs(0.1 + 0.2 - 0.3) < Number.EPSILON; // true"
+  },
+  {
+    "id": "bits-53",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "Convert decimal 0.625 to binary. Why can 0.625 be stored exactly but 0.1 cannot?",
+    "answer": "0.101.\nStep 1: Multiply the fraction by 2 and take the whole part: 0.625 x 2 = 1.25 -> 1.\nStep 2: 0.25 x 2 = 0.5 -> 0.\nStep 3: 0.5 x 2 = 1.0 -> 1, fraction is now 0, stop.\nStep 4: Read top to bottom: 0.101 (= 1/2 + 1/8).\n0.625 is a sum of powers of 2, so it ends. 0.1 never reaches 0 (0.000110011...), so it must be rounded.",
+    "example": "(0.625).toString(2); // '0.101'\n(0.1).toString(2);   // '0.0001100110011...'"
+  },
+  {
+    "id": "bits-54",
+    "topic": "bits",
+    "type": "concept",
+    "level": "advanced",
+    "question": "What is Number.MAX_SAFE_INTEGER and when do you need BigInt?",
+    "answer": "A double has 52 fraction bits plus one hidden bit, so it can hold every whole number exactly only up to 2^53 - 1 = 9007199254740991. That limit is Number.MAX_SAFE_INTEGER. Above it, some integers cannot be stored and get rounded to a neighbour. For bigger exact whole numbers (large IDs, money in smallest units, crypto) use BigInt, written with an n at the end.",
+    "example": "Number.MAX_SAFE_INTEGER; // 9007199254740991\n2 ** 53 + 1;             // 9007199254740992 (wrong!)\n2n ** 53n + 1n;          // 9007199254740993n"
+  },
+  {
+    "id": "bits-55",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "Compute 2^53 - 1. Then explain why 2**53 === 2**53 + 1 is true in JS.",
+    "answer": "2^53 - 1 = 9007199254740991; the comparison is true because 2^53 + 1 cannot be stored exactly.\nStep 1: 2^10 = 1024, and 2^53 = 9,007,199,254,740,992.\nStep 2: Subtract 1: 9,007,199,254,740,991 (MAX_SAFE_INTEGER).\nStep 3: Above 2^53, doubles can only hold even integers.\nStep 4: 2^53 + 1 is odd, so it rounds back to 2^53, making both sides equal.",
+    "example": "2 ** 53 - 1 === Number.MAX_SAFE_INTEGER; // true\n2 ** 53 === 2 ** 53 + 1;                 // true\n2n ** 53n === 2n ** 53n + 1n;            // false"
+  },
+  {
+    "id": "bits-56",
+    "topic": "bits",
+    "type": "concept",
+    "level": "advanced",
+    "question": "How is an IPv4 address stored as bits?",
+    "answer": "An IPv4 address is a 32-bit number. We write it as 4 bytes in decimal, separated by dots, like 192.168.1.10; each part is 0-255. So there are 2^32 = 4,294,967,296 possible addresses. A /24 network means the first 24 bits are the network part and the last 8 bits number the hosts, giving 256 addresses.",
+    "example": "192     .168     .1       .10\n11000000.10101000.00000001.00001010"
+  },
+  {
+    "id": "bits-57",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "Write 192.168.1.10 in binary and as a single 32-bit number. How many addresses are in a /24 network?",
+    "answer": "11000000.10101000.00000001.00001010 = 3232235786; a /24 has 256 addresses.\nStep 1: Convert each byte: 192 = 11000000, 168 = 10101000, 1 = 00000001, 10 = 00001010.\nStep 2: As one number: 192x2^24 + 168x2^16 + 1x2^8 + 10.\nStep 3: = 3,221,225,472 + 11,010,048 + 256 + 10 = 3,232,235,786.\nStep 4: /24 leaves 32 - 24 = 8 host bits, so 2^8 = 256 addresses.",
+    "example": "const ip = [192,168,1,10]\n  .reduce((n, b) => n * 256 + b, 0); // 3232235786\n((192 << 24) | (168 << 16) | (1 << 8) | 10) >>> 0; // 3232235786\n2 ** (32 - 24); // 256"
+  },
+  {
+    "id": "bits-58",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "What are the red, green and blue values of the color #FF8800? And what is rgb(18, 52, 86) in hex?",
+    "answer": "#FF8800 = rgb(255, 136, 0); rgb(18, 52, 86) = #123456.\nStep 1: A hex color is 3 bytes: RR GG BB.\nStep 2: FF = 255, 88 = 8x16 + 8 = 136, 00 = 0.\nStep 3: Other way: 18 = 1x16 + 2 -> hex 12; 52 = 3x16 + 4 -> hex 34; 86 = 5x16 + 6 -> hex 56.\nStep 4: Join with #: #123456.",
+    "example": "const h = 'FF8800';\n[0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); // [255,136,0]\n'#' + [18, 52, 86].map(n => n.toString(16).padStart(2, '0')).join(''); // '#123456'"
+  },
+  {
+    "id": "bits-59",
+    "topic": "bits",
+    "type": "concept",
+    "level": "advanced",
+    "question": "What is base64 and why does it make data about 4/3 bigger?",
+    "answer": "Base64 turns any bytes into plain text using 64 safe characters (A-Z, a-z, 0-9, + and /). 64 = 2^6, so each character carries only 6 bits. Every 3 bytes (24 bits) become 4 characters (4 x 6 = 24 bits). So the output is about 4/3 the size (33% bigger), with = padding at the end when the input length is not a multiple of 3. It is used in data URLs, JWTs and email attachments.",
+    "example": "Buffer.from('Man').toString('base64'); // 'TWFu'\n// 3 bytes -> 4 chars"
+  },
+  {
+    "id": "bits-60",
+    "topic": "bits",
+    "type": "practice",
+    "level": "advanced",
+    "question": "How long is the base64 text for 'Hello!' (6 bytes), for 'Hi' (2 bytes), and for a 3,000,000-byte image?",
+    "answer": "'Hello!' -> 8 chars; 'Hi' -> 4 chars; 3,000,000 bytes -> 4,000,000 chars (about 4 MB).\nStep 1: Formula: 4 x ceil(bytes / 3).\nStep 2: 6 bytes: ceil(6/3) = 2 groups -> 8 chars ('SGVsbG8h').\nStep 3: 2 bytes: ceil(2/3) = 1 group -> 4 chars, with one = pad ('SGk=').\nStep 4: 3,000,000 / 3 = 1,000,000 groups -> 4,000,000 chars.",
+    "example": "Buffer.from('Hello!').toString('base64'); // 'SGVsbG8h'\nBuffer.from('Hi').toString('base64');     // 'SGk='\n4 * Math.ceil(3e6 / 3);                    // 4000000"
+  }
+]

@@ -1,0 +1,2801 @@
+[
+  {
+    "id": "lx-001",
+    "name": "pwd",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Prints the full path of the folder you are currently in. Handy when you get lost after a few cd commands or before running something that depends on location.",
+    "example": "pwd",
+    "exampleExplained": "Shows something like /home/deploy/app so you know exactly where commands will run."
+  },
+  {
+    "id": "lx-002",
+    "name": "ls",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Lists the files and folders in a directory. The most-used command on any server for seeing what is there.",
+    "example": "ls -lah",
+    "exampleExplained": "-l long format (permissions, owner, size, date), -a includes hidden dotfiles like .env, -h shows sizes as K/M/G."
+  },
+  {
+    "id": "lx-003",
+    "name": "cd",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Changes your current directory. With no argument it takes you to your home folder.",
+    "example": "cd /var/www/myapp",
+    "exampleExplained": "Moves into the app folder. Use cd .. to go up one level and cd ~ (or plain cd) to go home."
+  },
+  {
+    "id": "lx-004",
+    "name": "ls -ltr",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "A variant of ls that sorts files by modification time. Great for spotting the newest log or the file you just changed.",
+    "example": "ls -ltr /var/log",
+    "exampleExplained": "-l long listing, -t sort by time (newest first), -r reverse it so the newest files appear at the bottom, right above your prompt."
+  },
+  {
+    "id": "lx-005",
+    "name": "tree",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Shows a folder and its subfolders as an indented tree. Often not installed by default; get it with apt install tree.",
+    "example": "tree -L 2 -I node_modules",
+    "exampleExplained": "-L 2 limits depth to two levels, -I node_modules hides that folder so the output stays readable."
+  },
+  {
+    "id": "lx-006",
+    "name": "man",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Opens the manual page for a command, describing every option. Press / to search, q to quit.",
+    "example": "man tar",
+    "exampleExplained": "Shows the full manual for tar. Use man -k keyword to search all manual pages by topic."
+  },
+  {
+    "id": "lx-007",
+    "name": "whatis",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Prints a one-line description of a command taken from its manual page. A quick way to recall what a command is for.",
+    "example": "whatis rsync",
+    "exampleExplained": "Prints a short line like rsync - a fast, versatile, remote file-copying tool."
+  },
+  {
+    "id": "lx-008",
+    "name": "apropos",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Searches manual page names and descriptions for a keyword. Useful when you know what you want to do but not the command name.",
+    "example": "apropos compress",
+    "exampleExplained": "Lists every command whose description mentions compress, such as gzip, xz and zip."
+  },
+  {
+    "id": "lx-009",
+    "name": "history",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Lists the commands you ran earlier in this shell. You can re-run one with !number or search it interactively with Ctrl+R.",
+    "example": "history | tail -20",
+    "exampleExplained": "Shows your last 20 commands. Then !512 would re-run command number 512."
+  },
+  {
+    "id": "lx-010",
+    "name": "clear",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Clears the terminal screen so you get a fresh view. Ctrl+L does the same thing.",
+    "example": "clear",
+    "exampleExplained": "Wipes the visible screen; your scrollback history and shell state are unchanged."
+  },
+  {
+    "id": "lx-011",
+    "name": "echo",
+    "category": "Navigation",
+    "level": "basic",
+    "summary": "Prints text or variable values to the screen. Commonly used in scripts and to check environment variables.",
+    "example": "echo \"Home is $HOME\"",
+    "exampleExplained": "Prints the sentence with $HOME replaced by your home path. Double quotes allow variables to expand."
+  },
+  {
+    "id": "lx-012",
+    "name": "touch",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Creates an empty file, or updates the modified time of an existing one without changing its content.",
+    "example": "touch .env",
+    "exampleExplained": "Creates an empty .env file if missing; if it exists, only its timestamp is refreshed."
+  },
+  {
+    "id": "lx-013",
+    "name": "mkdir",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Creates a new directory.",
+    "example": "mkdir logs",
+    "exampleExplained": "Makes a folder called logs inside the current directory. Fails if it already exists."
+  },
+  {
+    "id": "lx-014",
+    "name": "mkdir -p",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Creates a directory and any missing parent folders in one go, and does not complain if it already exists. Safe to use in scripts.",
+    "example": "mkdir -p /var/www/myapp/releases/v2",
+    "exampleExplained": "-p builds every missing folder in the path and is silent if the path is already there."
+  },
+  {
+    "id": "lx-015",
+    "name": "cp",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Copies a file to a new name or location.",
+    "example": "cp config.example.json config.json",
+    "exampleExplained": "Makes a copy of the example config under a new name, leaving the original untouched."
+  },
+  {
+    "id": "lx-016",
+    "name": "cp -r",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Copies a whole directory and everything inside it.",
+    "example": "cp -a dist/ /var/www/myapp/",
+    "exampleExplained": "-r copies recursively; -a goes further and also keeps permissions, ownership and timestamps (archive mode)."
+  },
+  {
+    "id": "lx-017",
+    "name": "mv",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Moves or renames files and folders. There is no separate rename step; renaming is just moving to a new name.",
+    "example": "mv app.log app.log.old",
+    "exampleExplained": "Renames app.log to app.log.old. Add -i to be asked before overwriting an existing file."
+  },
+  {
+    "id": "lx-018",
+    "name": "rm",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Deletes files permanently. There is no trash bin, so double-check what you type.",
+    "example": "rm -i old-notes.txt",
+    "exampleExplained": "-i asks for confirmation before deleting, a good habit when you are unsure."
+  },
+  {
+    "id": "lx-019",
+    "name": "rm -rf",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Deletes a folder and everything inside it without asking. Very dangerous: a wrong path or a stray space can wipe important data, so always check the path first.",
+    "example": "rm -rf ./node_modules",
+    "exampleExplained": "-r removes folder contents recursively, -f never prompts. The ./ makes it clear you mean the folder here. Never run it with sudo on paths like / or a blank variable."
+  },
+  {
+    "id": "lx-020",
+    "name": "rmdir",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Removes an empty directory. It refuses if the folder has anything in it, which makes it a safe choice.",
+    "example": "rmdir tmp-build",
+    "exampleExplained": "Deletes tmp-build only if it is empty; otherwise it prints an error and does nothing."
+  },
+  {
+    "id": "lx-021",
+    "name": "ln -s",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Creates a symbolic link, a shortcut that points to another file or folder. Common for switching app releases or enabling nginx sites.",
+    "example": "ln -sfn /var/www/releases/v2 /var/www/current",
+    "exampleExplained": "-s makes a symlink, -f replaces an existing link, -n treats an existing link to a folder as a file so it is swapped rather than nested."
+  },
+  {
+    "id": "lx-022",
+    "name": "ln",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Without -s, creates a hard link: a second name for the same file data. Deleting one name keeps the data alive through the other.",
+    "example": "ln data.csv data-backup.csv",
+    "exampleExplained": "Both names now point at the same data on disk; editing one shows in the other. Hard links cannot span disks or point to folders."
+  },
+  {
+    "id": "lx-023",
+    "name": "file",
+    "category": "Files & directories",
+    "level": "basic",
+    "summary": "Tells you what kind of data a file holds by looking at its content, not its extension.",
+    "example": "file upload.bin",
+    "exampleExplained": "Might print PNG image data or gzip compressed data, which helps when a file has the wrong extension."
+  },
+  {
+    "id": "lx-024",
+    "name": "stat",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Shows detailed info about a file: size, permissions in number form, owner, and access, modify and change times.",
+    "example": "stat package.json",
+    "exampleExplained": "Prints size, inode, permission bits like 0644, owner and the exact timestamps."
+  },
+  {
+    "id": "lx-025",
+    "name": "basename",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Strips the folder path (and optionally a suffix) from a file path, leaving just the file name. Useful in scripts.",
+    "example": "basename /var/log/nginx/access.log .log",
+    "exampleExplained": "Prints access: the directory part is removed and the .log suffix is dropped."
+  },
+  {
+    "id": "lx-026",
+    "name": "dirname",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Returns only the folder part of a path. Often used in scripts to find where the script itself lives.",
+    "example": "dirname /var/log/nginx/access.log",
+    "exampleExplained": "Prints /var/log/nginx."
+  },
+  {
+    "id": "lx-027",
+    "name": "realpath",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Prints the absolute path of a file, resolving .., . and symlinks.",
+    "example": "realpath ../config/app.json",
+    "exampleExplained": "Turns the relative path into a full path like /home/deploy/config/app.json."
+  },
+  {
+    "id": "lx-028",
+    "name": "readlink",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Shows where a symbolic link points. With -f it follows the whole chain to the final real file.",
+    "example": "readlink -f /var/www/current",
+    "exampleExplained": "-f resolves every link in the chain and prints the final target, e.g. /var/www/releases/v2."
+  },
+  {
+    "id": "lx-029",
+    "name": "mktemp",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Creates a temporary file or folder with a unique random name and prints its path. Safer than inventing your own temp names in scripts.",
+    "example": "tmpdir=$(mktemp -d)",
+    "exampleExplained": "-d creates a directory instead of a file; its path, like /tmp/tmp.Xa12bC, is stored in the tmpdir variable."
+  },
+  {
+    "id": "lx-030",
+    "name": "truncate",
+    "category": "Files & directories",
+    "level": "intermediate",
+    "summary": "Shrinks or grows a file to a given size. Commonly used to empty a huge log file without deleting it, so the app keeps writing to it.",
+    "example": "truncate -s 0 /var/log/myapp/app.log",
+    "exampleExplained": "-s 0 sets the file size to zero, freeing disk space while keeping the same file open for the running process."
+  },
+  {
+    "id": "lx-031",
+    "name": "install",
+    "category": "Files & directories",
+    "level": "advanced",
+    "summary": "Copies files while setting permissions and owner in one step. Used in build and deploy scripts instead of cp plus chmod plus chown.",
+    "example": "sudo install -m 755 -o root -g root mytool /usr/local/bin/",
+    "exampleExplained": "-m sets mode 755, -o and -g set owner and group, then the file is copied into /usr/local/bin."
+  },
+  {
+    "id": "lx-032",
+    "name": "cat",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "Prints the whole content of one or more files to the screen. Best for short files; also used to join files together.",
+    "example": "cat .env.example",
+    "exampleExplained": "Dumps the file to the terminal. cat a.txt b.txt > both.txt would join two files into one."
+  },
+  {
+    "id": "lx-033",
+    "name": "less",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "Opens a file in a scrollable viewer that loads quickly even for huge logs. Search with /, jump to end with G, quit with q.",
+    "example": "less +F /var/log/syslog",
+    "exampleExplained": "+F starts in follow mode like tail -f; press Ctrl+C to stop following and scroll, F to resume."
+  },
+  {
+    "id": "lx-034",
+    "name": "more",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "An older, simpler pager that shows a file one screen at a time. Use less when available; more is still found on minimal systems.",
+    "example": "more README.md",
+    "exampleExplained": "Space goes to the next page, q quits. It can only scroll forward on many systems."
+  },
+  {
+    "id": "lx-035",
+    "name": "head",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "Shows the first lines of a file, 10 by default. Good for peeking at CSVs or large files.",
+    "example": "head -n 5 users.csv",
+    "exampleExplained": "-n 5 prints only the first five lines, e.g. the header and four rows."
+  },
+  {
+    "id": "lx-036",
+    "name": "tail",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "Shows the last lines of a file, 10 by default. Perfect for checking the latest log entries.",
+    "example": "tail -n 50 error.log",
+    "exampleExplained": "-n 50 prints the last 50 lines of the log."
+  },
+  {
+    "id": "lx-037",
+    "name": "tail -f",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "Keeps a file open and prints new lines as they are written. The classic way to watch a Node app log live.",
+    "example": "tail -F /var/log/myapp/app.log",
+    "exampleExplained": "-f follows new output; capital -F also keeps working if the log is rotated or recreated. Ctrl+C to stop."
+  },
+  {
+    "id": "lx-038",
+    "name": "wc",
+    "category": "Viewing files",
+    "level": "basic",
+    "summary": "Counts lines, words and bytes in files or piped input.",
+    "example": "wc -l access.log",
+    "exampleExplained": "-l prints only the number of lines, a quick way to count requests in a log."
+  },
+  {
+    "id": "lx-039",
+    "name": "nl",
+    "category": "Viewing files",
+    "level": "intermediate",
+    "summary": "Prints a file with line numbers added in front of each line.",
+    "example": "nl -ba server.js",
+    "exampleExplained": "-ba numbers all lines, including blank ones, which matches what your editor shows."
+  },
+  {
+    "id": "lx-040",
+    "name": "xxd",
+    "category": "Viewing files",
+    "level": "advanced",
+    "summary": "Shows a hex dump of a file, revealing raw bytes. Useful for finding hidden characters like BOMs or Windows line endings.",
+    "example": "xxd file.txt | head",
+    "exampleExplained": "Prints byte offsets, hex values and printable text side by side for the first lines."
+  },
+  {
+    "id": "lx-041",
+    "name": "chmod",
+    "category": "Permissions & ownership",
+    "level": "basic",
+    "summary": "Changes who can read, write or execute a file using letters: u user, g group, o others, a all.",
+    "example": "chmod u+x deploy.sh",
+    "exampleExplained": "u+x adds execute permission for the file owner so you can run ./deploy.sh."
+  },
+  {
+    "id": "lx-042",
+    "name": "chmod numeric",
+    "category": "Permissions & ownership",
+    "level": "basic",
+    "summary": "Sets permissions with three digits: read=4, write=2, execute=1, added up for owner, group and others.",
+    "example": "chmod 640 .env",
+    "exampleExplained": "6 (4+2) owner can read and write, 4 group can read, 0 others get nothing. 755 and 644 are other common choices."
+  },
+  {
+    "id": "lx-043",
+    "name": "ls -l permissions",
+    "category": "Permissions & ownership",
+    "level": "basic",
+    "summary": "Reading the permission string from ls -l, like -rwxr-xr--, is key to fixing access problems. First char is type, then three rwx sets.",
+    "example": "ls -l deploy.sh",
+    "exampleExplained": "-rwxr-xr-- means a regular file; owner can read/write/execute, group read/execute, others read only."
+  },
+  {
+    "id": "lx-044",
+    "name": "chown",
+    "category": "Permissions & ownership",
+    "level": "basic",
+    "summary": "Changes the owner (and optionally group) of a file. Usually needs sudo.",
+    "example": "sudo chown deploy:www-data app.log",
+    "exampleExplained": "Makes user deploy the owner and www-data the group, written as user:group."
+  },
+  {
+    "id": "lx-045",
+    "name": "chown -R",
+    "category": "Permissions & ownership",
+    "level": "intermediate",
+    "summary": "Changes ownership of a folder and all its contents. A common fix after files were created with sudo.",
+    "example": "sudo chown -R deploy:deploy /var/www/myapp",
+    "exampleExplained": "-R applies the new owner and group to every file and subfolder in the app."
+  },
+  {
+    "id": "lx-046",
+    "name": "chgrp",
+    "category": "Permissions & ownership",
+    "level": "intermediate",
+    "summary": "Changes only the group that owns a file.",
+    "example": "sudo chgrp www-data uploads",
+    "exampleExplained": "Gives group ownership of the uploads folder to www-data so the web server group can use it."
+  },
+  {
+    "id": "lx-047",
+    "name": "umask",
+    "category": "Permissions & ownership",
+    "level": "intermediate",
+    "summary": "Shows or sets the default permissions removed from new files. A umask of 022 means new files get 644 and folders get 755.",
+    "example": "umask 027",
+    "exampleExplained": "New files will be 640 and folders 750 in this shell, so others get no access."
+  },
+  {
+    "id": "lx-048",
+    "name": "sudo",
+    "category": "Permissions & ownership",
+    "level": "basic",
+    "summary": "Runs one command as root (or another user) after checking your password. Use it only for commands that really need admin rights.",
+    "example": "sudo systemctl restart nginx",
+    "exampleExplained": "Runs the restart as root. Your sudo rights are listed in /etc/sudoers."
+  },
+  {
+    "id": "lx-049",
+    "name": "sudo -u",
+    "category": "Permissions & ownership",
+    "level": "intermediate",
+    "summary": "Runs a command as a specific non-root user. Useful to test whether the app user can read a file or to run the app as that user.",
+    "example": "sudo -u www-data cat /var/www/myapp/.env",
+    "exampleExplained": "Tries to read the file as www-data, showing whether that user has permission."
+  },
+  {
+    "id": "lx-050",
+    "name": "su",
+    "category": "Permissions & ownership",
+    "level": "intermediate",
+    "summary": "Switches to another user account in the current terminal. With a dash you also get that user's full login environment.",
+    "example": "sudo su - deploy",
+    "exampleExplained": "Starts a login shell as the deploy user without needing deploy's password, since sudo already made you root."
+  },
+  {
+    "id": "lx-051",
+    "name": "setfacl",
+    "category": "Permissions & ownership",
+    "level": "advanced",
+    "summary": "Sets access control lists, which give extra users or groups permissions beyond the basic owner/group/others model.",
+    "example": "setfacl -m u:alice:rw report.csv",
+    "exampleExplained": "-m modifies the ACL to give user alice read and write access without changing the owner or group."
+  },
+  {
+    "id": "lx-052",
+    "name": "getfacl",
+    "category": "Permissions & ownership",
+    "level": "advanced",
+    "summary": "Shows the access control list of a file, including any extra user or group rules set with setfacl.",
+    "example": "getfacl report.csv",
+    "exampleExplained": "Prints owner, group and every ACL entry like user:alice:rw-."
+  },
+  {
+    "id": "lx-053",
+    "name": "chattr",
+    "category": "Permissions & ownership",
+    "level": "advanced",
+    "summary": "Changes special file attributes on ext filesystems. The immutable flag stops even root from changing or deleting a file.",
+    "example": "sudo chattr +i /etc/resolv.conf",
+    "exampleExplained": "+i makes the file immutable; remove it later with chattr -i before editing."
+  },
+  {
+    "id": "lx-054",
+    "name": "lsattr",
+    "category": "Permissions & ownership",
+    "level": "advanced",
+    "summary": "Lists the special attributes set with chattr, such as i for immutable or a for append-only.",
+    "example": "lsattr /etc/resolv.conf",
+    "exampleExplained": "Shows a flag string; an i in it explains why you cannot edit the file even with sudo."
+  },
+  {
+    "id": "lx-055",
+    "name": "find",
+    "category": "Search",
+    "level": "basic",
+    "summary": "Searches a folder tree for files by name, type, size, time and more. Works anywhere, no index needed.",
+    "example": "find . -type f -name \"*.log\"",
+    "exampleExplained": "Searches from the current folder for regular files (-type f) whose names end in .log. Quote the pattern so the shell does not expand it."
+  },
+  {
+    "id": "lx-056",
+    "name": "find -mtime",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Finds files by how long ago they were modified, in days. Good for cleaning up old logs or backups.",
+    "example": "find /var/backups -name \"*.gz\" -mtime +30",
+    "exampleExplained": "-mtime +30 matches files changed more than 30 days ago. -mmin -10 would match files changed in the last 10 minutes."
+  },
+  {
+    "id": "lx-057",
+    "name": "find -size",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Finds files bigger or smaller than a size. Perfect when the disk fills up and you need the culprits.",
+    "example": "find / -xdev -type f -size +500M 2>/dev/null",
+    "exampleExplained": "-size +500M means larger than 500 MB, -xdev stays on one filesystem, 2>/dev/null hides permission errors."
+  },
+  {
+    "id": "lx-058",
+    "name": "find -exec",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Runs a command on every file find matches. Lets you delete, compress or change many files at once.",
+    "example": "find . -name \"*.tmp\" -exec rm {} +",
+    "exampleExplained": "{} is replaced by matched file names and + passes many at once. Run without -exec first to preview what will be removed."
+  },
+  {
+    "id": "lx-059",
+    "name": "locate",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Finds files by name instantly using a prebuilt database. Faster than find but may miss very new files. Install with apt install plocate.",
+    "example": "locate nginx.conf",
+    "exampleExplained": "Prints every indexed path containing nginx.conf in a fraction of a second."
+  },
+  {
+    "id": "lx-060",
+    "name": "updatedb",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Rebuilds the database used by locate. It normally runs daily, but you can run it after creating many files.",
+    "example": "sudo updatedb",
+    "exampleExplained": "Rescans the filesystem so locate can see recently added files."
+  },
+  {
+    "id": "lx-061",
+    "name": "which",
+    "category": "Search",
+    "level": "basic",
+    "summary": "Shows the full path of the program that runs when you type a command. Helpful when several versions of node are installed.",
+    "example": "which node",
+    "exampleExplained": "Prints something like /usr/bin/node or a path inside ~/.nvm, showing which node binary wins."
+  },
+  {
+    "id": "lx-062",
+    "name": "whereis",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Finds the binary, source and man page locations for a command.",
+    "example": "whereis python3",
+    "exampleExplained": "Lists paths such as /usr/bin/python3 and /usr/share/man/man1/python3.1.gz."
+  },
+  {
+    "id": "lx-063",
+    "name": "type",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Tells you how the shell will interpret a name: alias, function, builtin or a file on disk.",
+    "example": "type ll",
+    "exampleExplained": "Might print ll is aliased to ls -alF, revealing that ll is an alias rather than a program."
+  },
+  {
+    "id": "lx-064",
+    "name": "grep",
+    "category": "Search",
+    "level": "basic",
+    "summary": "Searches text for lines matching a pattern. Works on files or on output piped from another command.",
+    "example": "grep \"ERROR\" app.log",
+    "exampleExplained": "Prints every line of app.log that contains ERROR. Matching is case-sensitive by default."
+  },
+  {
+    "id": "lx-065",
+    "name": "grep -i -n",
+    "category": "Search",
+    "level": "basic",
+    "summary": "Common grep options: ignore case and show line numbers, so you can jump straight to the spot in an editor.",
+    "example": "grep -in \"timeout\" server.js",
+    "exampleExplained": "-i matches Timeout, TIMEOUT and so on; -n prefixes each result with its line number."
+  },
+  {
+    "id": "lx-066",
+    "name": "grep -r",
+    "category": "Search",
+    "level": "basic",
+    "summary": "Searches every file inside a folder tree. Great for finding where a function or config value is used.",
+    "example": "grep -rn --exclude-dir=node_modules \"connectDB\" .",
+    "exampleExplained": "-r recurses into folders, -n shows line numbers, --exclude-dir skips node_modules to keep it fast."
+  },
+  {
+    "id": "lx-067",
+    "name": "grep -v",
+    "category": "Search",
+    "level": "basic",
+    "summary": "Inverts the match, showing only lines that do NOT contain the pattern. Useful for filtering out noise.",
+    "example": "grep -v \"healthcheck\" access.log",
+    "exampleExplained": "Prints all log lines except those from health checks."
+  },
+  {
+    "id": "lx-068",
+    "name": "grep -E",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Turns on extended regular expressions so you can use |, +, ? and groups without backslashes.",
+    "example": "grep -E \"ERROR|WARN\" app.log",
+    "exampleExplained": "Matches lines that contain either ERROR or WARN."
+  },
+  {
+    "id": "lx-069",
+    "name": "grep -A -B",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "Shows lines of context after (-A) or before (-B) each match. Ideal for seeing a stack trace around an error.",
+    "example": "grep -A 5 -B 2 \"Unhandled\" app.log",
+    "exampleExplained": "Prints 2 lines before and 5 lines after each match; -C 3 would give 3 on both sides."
+  },
+  {
+    "id": "lx-070",
+    "name": "rg",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "ripgrep: a very fast recursive search tool that skips files in .gitignore by default. Install with apt install ripgrep.",
+    "example": "rg \"process.env\" src/",
+    "exampleExplained": "Searches src for process.env with line numbers and colors, ignoring node_modules if it is gitignored."
+  },
+  {
+    "id": "lx-071",
+    "name": "fdfind",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "fd is a simpler, faster alternative to find. On Ubuntu the package is fd-find and the command is fdfind.",
+    "example": "fdfind -e js config",
+    "exampleExplained": "Finds files with the .js extension whose names contain config, skipping hidden and ignored files."
+  },
+  {
+    "id": "lx-072",
+    "name": "command -v",
+    "category": "Search",
+    "level": "intermediate",
+    "summary": "A portable way to check if a command exists, often used in scripts before calling a tool.",
+    "example": "command -v docker || echo \"docker missing\"",
+    "exampleExplained": "Prints docker's path if installed; otherwise the || part runs and prints the message."
+  },
+  {
+    "id": "lx-073",
+    "name": "ps",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Shows a snapshot of running processes. With aux you see every process on the machine, with CPU, memory and the command line.",
+    "example": "ps aux | grep node",
+    "exampleExplained": "a and x include all users' processes and ones without a terminal, u adds user/CPU/memory columns; grep filters to node."
+  },
+  {
+    "id": "lx-074",
+    "name": "top",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "A live, updating view of processes sorted by CPU use, plus load and memory totals. Press M to sort by memory, q to quit.",
+    "example": "top -o %MEM",
+    "exampleExplained": "-o %MEM starts top sorted by memory use instead of CPU."
+  },
+  {
+    "id": "lx-075",
+    "name": "htop",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "A friendlier, colorful version of top with mouse support, tree view and easy killing. Install with apt install htop.",
+    "example": "htop -u deploy",
+    "exampleExplained": "-u deploy shows only processes owned by the deploy user. F5 toggles tree view, F9 sends a signal."
+  },
+  {
+    "id": "lx-076",
+    "name": "kill",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Sends a signal to a process by its PID. By default it sends SIGTERM, which politely asks the program to shut down.",
+    "example": "kill 12345",
+    "exampleExplained": "Asks process 12345 to stop; a Node app can catch SIGTERM to close DB connections cleanly first."
+  },
+  {
+    "id": "lx-077",
+    "name": "kill -9",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Sends SIGKILL, which the process cannot catch or ignore. Use only when a normal kill fails, as the app gets no chance to clean up.",
+    "example": "kill -9 12345",
+    "exampleExplained": "-9 is SIGKILL: the kernel ends the process immediately. Open files and unsaved data are not flushed by the app."
+  },
+  {
+    "id": "lx-078",
+    "name": "pkill",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Kills processes by name or other attributes instead of PID.",
+    "example": "pkill -f \"node server.js\"",
+    "exampleExplained": "-f matches against the full command line, so only the node process running server.js is signaled."
+  },
+  {
+    "id": "lx-079",
+    "name": "pgrep",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Finds process IDs by name, without the noise of ps piped to grep.",
+    "example": "pgrep -a node",
+    "exampleExplained": "-a prints each PID with its full command line, listing every running node process."
+  },
+  {
+    "id": "lx-080",
+    "name": "killall",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Kills all processes with an exact program name.",
+    "example": "killall -s HUP nginx",
+    "exampleExplained": "-s HUP sends the hang-up signal to every nginx process, which many daemons treat as reload config."
+  },
+  {
+    "id": "lx-081",
+    "name": "pidof",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Prints the PIDs of a running program given its exact name.",
+    "example": "pidof mongod",
+    "exampleExplained": "Outputs the PID(s) of the mongod daemon, or nothing if it is not running."
+  },
+  {
+    "id": "lx-082",
+    "name": "pstree",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Shows processes as a tree so you can see which process started which. Great for understanding pm2 or systemd children.",
+    "example": "pstree -p deploy",
+    "exampleExplained": "Shows the process tree for user deploy with -p adding PIDs next to each name."
+  },
+  {
+    "id": "lx-083",
+    "name": "jobs",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Lists background or paused jobs started from the current shell.",
+    "example": "jobs -l",
+    "exampleExplained": "-l shows job numbers along with PIDs and their state such as Running or Stopped."
+  },
+  {
+    "id": "lx-084",
+    "name": "bg",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Resumes a paused job in the background. Pair it with Ctrl+Z, which pauses the job running in the foreground.",
+    "example": "bg %1",
+    "exampleExplained": "Continues job 1 in the background so you get your prompt back."
+  },
+  {
+    "id": "lx-085",
+    "name": "fg",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Brings a background or paused job back to the foreground so you can interact with it.",
+    "example": "fg %1",
+    "exampleExplained": "Job 1 takes over the terminal again; Ctrl+C would now stop it."
+  },
+  {
+    "id": "lx-086",
+    "name": "command &",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Ending a command with & runs it in the background of the current shell so you can keep typing. It still dies when you log out.",
+    "example": "npm run build > build.log 2>&1 &",
+    "exampleExplained": "Runs the build in the background, sending output and errors to build.log; the shell prints the job number and PID."
+  },
+  {
+    "id": "lx-087",
+    "name": "nohup",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Runs a command that keeps going after you log out by ignoring the hang-up signal. A quick fix, though systemd or pm2 is better for real services.",
+    "example": "nohup node server.js > out.log 2>&1 &",
+    "exampleExplained": "nohup ignores logout, output goes to out.log, & puts it in the background."
+  },
+  {
+    "id": "lx-088",
+    "name": "disown",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Detaches a background job from the shell so it is not killed when you close the terminal.",
+    "example": "disown %1",
+    "exampleExplained": "Removes job 1 from the shell's job list; it keeps running after logout."
+  },
+  {
+    "id": "lx-089",
+    "name": "nice",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Starts a command with a lower (or higher) CPU priority. Higher nice values mean the process yields to others.",
+    "example": "nice -n 10 npm run build",
+    "exampleExplained": "Runs the build with niceness 10 so the live app gets CPU first. Only root can use negative values."
+  },
+  {
+    "id": "lx-090",
+    "name": "renice",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Changes the priority of a process that is already running.",
+    "example": "sudo renice -n 5 -p 12345",
+    "exampleExplained": "Sets process 12345 to niceness 5, lowering its CPU priority."
+  },
+  {
+    "id": "lx-091",
+    "name": "timeout",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Runs a command but kills it if it takes longer than a time limit. Useful in scripts and CI to avoid hangs.",
+    "example": "timeout 30s npm test",
+    "exampleExplained": "Stops npm test after 30 seconds; the exit code is 124 when the timeout fires."
+  },
+  {
+    "id": "lx-092",
+    "name": "watch",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Runs a command again every few seconds and shows the fresh output full screen. Good for watching disk, memory or a queue.",
+    "example": "watch -n 2 df -h",
+    "exampleExplained": "-n 2 refreshes every 2 seconds. Add -d to highlight what changed between runs."
+  },
+  {
+    "id": "lx-093",
+    "name": "sleep",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Pauses for a number of seconds (or m, h). Used in scripts between retries.",
+    "example": "sleep 5 && curl localhost:3000/health",
+    "exampleExplained": "Waits 5 seconds, then checks the health endpoint."
+  },
+  {
+    "id": "lx-094",
+    "name": "time",
+    "category": "Processes",
+    "level": "basic",
+    "summary": "Measures how long a command takes, showing real (wall clock), user and system CPU time.",
+    "example": "time npm ci",
+    "exampleExplained": "After npm ci finishes, prints real, user and sys times so you can compare install speed."
+  },
+  {
+    "id": "lx-095",
+    "name": "screen",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "Creates terminal sessions that survive disconnects. Start a long job, detach, log out and reattach later.",
+    "example": "screen -S migrate",
+    "exampleExplained": "Starts a session named migrate. Ctrl+A then D detaches; screen -r migrate reattaches."
+  },
+  {
+    "id": "lx-096",
+    "name": "tmux",
+    "category": "Processes",
+    "level": "intermediate",
+    "summary": "A modern terminal multiplexer: persistent sessions, split panes and windows. Loved for long-running work on servers.",
+    "example": "tmux new -s deploy",
+    "exampleExplained": "Creates session deploy. Ctrl+B then D detaches; tmux attach -t deploy brings it back."
+  },
+  {
+    "id": "lx-097",
+    "name": "sort",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Sorts lines of text alphabetically by default. Often used with uniq to group and count.",
+    "example": "sort names.txt",
+    "exampleExplained": "Prints the lines of names.txt in alphabetical order without changing the file."
+  },
+  {
+    "id": "lx-098",
+    "name": "sort -n -k",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Sorts by a chosen column and treats values as numbers, so 100 comes after 20.",
+    "example": "sort -t, -k3 -n -r sales.csv",
+    "exampleExplained": "-t, splits on commas, -k3 sorts by column 3, -n compares numerically, -r puts the largest first."
+  },
+  {
+    "id": "lx-099",
+    "name": "uniq",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Removes repeated lines that are next to each other, so input usually needs sorting first.",
+    "example": "sort emails.txt | uniq",
+    "exampleExplained": "Sorting puts duplicates side by side, then uniq keeps one copy of each."
+  },
+  {
+    "id": "lx-100",
+    "name": "uniq -c",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Counts how many times each line repeats. With sort it builds a quick frequency table.",
+    "example": "cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head",
+    "exampleExplained": "Takes the IP column, groups and counts each IP, and lists the top 10 most frequent visitors."
+  },
+  {
+    "id": "lx-101",
+    "name": "cut",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Extracts columns or characters from each line, split by a delimiter.",
+    "example": "cut -d: -f1 /etc/passwd",
+    "exampleExplained": "-d: uses colon as the separator and -f1 keeps field 1, listing every username."
+  },
+  {
+    "id": "lx-102",
+    "name": "tr",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Translates or deletes characters in a stream, like changing case or stripping characters.",
+    "example": "tr -d '\\r' < win.txt > unix.txt",
+    "exampleExplained": "-d deletes every carriage return, turning Windows line endings into Linux ones."
+  },
+  {
+    "id": "lx-103",
+    "name": "sed",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "A stream editor that applies edits like find-and-replace to text as it flows through.",
+    "example": "sed 's/localhost/db.internal/g' config.txt",
+    "exampleExplained": "s/old/new/g replaces every match on each line and prints the result; the file is not changed."
+  },
+  {
+    "id": "lx-104",
+    "name": "sed -i",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Edits a file in place. Powerful for scripted config changes, so keep a backup the first time.",
+    "example": "sed -i.bak 's/^PORT=.*/PORT=8080/' .env",
+    "exampleExplained": "-i.bak edits .env and saves the original as .env.bak; the regex replaces the whole PORT line."
+  },
+  {
+    "id": "lx-105",
+    "name": "awk",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "A small language for processing columns of text. Great for pulling fields, filtering rows and doing sums.",
+    "example": "awk '{print $1, $9}' access.log",
+    "exampleExplained": "Prints field 1 (client IP) and field 9 (HTTP status) from each nginx log line; fields split on spaces."
+  },
+  {
+    "id": "lx-106",
+    "name": "awk -F",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Sets the field separator for awk and lets you add conditions and totals.",
+    "example": "awk -F, '$3 > 100 {sum += $3} END {print sum}' sales.csv",
+    "exampleExplained": "-F, splits on commas; rows with column 3 above 100 are added up and the total is printed at the end."
+  },
+  {
+    "id": "lx-107",
+    "name": "paste",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Joins lines from files side by side, or merges many lines into one.",
+    "example": "paste -sd, ids.txt",
+    "exampleExplained": "-s joins all lines of the file into one, -d, puts commas between them: 1,2,3."
+  },
+  {
+    "id": "lx-108",
+    "name": "diff",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Compares two files line by line and shows what differs.",
+    "example": "diff -u old.conf new.conf",
+    "exampleExplained": "-u prints a unified diff with - for removed and + for added lines, the same style git uses."
+  },
+  {
+    "id": "lx-109",
+    "name": "comm",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Compares two sorted files and shows lines unique to each and lines in both.",
+    "example": "comm -12 a.txt b.txt",
+    "exampleExplained": "-12 hides columns 1 and 2, leaving only lines present in both files."
+  },
+  {
+    "id": "lx-110",
+    "name": "tee",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Writes input to a file and to the screen at the same time. Also the standard way to write root-owned files with sudo.",
+    "example": "echo \"vm.swappiness=10\" | sudo tee -a /etc/sysctl.conf",
+    "exampleExplained": "tee runs as root via sudo and -a appends. A plain sudo echo > file would fail because the redirect is done by your shell."
+  },
+  {
+    "id": "lx-111",
+    "name": "column",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Formats text into neat aligned columns, making CSV or command output readable.",
+    "example": "column -t -s, data.csv",
+    "exampleExplained": "-t builds a table, -s, splits on commas so each field lines up."
+  },
+  {
+    "id": "lx-112",
+    "name": "printf",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Prints formatted text with control over spacing and number formats. More predictable than echo in scripts.",
+    "example": "printf \"%-10s %5d\\n\" api 42",
+    "exampleExplained": "%-10s left-aligns a string in 10 chars, %5d right-aligns a number in 5, \\n ends the line."
+  },
+  {
+    "id": "lx-113",
+    "name": "split",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Splits a big file into smaller pieces by lines or size. Handy for huge CSV imports or uploads with size limits.",
+    "example": "split -l 100000 big.csv part_",
+    "exampleExplained": "-l 100000 puts 100k lines in each piece, named part_aa, part_ab and so on."
+  },
+  {
+    "id": "lx-114",
+    "name": "seq",
+    "category": "Text processing",
+    "level": "basic",
+    "summary": "Prints a sequence of numbers, mostly used in loops and quick tests.",
+    "example": "seq 1 5",
+    "exampleExplained": "Prints 1 to 5, one per line. seq 0 10 100 counts by tens."
+  },
+  {
+    "id": "lx-115",
+    "name": "jq",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "A command-line JSON processor: pretty-prints, filters and reshapes JSON. Essential for APIs and logs. Install with apt install jq.",
+    "example": "curl -s localhost:3000/api/users | jq '.[] | .email'",
+    "exampleExplained": "Pretty-prints the response and outputs the email field of each element in the array."
+  },
+  {
+    "id": "lx-116",
+    "name": "dos2unix",
+    "category": "Text processing",
+    "level": "intermediate",
+    "summary": "Converts Windows CRLF line endings to Linux LF. Fixes errors like bad interpreter: /bin/bash^M. Install with apt install dos2unix.",
+    "example": "dos2unix deploy.sh",
+    "exampleExplained": "Rewrites deploy.sh in place with Linux line endings so the shebang works."
+  },
+  {
+    "id": "lx-117",
+    "name": "envsubst",
+    "category": "Text processing",
+    "level": "advanced",
+    "summary": "Replaces $VAR placeholders in text with environment variable values. Great for templating config files in deploys.",
+    "example": "PORT=3000 envsubst < nginx.tpl > nginx.conf",
+    "exampleExplained": "Every $PORT or ${PORT} in the template becomes 3000 in the output file."
+  },
+  {
+    "id": "lx-118",
+    "name": "ping",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Checks if a host is reachable and how long round trips take, using ICMP packets.",
+    "example": "ping -c 4 google.com",
+    "exampleExplained": "-c 4 sends four packets then stops (on Linux ping runs forever without it) and prints loss and timing."
+  },
+  {
+    "id": "lx-119",
+    "name": "curl",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Transfers data to or from URLs. The go-to tool for testing APIs, downloading files and checking web servers.",
+    "example": "curl -s https://api.example.com/health",
+    "exampleExplained": "-s silent mode hides the progress bar and prints just the response body."
+  },
+  {
+    "id": "lx-120",
+    "name": "curl -I",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Fetches only the HTTP response headers. Quick way to check status codes, redirects and caching headers.",
+    "example": "curl -I https://example.com",
+    "exampleExplained": "-I sends a HEAD request and prints status line and headers such as content-type."
+  },
+  {
+    "id": "lx-121",
+    "name": "curl POST JSON",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Sends a POST request with a JSON body, like Postman in one line.",
+    "example": "curl -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Ana\"}' localhost:3000/users",
+    "exampleExplained": "-X POST sets the method, -H adds a header, -d supplies the request body."
+  },
+  {
+    "id": "lx-122",
+    "name": "wget",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Downloads files from the web, can resume broken downloads and mirror sites.",
+    "example": "wget -c https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz",
+    "exampleExplained": "-c continues a partially downloaded file instead of starting over."
+  },
+  {
+    "id": "lx-123",
+    "name": "ip addr",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Shows network interfaces and their IP addresses. The modern replacement for ifconfig.",
+    "example": "ip -br addr",
+    "exampleExplained": "-br prints a brief one-line summary per interface with state and IPs."
+  },
+  {
+    "id": "lx-124",
+    "name": "ip route",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Shows the routing table, including the default gateway traffic leaves through.",
+    "example": "ip route get 8.8.8.8",
+    "exampleExplained": "Prints which interface and gateway would be used to reach 8.8.8.8."
+  },
+  {
+    "id": "lx-125",
+    "name": "ip link",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Shows or changes network interface state, such as bringing a link up or down.",
+    "example": "ip link show",
+    "exampleExplained": "Lists interfaces with MAC address, MTU and whether they are UP."
+  },
+  {
+    "id": "lx-126",
+    "name": "ss",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Shows sockets and listening ports. Use it to see what is running on port 3000 or 27017.",
+    "example": "sudo ss -tulpn",
+    "exampleExplained": "-t TCP, -u UDP, -l listening only, -p shows process, -n shows numbers instead of names."
+  },
+  {
+    "id": "lx-127",
+    "name": "netstat",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "The older tool for listing connections and ports, still common in guides. Part of net-tools; ss is the modern choice.",
+    "example": "sudo netstat -tulpn",
+    "exampleExplained": "Same flags as ss: TCP, UDP, listening, process names, numeric ports."
+  },
+  {
+    "id": "lx-128",
+    "name": "hostname",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Prints the machine's network name, or its IP addresses with -I.",
+    "example": "hostname -I",
+    "exampleExplained": "-I lists all IP addresses assigned to the machine (Linux-specific flag)."
+  },
+  {
+    "id": "lx-129",
+    "name": "dig",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Queries DNS records in detail. Essential when a domain is not pointing where you expect. Part of dnsutils.",
+    "example": "dig +short A myapp.com",
+    "exampleExplained": "Asks for A records of myapp.com; +short prints just the IP addresses."
+  },
+  {
+    "id": "lx-130",
+    "name": "nslookup",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "A simpler DNS lookup tool, available on most systems.",
+    "example": "nslookup myapp.com 1.1.1.1",
+    "exampleExplained": "Looks up myapp.com using the DNS server 1.1.1.1 instead of the default one."
+  },
+  {
+    "id": "lx-131",
+    "name": "traceroute",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Shows each router hop between you and a host, which helps find where traffic slows or stops.",
+    "example": "traceroute api.example.com",
+    "exampleExplained": "Prints each hop with its timing; rows of * mean that hop did not reply."
+  },
+  {
+    "id": "lx-132",
+    "name": "mtr",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Combines ping and traceroute into a live view of every hop with packet loss. Install with apt install mtr.",
+    "example": "mtr -rwc 50 example.com",
+    "exampleExplained": "-r report mode, -w wide names, -c 50 sends 50 probes then prints a summary table."
+  },
+  {
+    "id": "lx-133",
+    "name": "nc",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "netcat: opens raw TCP or UDP connections. Great for testing whether a port is open from a server.",
+    "example": "nc -zv db.internal 27017",
+    "exampleExplained": "-z just scans without sending data, -v reports success or failure. Shows if MongoDB's port is reachable."
+  },
+  {
+    "id": "lx-134",
+    "name": "ssh",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Logs into a remote server securely or runs a command there. The way you reach Linux servers from your Mac.",
+    "example": "ssh -i ~/.ssh/id_ed25519 deploy@203.0.113.10",
+    "exampleExplained": "-i picks the private key file; deploy is the user and the IP is the server."
+  },
+  {
+    "id": "lx-135",
+    "name": "ssh -L",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Creates a local port forward through SSH, letting you reach a remote service like a private MongoDB from your laptop.",
+    "example": "ssh -L 27018:localhost:27017 deploy@myserver",
+    "exampleExplained": "Your local port 27018 now tunnels to port 27017 on the server; connect Compass to localhost:27018."
+  },
+  {
+    "id": "lx-136",
+    "name": "ssh-keygen",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Generates an SSH key pair for passwordless, secure logins.",
+    "example": "ssh-keygen -t ed25519 -C \"you@laptop\"",
+    "exampleExplained": "-t ed25519 picks a modern key type, -C adds a comment label. Keys go into ~/.ssh by default."
+  },
+  {
+    "id": "lx-137",
+    "name": "ssh-copy-id",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Copies your public key to a server's authorized_keys so you can log in with your key.",
+    "example": "ssh-copy-id deploy@203.0.113.10",
+    "exampleExplained": "Asks for the password once, then installs your public key for future key-based logins."
+  },
+  {
+    "id": "lx-138",
+    "name": "scp",
+    "category": "Networking",
+    "level": "basic",
+    "summary": "Copies files over SSH between your machine and a server.",
+    "example": "scp -r ./dist deploy@myserver:/var/www/myapp/",
+    "exampleExplained": "-r copies the folder recursively to the remote path after the colon."
+  },
+  {
+    "id": "lx-139",
+    "name": "rsync",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Syncs files locally or over SSH, sending only what changed. Faster and safer than scp for repeated deploys and backups.",
+    "example": "rsync -avz --exclude node_modules ./ deploy@myserver:/var/www/myapp/",
+    "exampleExplained": "-a keeps permissions and times, -v verbose, -z compresses in transit, --exclude skips node_modules."
+  },
+  {
+    "id": "lx-140",
+    "name": "rsync --delete",
+    "category": "Networking",
+    "level": "advanced",
+    "summary": "Makes the destination an exact mirror by removing files that no longer exist in the source. Preview with --dry-run first.",
+    "example": "rsync -av --delete --dry-run dist/ deploy@myserver:/var/www/site/",
+    "exampleExplained": "--delete removes extra files at the destination; --dry-run only shows what would change. The trailing slash on dist/ means its contents."
+  },
+  {
+    "id": "lx-141",
+    "name": "sftp",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "An interactive file transfer session over SSH, with commands like ls, get and put.",
+    "example": "sftp deploy@myserver",
+    "exampleExplained": "Opens an sftp> prompt; get file downloads, put file uploads, exit closes."
+  },
+  {
+    "id": "lx-142",
+    "name": "ssh config",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "The ~/.ssh/config file lets you define short aliases with host, user, key and port, so long ssh commands become one word.",
+    "example": "ssh prod",
+    "exampleExplained": "Works after adding Host prod with HostName, User and IdentityFile lines to ~/.ssh/config."
+  },
+  {
+    "id": "lx-143",
+    "name": "whois",
+    "category": "Networking",
+    "level": "intermediate",
+    "summary": "Shows registration info for a domain or IP: owner org, registrar, expiry date.",
+    "example": "whois example.com",
+    "exampleExplained": "Prints registrar, creation and expiry dates, and name servers for the domain."
+  },
+  {
+    "id": "lx-144",
+    "name": "resolvectl",
+    "category": "Networking",
+    "level": "advanced",
+    "summary": "Shows and controls DNS settings on systems using systemd-resolved, like modern Ubuntu.",
+    "example": "resolvectl status",
+    "exampleExplained": "Prints which DNS servers each interface uses. resolvectl query example.com resolves a name."
+  },
+  {
+    "id": "lx-145",
+    "name": "tcpdump",
+    "category": "Networking",
+    "level": "advanced",
+    "summary": "Captures and shows network packets live. Powerful for debugging traffic that never reaches your app.",
+    "example": "sudo tcpdump -i any -n port 3000",
+    "exampleExplained": "-i any listens on all interfaces, -n skips name lookups, port 3000 filters to that port's traffic."
+  },
+  {
+    "id": "lx-146",
+    "name": "apt update",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Refreshes the list of available packages from the repositories. Run it before installing or upgrading anything.",
+    "example": "sudo apt update",
+    "exampleExplained": "Downloads the latest package lists; it does not install or upgrade anything by itself."
+  },
+  {
+    "id": "lx-147",
+    "name": "apt upgrade",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Installs newer versions of all installed packages. Do it regularly for security fixes.",
+    "example": "sudo apt upgrade -y",
+    "exampleExplained": "Upgrades all packages; -y answers yes automatically. Run apt update first."
+  },
+  {
+    "id": "lx-148",
+    "name": "apt install",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Installs a package and its dependencies on Debian/Ubuntu.",
+    "example": "sudo apt install -y nginx",
+    "exampleExplained": "Downloads and installs nginx; -y skips the confirmation prompt."
+  },
+  {
+    "id": "lx-149",
+    "name": "apt remove",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Uninstalls a package but keeps its configuration files.",
+    "example": "sudo apt remove nginx",
+    "exampleExplained": "Removes the nginx program; configs in /etc/nginx stay in case you reinstall."
+  },
+  {
+    "id": "lx-150",
+    "name": "apt purge",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Uninstalls a package and also deletes its system-wide config files.",
+    "example": "sudo apt purge nginx",
+    "exampleExplained": "Removes nginx and its config files for a clean slate. Your own data elsewhere is not touched."
+  },
+  {
+    "id": "lx-151",
+    "name": "apt autoremove",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Removes dependency packages that nothing needs anymore, freeing space.",
+    "example": "sudo apt autoremove",
+    "exampleExplained": "Lists unused dependencies and removes them after confirmation."
+  },
+  {
+    "id": "lx-152",
+    "name": "apt search",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Searches available packages by name and description.",
+    "example": "apt search redis",
+    "exampleExplained": "Lists packages related to redis with short descriptions."
+  },
+  {
+    "id": "lx-153",
+    "name": "apt show",
+    "category": "Packages",
+    "level": "basic",
+    "summary": "Shows details about a package: version, size, dependencies and description.",
+    "example": "apt show nodejs",
+    "exampleExplained": "Prints the version your repos offer, which is often older than what you want for Node."
+  },
+  {
+    "id": "lx-154",
+    "name": "apt list",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Lists packages, filtered by installed or upgradable status.",
+    "example": "apt list --upgradable",
+    "exampleExplained": "Shows packages with newer versions waiting; --installed lists everything installed."
+  },
+  {
+    "id": "lx-155",
+    "name": "apt-cache policy",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Shows which version of a package is installed and which repositories offer which versions.",
+    "example": "apt-cache policy nodejs",
+    "exampleExplained": "Prints Installed and Candidate versions plus the repo each comes from, handy after adding NodeSource."
+  },
+  {
+    "id": "lx-156",
+    "name": "apt-mark hold",
+    "category": "Packages",
+    "level": "advanced",
+    "summary": "Pins a package so upgrades skip it. Useful to keep a known-good database version.",
+    "example": "sudo apt-mark hold mongodb-org",
+    "exampleExplained": "Marks mongodb-org as held; apt upgrade will not touch it until you run apt-mark unhold."
+  },
+  {
+    "id": "lx-157",
+    "name": "dpkg -i",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Installs a .deb package file you downloaded. dpkg is the low-level tool under apt.",
+    "example": "sudo dpkg -i ./mongodb-compass.deb",
+    "exampleExplained": "Installs the local .deb file. dpkg does not fetch dependencies; if it reports missing ones, run sudo apt -f install (or use apt install ./file.deb)."
+  },
+  {
+    "id": "lx-158",
+    "name": "dpkg -l",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Lists installed packages with their versions and status.",
+    "example": "dpkg -l | grep nginx",
+    "exampleExplained": "Shows nginx-related packages; ii at the start means installed fine."
+  },
+  {
+    "id": "lx-159",
+    "name": "add-apt-repository",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Adds an extra package source, such as a PPA, on Ubuntu.",
+    "example": "sudo add-apt-repository ppa:deadsnakes/ppa",
+    "exampleExplained": "Registers the PPA so newer Python versions become installable; it refreshes package lists too."
+  },
+  {
+    "id": "lx-160",
+    "name": "snap",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "Ubuntu's sandboxed package system. Snaps bundle their dependencies and update themselves.",
+    "example": "sudo snap install certbot --classic",
+    "exampleExplained": "Installs certbot as a snap; --classic gives it normal system access."
+  },
+  {
+    "id": "lx-161",
+    "name": "dnf",
+    "category": "Packages",
+    "level": "intermediate",
+    "summary": "The package manager on Fedora, RHEL, Rocky and Amazon Linux 2023. Same ideas as apt with different names.",
+    "example": "sudo dnf install -y git",
+    "exampleExplained": "Installs git on a Red Hat family system. dnf upgrade updates everything."
+  },
+  {
+    "id": "lx-162",
+    "name": "update-alternatives",
+    "category": "Packages",
+    "level": "advanced",
+    "summary": "Chooses which version of a program the generic name points to when several are installed, such as python3 or java.",
+    "example": "sudo update-alternatives --config editor",
+    "exampleExplained": "Shows a numbered menu of installed editors and sets the system default."
+  },
+  {
+    "id": "lx-163",
+    "name": "df",
+    "category": "Disks & storage",
+    "level": "basic",
+    "summary": "Shows how much space is used and free on each mounted filesystem. The first thing to run when a server says no space left on device.",
+    "example": "df -h",
+    "exampleExplained": "-h prints sizes in human units like 20G. Look at the Use% column for the root (/) filesystem."
+  },
+  {
+    "id": "lx-164",
+    "name": "du",
+    "category": "Disks & storage",
+    "level": "basic",
+    "summary": "Shows how much disk space files and folders use. Use it to find what is eating your disk.",
+    "example": "du -sh node_modules",
+    "exampleExplained": "-s gives one total for the folder, -h prints human-readable sizes."
+  },
+  {
+    "id": "lx-165",
+    "name": "du sorted",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Combining du with sort lists the biggest folders first, the fastest way to track down disk hogs.",
+    "example": "sudo du -h --max-depth=1 /var | sort -hr | head",
+    "exampleExplained": "Sizes each folder directly under /var, sort -hr orders human sizes largest first, head shows the top 10."
+  },
+  {
+    "id": "lx-166",
+    "name": "ncdu",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "An interactive disk usage browser. Navigate folders with arrow keys to see what is big, and delete with d. Install with apt install ncdu.",
+    "example": "sudo ncdu -x /",
+    "exampleExplained": "-x stays on the root filesystem so other mounts are not scanned."
+  },
+  {
+    "id": "lx-167",
+    "name": "lsblk",
+    "category": "Disks & storage",
+    "level": "basic",
+    "summary": "Lists disks and partitions as a tree with sizes and mount points. Good for spotting a newly attached cloud volume.",
+    "example": "lsblk -f",
+    "exampleExplained": "-f adds filesystem type, label, UUID and mount point for each device."
+  },
+  {
+    "id": "lx-168",
+    "name": "blkid",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Prints filesystem type and UUID of block devices. The UUID is what you put in /etc/fstab.",
+    "example": "sudo blkid /dev/nvme1n1",
+    "exampleExplained": "Shows UUID and TYPE (e.g. ext4) of that volume."
+  },
+  {
+    "id": "lx-169",
+    "name": "mount",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Attaches a filesystem to a folder so its files become accessible. Without arguments it lists current mounts.",
+    "example": "sudo mount /dev/nvme1n1 /mnt/data",
+    "exampleExplained": "Makes the volume's contents appear under /mnt/data. The folder must exist first."
+  },
+  {
+    "id": "lx-170",
+    "name": "umount",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Detaches a mounted filesystem. It fails if a process is still using it.",
+    "example": "sudo umount /mnt/data",
+    "exampleExplained": "Unmounts the volume. If it says target is busy, check with lsof +D /mnt/data."
+  },
+  {
+    "id": "lx-171",
+    "name": "findmnt",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Shows mounted filesystems as a clear tree, and can verify your fstab file.",
+    "example": "findmnt --verify",
+    "exampleExplained": "Checks /etc/fstab for mistakes before a reboot, which could otherwise leave the server unbootable."
+  },
+  {
+    "id": "lx-172",
+    "name": "fdisk",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Views and edits disk partition tables. Editing is destructive, so double-check the device name.",
+    "example": "sudo fdisk -l",
+    "exampleExplained": "-l only lists disks and partitions; it changes nothing."
+  },
+  {
+    "id": "lx-173",
+    "name": "mkfs.ext4",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Creates a new ext4 filesystem on a partition or volume. This ERASES everything on that device.",
+    "example": "sudo mkfs.ext4 -L data /dev/nvme1n1",
+    "exampleExplained": "Formats the new empty volume as ext4 with label data. Confirm the device with lsblk first."
+  },
+  {
+    "id": "lx-174",
+    "name": "fsck",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Checks and repairs a filesystem. Run it only on unmounted filesystems.",
+    "example": "sudo fsck -n /dev/sdb1",
+    "exampleExplained": "-n checks without fixing anything, a safe first look. Without -n it may ask to repair."
+  },
+  {
+    "id": "lx-175",
+    "name": "resize2fs",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Grows (or shrinks) an ext4 filesystem, for example after enlarging a cloud disk.",
+    "example": "sudo resize2fs /dev/nvme0n1p1",
+    "exampleExplained": "Expands the filesystem to fill its partition. Grow the partition first, often with growpart."
+  },
+  {
+    "id": "lx-176",
+    "name": "growpart",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Extends a partition to use free space after a cloud disk was resized. Part of cloud-guest-utils.",
+    "example": "sudo growpart /dev/nvme0n1 1",
+    "exampleExplained": "Grows partition 1 of the disk; follow with resize2fs to grow the filesystem."
+  },
+  {
+    "id": "lx-177",
+    "name": "mkswap",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Prepares a file or partition to be used as swap space.",
+    "example": "sudo mkswap /swapfile",
+    "exampleExplained": "Writes swap headers to /swapfile. Create it first with fallocate and chmod 600."
+  },
+  {
+    "id": "lx-178",
+    "name": "swapon",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Enables swap space, or lists active swap. Small servers running npm builds often need some swap.",
+    "example": "swapon --show",
+    "exampleExplained": "Lists active swap files or partitions with their size and usage."
+  },
+  {
+    "id": "lx-179",
+    "name": "fallocate",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Quickly reserves disk space for a file. Commonly used to create a swap file.",
+    "example": "sudo fallocate -l 2G /swapfile",
+    "exampleExplained": "-l 2G makes a 2 GB file instantly without writing zeros."
+  },
+  {
+    "id": "lx-180",
+    "name": "dd",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Copies raw data block by block. Used for disk images and test files, but a wrong of= target can wipe a disk.",
+    "example": "dd if=/dev/zero of=test.img bs=1M count=100",
+    "exampleExplained": "Writes 100 blocks of 1 MB zeros into test.img. if= is input, of= is output; never point of= at a disk by mistake."
+  },
+  {
+    "id": "lx-181",
+    "name": "sync",
+    "category": "Disks & storage",
+    "level": "intermediate",
+    "summary": "Forces data still in memory to be written to disk. Use before removing a USB drive or after big copies.",
+    "example": "sync",
+    "exampleExplained": "Flushes pending writes so data is safely on disk."
+  },
+  {
+    "id": "lx-182",
+    "name": "lvs",
+    "category": "Disks & storage",
+    "level": "advanced",
+    "summary": "Lists LVM logical volumes. LVM lets you resize and combine disks more flexibly than plain partitions.",
+    "example": "sudo lvs",
+    "exampleExplained": "Shows each logical volume, its volume group and size."
+  },
+  {
+    "id": "lx-183",
+    "name": "whoami",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Prints the name of the user you are acting as. Useful after sudo or su to confirm who you are.",
+    "example": "whoami",
+    "exampleExplained": "Prints e.g. deploy, or root inside a sudo shell."
+  },
+  {
+    "id": "lx-184",
+    "name": "id",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Shows your user ID, group ID and all groups you belong to. Key for debugging permission errors.",
+    "example": "id deploy",
+    "exampleExplained": "Prints uid, gid and groups of deploy, e.g. showing whether it is in the docker or www-data group."
+  },
+  {
+    "id": "lx-185",
+    "name": "groups",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Lists the groups a user belongs to.",
+    "example": "groups deploy",
+    "exampleExplained": "Prints group names like deploy sudo www-data."
+  },
+  {
+    "id": "lx-186",
+    "name": "who",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Shows who is logged in right now and from where.",
+    "example": "who",
+    "exampleExplained": "Lists logged-in users, their terminals, login times and source IPs."
+  },
+  {
+    "id": "lx-187",
+    "name": "w",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "Shows logged-in users and what they are running, plus uptime and load averages.",
+    "example": "w",
+    "exampleExplained": "Each row shows the user, where they came from, idle time and their current command."
+  },
+  {
+    "id": "lx-188",
+    "name": "last",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "Lists recent logins and reboots from the login history.",
+    "example": "last -n 10",
+    "exampleExplained": "Shows the last 10 logins with times and IPs; reboot lines show when the server restarted."
+  },
+  {
+    "id": "lx-189",
+    "name": "adduser",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Creates a new user interactively on Debian/Ubuntu, setting up a home folder and password. Friendlier than useradd.",
+    "example": "sudo adduser deploy",
+    "exampleExplained": "Creates user deploy with /home/deploy and asks for a password and optional details."
+  },
+  {
+    "id": "lx-190",
+    "name": "useradd",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "The low-level command to create users, available on every distro. Good for scripts.",
+    "example": "sudo useradd -m -s /bin/bash -G sudo alice",
+    "exampleExplained": "-m creates a home folder, -s sets the shell, -G adds the user to the sudo group."
+  },
+  {
+    "id": "lx-191",
+    "name": "usermod -aG",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Adds an existing user to extra groups. Forgetting -a removes them from all other groups, a classic mistake.",
+    "example": "sudo usermod -aG docker deploy",
+    "exampleExplained": "-a appends, -G docker names the group. The user must log out and in again for it to apply."
+  },
+  {
+    "id": "lx-192",
+    "name": "userdel",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "Deletes a user account.",
+    "example": "sudo userdel -r olduser",
+    "exampleExplained": "-r also deletes the user's home folder and mail spool. Back up anything needed first."
+  },
+  {
+    "id": "lx-193",
+    "name": "passwd",
+    "category": "Users & groups",
+    "level": "basic",
+    "summary": "Changes a user's password. Without a username it changes your own.",
+    "example": "sudo passwd deploy",
+    "exampleExplained": "Sets a new password for deploy. passwd -l deploy would lock the password login."
+  },
+  {
+    "id": "lx-194",
+    "name": "groupadd",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "Creates a new group.",
+    "example": "sudo groupadd developers",
+    "exampleExplained": "Creates the developers group; add people to it with usermod -aG."
+  },
+  {
+    "id": "lx-195",
+    "name": "getent",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "Looks up entries in system databases like users, groups and hosts, including ones from LDAP.",
+    "example": "getent passwd deploy",
+    "exampleExplained": "Prints the passwd line for deploy: uid, gid, home folder and shell."
+  },
+  {
+    "id": "lx-196",
+    "name": "visudo",
+    "category": "Users & groups",
+    "level": "intermediate",
+    "summary": "Safely edits the sudoers file, checking syntax before saving so you cannot lock yourself out.",
+    "example": "sudo visudo -f /etc/sudoers.d/deploy",
+    "exampleExplained": "Edits a separate drop-in file; a line like deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart myapp allows one command."
+  },
+  {
+    "id": "lx-197",
+    "name": "uname",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Prints system information such as kernel version and CPU architecture.",
+    "example": "uname -a",
+    "exampleExplained": "-a prints everything: kernel name, hostname, kernel release, architecture (x86_64 or aarch64)."
+  },
+  {
+    "id": "lx-198",
+    "name": "/etc/os-release",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Reading this file tells you which distro and version you are on, which decides the right install instructions.",
+    "example": "cat /etc/os-release",
+    "exampleExplained": "Shows NAME, VERSION_ID and VERSION_CODENAME, like Ubuntu 24.04 noble."
+  },
+  {
+    "id": "lx-199",
+    "name": "lsb_release",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Prints distribution info on Ubuntu and Debian.",
+    "example": "lsb_release -a",
+    "exampleExplained": "-a shows distributor, description, release number and codename."
+  },
+  {
+    "id": "lx-200",
+    "name": "uptime",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Shows how long the system has been running and the load averages over 1, 5 and 15 minutes.",
+    "example": "uptime",
+    "exampleExplained": "A load near your CPU core count means the machine is fully busy; much higher means work is queuing."
+  },
+  {
+    "id": "lx-201",
+    "name": "date",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Shows or formats the current date and time. Often used to timestamp file names in scripts.",
+    "example": "date +%Y-%m-%d_%H%M",
+    "exampleExplained": "Formats the date like 2026-10-05_1430, ideal for backup file names."
+  },
+  {
+    "id": "lx-202",
+    "name": "timedatectl",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Shows and sets the system clock, time zone and NTP sync status.",
+    "example": "sudo timedatectl set-timezone UTC",
+    "exampleExplained": "Sets the time zone to UTC, which keeps logs consistent across servers."
+  },
+  {
+    "id": "lx-203",
+    "name": "hostnamectl",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Shows or changes the system hostname and some machine info.",
+    "example": "sudo hostnamectl set-hostname api-prod-1",
+    "exampleExplained": "Sets a permanent hostname so the server is easy to recognize in prompts and logs."
+  },
+  {
+    "id": "lx-204",
+    "name": "systemctl status",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Shows whether a service is running, its PID, memory use and recent log lines.",
+    "example": "systemctl status nginx",
+    "exampleExplained": "Shows active (running) or failed, plus the last few log lines to explain why."
+  },
+  {
+    "id": "lx-205",
+    "name": "systemctl restart",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Starts, stops or restarts a service managed by systemd.",
+    "example": "sudo systemctl restart myapp",
+    "exampleExplained": "Stops and starts myapp. Use start, stop or reload in the same way; reload rereads config without stopping."
+  },
+  {
+    "id": "lx-206",
+    "name": "systemctl enable",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Makes a service start automatically at boot. --now also starts it immediately.",
+    "example": "sudo systemctl enable --now nginx",
+    "exampleExplained": "Enables nginx at boot and starts it right away. disable turns auto-start off."
+  },
+  {
+    "id": "lx-207",
+    "name": "systemctl list-units",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Lists units systemd knows about, filtered by type or state. Helps find failing services.",
+    "example": "systemctl list-units --type=service --state=failed",
+    "exampleExplained": "Shows only services that are in the failed state."
+  },
+  {
+    "id": "lx-208",
+    "name": "systemd unit file",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "A small .service file lets systemd run your Node app, restart it on crash and start it on boot.",
+    "example": "sudo nano /etc/systemd/system/myapp.service",
+    "exampleExplained": "In it, ExecStart=/usr/bin/node /var/www/myapp/server.js, User=deploy and Restart=always define how the app runs."
+  },
+  {
+    "id": "lx-209",
+    "name": "systemctl daemon-reload",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Tells systemd to reread unit files after you create or edit them.",
+    "example": "sudo systemctl daemon-reload",
+    "exampleExplained": "Run it after editing myapp.service, then restart the service so changes apply."
+  },
+  {
+    "id": "lx-210",
+    "name": "journalctl",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Reads logs collected by systemd, including stdout of services you run with systemd.",
+    "example": "journalctl -u myapp --since \"1 hour ago\"",
+    "exampleExplained": "-u filters to the myapp unit, --since limits to the last hour."
+  },
+  {
+    "id": "lx-211",
+    "name": "journalctl -f",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Follows the systemd journal live, like tail -f for service logs.",
+    "example": "journalctl -u myapp -f -n 50",
+    "exampleExplained": "-f follows new entries, -n 50 first shows the last 50 lines."
+  },
+  {
+    "id": "lx-212",
+    "name": "dmesg",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Shows kernel messages: hardware events, disk errors and the out-of-memory killer.",
+    "example": "sudo dmesg -T | grep -i \"killed process\"",
+    "exampleExplained": "-T shows readable timestamps; the grep reveals if the OOM killer stopped your Node app."
+  },
+  {
+    "id": "lx-213",
+    "name": "crontab -e",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Edits your scheduled jobs. Each line has five time fields (minute hour day month weekday) and a command.",
+    "example": "crontab -e",
+    "exampleExplained": "Opens your crontab; a line like 0 2 * * * /home/deploy/backup.sh runs the script daily at 02:00."
+  },
+  {
+    "id": "lx-214",
+    "name": "crontab -l",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Lists your current scheduled cron jobs.",
+    "example": "sudo crontab -l -u deploy",
+    "exampleExplained": "-l lists, -u deploy shows that user's crontab instead of yours."
+  },
+  {
+    "id": "lx-215",
+    "name": "at",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Schedules a one-time command for later, unlike cron which repeats.",
+    "example": "echo \"systemctl restart myapp\" | sudo at 03:00",
+    "exampleExplained": "Queues the restart to run once at 3 AM. atq lists pending jobs."
+  },
+  {
+    "id": "lx-216",
+    "name": "systemctl list-timers",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Lists systemd timers, the modern alternative to cron, with their next and last run times.",
+    "example": "systemctl list-timers --all",
+    "exampleExplained": "Shows every timer, like apt-daily or logrotate, and when it runs next."
+  },
+  {
+    "id": "lx-217",
+    "name": "shutdown",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Powers off or reboots the system, optionally after a delay with a warning to users.",
+    "example": "sudo shutdown -r +5 \"Kernel update\"",
+    "exampleExplained": "-r reboots in 5 minutes and broadcasts the message. shutdown -c cancels."
+  },
+  {
+    "id": "lx-218",
+    "name": "reboot",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Restarts the machine immediately.",
+    "example": "sudo reboot",
+    "exampleExplained": "Reboots now. Check that services are enabled first so they come back up."
+  },
+  {
+    "id": "lx-219",
+    "name": "env",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Prints all environment variables, or runs a command with a modified environment.",
+    "example": "env NODE_ENV=production node server.js",
+    "exampleExplained": "Runs node with NODE_ENV set only for that one command."
+  },
+  {
+    "id": "lx-220",
+    "name": "printenv",
+    "category": "System & services",
+    "level": "basic",
+    "summary": "Prints the value of one environment variable or all of them.",
+    "example": "printenv PATH",
+    "exampleExplained": "Shows the folders the shell searches for programs, separated by colons."
+  },
+  {
+    "id": "lx-221",
+    "name": "lscpu",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Shows CPU details: model, number of cores and threads, architecture.",
+    "example": "lscpu",
+    "exampleExplained": "Look at CPU(s) to decide how many Node cluster workers to run."
+  },
+  {
+    "id": "lx-222",
+    "name": "modprobe",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Loads or removes kernel modules along with their dependencies.",
+    "example": "sudo modprobe br_netfilter",
+    "exampleExplained": "Loads the module now; add it to /etc/modules-load.d to load at boot."
+  },
+  {
+    "id": "lx-223",
+    "name": "sysctl",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Reads or changes kernel settings at runtime, like network buffers or file limits.",
+    "example": "sudo sysctl -w net.core.somaxconn=1024",
+    "exampleExplained": "-w writes a value; put it in /etc/sysctl.d/*.conf to keep it after reboot."
+  },
+  {
+    "id": "lx-224",
+    "name": "logrotate",
+    "category": "System & services",
+    "level": "intermediate",
+    "summary": "Rotates, compresses and deletes old log files on a schedule so they do not fill the disk.",
+    "example": "sudo logrotate -d /etc/logrotate.d/myapp",
+    "exampleExplained": "-d is debug mode: it shows what would happen without rotating anything."
+  },
+  {
+    "id": "lx-225",
+    "name": "systemd-analyze",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Shows how long boot took and which services slowed it down.",
+    "example": "systemd-analyze blame",
+    "exampleExplained": "Lists services ordered by how long they took to start."
+  },
+  {
+    "id": "lx-226",
+    "name": "tar -czf",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Creates a gzip-compressed tar archive, the standard way to bundle a folder on Linux.",
+    "example": "tar -czf backup.tar.gz ./uploads",
+    "exampleExplained": "-c create, -z gzip compress, -f names the archive file. The result holds the whole uploads folder."
+  },
+  {
+    "id": "lx-227",
+    "name": "tar -xzf",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Extracts a .tar.gz archive.",
+    "example": "tar -xzf backup.tar.gz -C /restore",
+    "exampleExplained": "-x extract, -z gunzip, -f archive name, -C sets the folder to extract into (it must exist)."
+  },
+  {
+    "id": "lx-228",
+    "name": "tar -tzf",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Lists what is inside a .tar.gz without extracting it. Always worth a look before unpacking.",
+    "example": "tar -tzf backup.tar.gz | head",
+    "exampleExplained": "-t lists the contents; head shows the first 10 entries."
+  },
+  {
+    "id": "lx-229",
+    "name": "tar exclude",
+    "category": "Archives & compression",
+    "level": "intermediate",
+    "summary": "Leaves out folders like node_modules or .git when creating an archive.",
+    "example": "tar -czf app.tar.gz --exclude=node_modules --exclude=.git .",
+    "exampleExplained": "Each --exclude skips matching paths, keeping the archive small."
+  },
+  {
+    "id": "lx-230",
+    "name": "gzip",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Compresses a file into .gz, replacing the original.",
+    "example": "gzip -k access.log",
+    "exampleExplained": "-k keeps the original file next to the new access.log.gz."
+  },
+  {
+    "id": "lx-231",
+    "name": "gunzip",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Decompresses a .gz file.",
+    "example": "gunzip access.log.gz",
+    "exampleExplained": "Restores access.log and removes the .gz file."
+  },
+  {
+    "id": "lx-232",
+    "name": "zcat",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Prints the contents of a .gz file without decompressing it to disk. Pairs well with grep on rotated logs.",
+    "example": "zcat access.log.2.gz | grep \" 500 \"",
+    "exampleExplained": "Reads the compressed log and searches it in one go. zgrep does the same in one command."
+  },
+  {
+    "id": "lx-233",
+    "name": "xz",
+    "category": "Archives & compression",
+    "level": "intermediate",
+    "summary": "Compresses with high ratio, smaller than gzip and bzip2 but slower.",
+    "example": "xz -T0 -k dump.sql",
+    "exampleExplained": "-T0 uses all CPU cores, -k keeps the original. Output is dump.sql.xz."
+  },
+  {
+    "id": "lx-234",
+    "name": "zstd",
+    "category": "Archives & compression",
+    "level": "advanced",
+    "summary": "A fast modern compressor with a great speed-to-size ratio. Install with apt install zstd.",
+    "example": "zstd -19 dump.sql",
+    "exampleExplained": "-19 is a high compression level; makes dump.sql.zst. unzstd decompresses."
+  },
+  {
+    "id": "lx-235",
+    "name": "zip",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Creates .zip archives, handy when sharing with Windows or macOS users.",
+    "example": "zip -r site.zip dist/",
+    "exampleExplained": "-r adds the folder and everything inside it."
+  },
+  {
+    "id": "lx-236",
+    "name": "unzip",
+    "category": "Archives & compression",
+    "level": "basic",
+    "summary": "Extracts .zip archives. Install with apt install unzip if missing.",
+    "example": "unzip site.zip -d /var/www/site",
+    "exampleExplained": "-d sets the target folder. unzip -l site.zip lists contents without extracting."
+  },
+  {
+    "id": "lx-237",
+    "name": "pipe |",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "The pipe sends the output of one command into the input of the next, letting you chain small tools into powerful one-liners.",
+    "example": "ps aux | grep node | wc -l",
+    "exampleExplained": "ps output goes to grep, which keeps node lines, and wc -l counts them."
+  },
+  {
+    "id": "lx-238",
+    "name": "redirection > >>",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Redirection sends output to a file instead of the screen. > overwrites the file, >> appends to it.",
+    "example": "node seed.js >> seed.log",
+    "exampleExplained": "Appends the script's output to seed.log rather than replacing its contents."
+  },
+  {
+    "id": "lx-239",
+    "name": "2>&1",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Redirects error output (stream 2) to wherever normal output (stream 1) goes, so both land in the same file.",
+    "example": "npm start > app.log 2>&1",
+    "exampleExplained": "Sends stdout to app.log, then points stderr at the same place. Order matters: put 2>&1 after the file."
+  },
+  {
+    "id": "lx-240",
+    "name": "/dev/null",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "A special file that throws away anything written to it. Used to silence output you do not need.",
+    "example": "crontab -l 2>/dev/null || echo \"no crontab\"",
+    "exampleExplained": "Hides the error message if there is no crontab, then prints a friendly line instead."
+  },
+  {
+    "id": "lx-241",
+    "name": "&& and ||",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "&& runs the next command only if the previous one succeeded; || runs it only if it failed. Basic flow control on one line.",
+    "example": "npm ci && npm run build || echo \"build failed\"",
+    "exampleExplained": "Builds only if install succeeded; if either step fails, the message is printed."
+  },
+  {
+    "id": "lx-242",
+    "name": "export",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Makes a variable available to programs started from this shell, like process.env in Node.",
+    "example": "export NODE_ENV=production",
+    "exampleExplained": "Sets NODE_ENV for this shell and every command it launches. Add it to ~/.bashrc to keep it."
+  },
+  {
+    "id": "lx-243",
+    "name": "alias",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Creates a shortcut name for a longer command. Put aliases in ~/.bashrc to keep them.",
+    "example": "alias ll='ls -lah'",
+    "exampleExplained": "Typing ll now runs ls -lah. Run alias alone to list current aliases."
+  },
+  {
+    "id": "lx-244",
+    "name": "source",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Runs a script inside the current shell, so variables and functions it sets stay available. Used to reload ~/.bashrc.",
+    "example": "source ~/.bashrc",
+    "exampleExplained": "Applies new aliases or PATH changes without opening a new terminal. A dot (. ~/.bashrc) does the same."
+  },
+  {
+    "id": "lx-245",
+    "name": "shebang",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "The first line of a script, starting with #!, tells Linux which interpreter runs it. The file also needs execute permission.",
+    "example": "#!/usr/bin/env bash",
+    "exampleExplained": "env finds bash in the PATH. After chmod +x script.sh you can run it as ./script.sh."
+  },
+  {
+    "id": "lx-246",
+    "name": "variables",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Shell variables hold text. Assign with no spaces around =, read with $NAME, and quote them to keep spaces intact.",
+    "example": "APP_DIR=\"/var/www/myapp\"; cd \"$APP_DIR\"",
+    "exampleExplained": "Spaces around = would break the assignment; quoting \"$APP_DIR\" avoids surprises with spaces in paths."
+  },
+  {
+    "id": "lx-247",
+    "name": "$(...)",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Command substitution runs a command and puts its output in place, like a template literal for shell output.",
+    "example": "echo \"Deployed at $(date +%H:%M)\"",
+    "exampleExplained": "The date command runs first and its output is inserted into the echoed text."
+  },
+  {
+    "id": "lx-248",
+    "name": "$?",
+    "category": "Shell & scripting",
+    "level": "basic",
+    "summary": "Holds the exit code of the last command: 0 means success, anything else means failure.",
+    "example": "npm test; echo \"exit code: $?\"",
+    "exampleExplained": "Prints 0 if tests passed, or a non-zero code if they failed."
+  },
+  {
+    "id": "lx-249",
+    "name": "read",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Reads a line of input from the user or a file into variables.",
+    "example": "read -rp \"Deploy to prod? (y/n) \" answer",
+    "exampleExplained": "-p shows a prompt, -r keeps backslashes literal; the reply is stored in $answer."
+  },
+  {
+    "id": "lx-250",
+    "name": "test [ ]",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Checks conditions such as whether a file exists or two strings match. [ ] is another name for test.",
+    "example": "[ -f .env ] || cp .env.example .env",
+    "exampleExplained": "-f is true if .env is a regular file; if it is missing, the example is copied in."
+  },
+  {
+    "id": "lx-251",
+    "name": "[[ ]]",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Bash's improved test with safer quoting, pattern matching and && / || inside.",
+    "example": "[[ \"$BRANCH\" == release/* ]] && echo \"release build\"",
+    "exampleExplained": "== with a glob on the right matches any branch starting with release/."
+  },
+  {
+    "id": "lx-252",
+    "name": "if",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Runs commands only when a condition (any command's exit status) succeeds.",
+    "example": "if systemctl is-active --quiet myapp; then echo up; else echo down; fi",
+    "exampleExplained": "is-active returns 0 when the service runs, so the then branch prints up."
+  },
+  {
+    "id": "lx-253",
+    "name": "for loop",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Repeats commands for each item in a list, such as files or server names.",
+    "example": "for f in *.log; do gzip \"$f\"; done",
+    "exampleExplained": "Loops over every .log file in the folder and compresses each one."
+  },
+  {
+    "id": "lx-254",
+    "name": "while read loop",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Processes a file or command output line by line, safely handling spaces.",
+    "example": "while IFS= read -r host; do ssh \"$host\" uptime; done < servers.txt",
+    "exampleExplained": "Reads each line of servers.txt into $host and runs uptime there. IFS= and -r keep each line exactly as written."
+  },
+  {
+    "id": "lx-255",
+    "name": "case",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Chooses between branches by matching a value against patterns. Cleaner than many ifs for command arguments.",
+    "example": "case \"$1\" in start) npm start;; stop) pkill -f server.js;; *) echo \"usage\";; esac",
+    "exampleExplained": "Matches the first script argument; * catches anything else. Each branch ends with ;;."
+  },
+  {
+    "id": "lx-256",
+    "name": "functions",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Groups commands under a name so a script can reuse them. Arguments arrive as $1, $2 and so on.",
+    "example": "log() { echo \"[$(date +%T)] $*\"; }; log \"starting\"",
+    "exampleExplained": "Defines log, which prints a timestamp and all its arguments ($*). Then calls it."
+  },
+  {
+    "id": "lx-257",
+    "name": "set -euo pipefail",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Strict mode for bash scripts: stop on errors, on unset variables and on failures inside pipes. Put it near the top of deploy scripts.",
+    "example": "set -euo pipefail",
+    "exampleExplained": "-e exits on any failing command, -u errors on unset variables, -o pipefail makes a pipe fail if any part fails."
+  },
+  {
+    "id": "lx-258",
+    "name": "bash -x",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Runs a script printing each command before it executes, which makes debugging much easier.",
+    "example": "bash -x deploy.sh",
+    "exampleExplained": "Every command is printed with a + prefix and variables expanded, so you see exactly what ran."
+  },
+  {
+    "id": "lx-259",
+    "name": "heredoc <<EOF",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Feeds a block of multi-line text into a command, useful for writing config files from scripts.",
+    "example": "cat <<EOF > .env\nPORT=3000\nEOF",
+    "exampleExplained": "Everything up to the EOF line becomes input to cat, which writes it to .env. Variables inside are expanded."
+  },
+  {
+    "id": "lx-260",
+    "name": "xargs",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "Turns input lines into arguments for another command. Useful when a command does not read from a pipe.",
+    "example": "find . -name \"*.log\" -print0 | xargs -0 rm -f",
+    "exampleExplained": "-print0 and -0 separate names with null bytes, so file names with spaces are handled safely."
+  },
+  {
+    "id": "lx-261",
+    "name": "xargs -P",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Runs several copies of a command in parallel, speeding up batch jobs.",
+    "example": "cat urls.txt | xargs -n1 -P4 curl -sO",
+    "exampleExplained": "-n1 passes one URL per call, -P4 runs four downloads at once, curl -O saves each file."
+  },
+  {
+    "id": "lx-262",
+    "name": "trap",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Runs cleanup code when a script exits or receives a signal, such as deleting temp files.",
+    "example": "trap 'rm -rf \"$tmpdir\"' EXIT",
+    "exampleExplained": "Whenever the script ends, even on error, the temp folder is removed."
+  },
+  {
+    "id": "lx-263",
+    "name": "getopts",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Parses short options like -v or -e prod in your own scripts.",
+    "example": "while getopts \"e:v\" opt; do case $opt in e) ENV=$OPTARG;; v) VERBOSE=1;; esac; done",
+    "exampleExplained": "e: means -e takes a value (in $OPTARG); v is a simple on/off flag."
+  },
+  {
+    "id": "lx-264",
+    "name": "shift",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Drops the first script argument and moves the others down one place. Handy when looping over arguments.",
+    "example": "echo \"$1\"; shift; echo \"$1\"",
+    "exampleExplained": "Prints the first argument, then shifts, so $1 now holds what was the second."
+  },
+  {
+    "id": "lx-265",
+    "name": "exec",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Replaces the current shell with a command, so it gets the same PID. Common at the end of Docker entrypoint scripts.",
+    "example": "exec node server.js",
+    "exampleExplained": "The shell is replaced by node, so signals like SIGTERM reach node directly."
+  },
+  {
+    "id": "lx-266",
+    "name": "shellcheck",
+    "category": "Shell & scripting",
+    "level": "intermediate",
+    "summary": "A linter for shell scripts that catches quoting bugs and common mistakes, like ESLint for bash. Install with apt install shellcheck.",
+    "example": "shellcheck deploy.sh",
+    "exampleExplained": "Prints warnings with codes such as SC2086 (unquoted variable) and suggests fixes."
+  },
+  {
+    "id": "lx-267",
+    "name": "ulimit",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "Shows or sets per-process resource limits, like the maximum number of open files. Busy Node servers can hit too many open files.",
+    "example": "ulimit -n",
+    "exampleExplained": "Prints the open file limit for this shell. ulimit -n 65535 raises it for the session if allowed."
+  },
+  {
+    "id": "lx-268",
+    "name": "free",
+    "category": "Performance & debugging",
+    "level": "basic",
+    "summary": "Shows total, used and available memory and swap. Look at the available column, not free.",
+    "example": "free -h",
+    "exampleExplained": "-h uses readable units. Linux uses spare RAM for cache, so low free with high available is normal."
+  },
+  {
+    "id": "lx-269",
+    "name": "nproc",
+    "category": "Performance & debugging",
+    "level": "basic",
+    "summary": "Prints the number of CPU cores available. Handy for choosing worker counts in scripts.",
+    "example": "make -j\"$(nproc)\"",
+    "exampleExplained": "Runs make with one job per core."
+  },
+  {
+    "id": "lx-270",
+    "name": "vmstat",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "Reports memory, swap, CPU and I/O activity over time, showing whether a box is CPU, memory or disk bound.",
+    "example": "vmstat 2 5",
+    "exampleExplained": "Prints a line every 2 seconds, 5 times. High si/so means swapping; high wa means waiting on disk."
+  },
+  {
+    "id": "lx-271",
+    "name": "iostat",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "Shows disk read/write rates and how busy each disk is. Part of sysstat.",
+    "example": "iostat -xz 2",
+    "exampleExplained": "-x extended stats, -z hides idle devices, 2 refreshes every 2 seconds. %util near 100 means the disk is saturated."
+  },
+  {
+    "id": "lx-272",
+    "name": "sar",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Collects and reports historical system activity so you can see what happened during last night's slowdown.",
+    "example": "sar -u -f /var/log/sysstat/sa05",
+    "exampleExplained": "-u shows CPU use, -f reads the saved data file for day 05."
+  },
+  {
+    "id": "lx-273",
+    "name": "iotop",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "Shows which processes are doing the most disk I/O, like top for disks.",
+    "example": "sudo iotop -o",
+    "exampleExplained": "-o shows only processes actually doing I/O right now."
+  },
+  {
+    "id": "lx-274",
+    "name": "lsof",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "Lists open files, including network sockets. On Linux everything is a file, so this reveals a lot.",
+    "example": "sudo lsof -p 12345 | wc -l",
+    "exampleExplained": "Counts files the process has open; a number that keeps growing hints at a file or socket leak."
+  },
+  {
+    "id": "lx-275",
+    "name": "lsof -i",
+    "category": "Performance & debugging",
+    "level": "basic",
+    "summary": "Shows which process is using a network port. The fix for EADDRINUSE: address already in use.",
+    "example": "sudo lsof -i :3000",
+    "exampleExplained": "Lists the process listening on or connected to port 3000, with its PID."
+  },
+  {
+    "id": "lx-276",
+    "name": "fuser",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "Shows which processes use a file, folder or port, and can kill them.",
+    "example": "sudo fuser -v 3000/tcp",
+    "exampleExplained": "-v shows user, PID and command using TCP port 3000."
+  },
+  {
+    "id": "lx-277",
+    "name": "strace",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Traces the system calls a process makes. Shows exactly which files it opens or where it hangs.",
+    "example": "sudo strace -f -e trace=openat -p 12345",
+    "exampleExplained": "-p attaches to a running process, -f follows child threads, -e trace=openat shows only file opens."
+  },
+  {
+    "id": "lx-278",
+    "name": "ldd",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Lists the shared libraries a binary needs. Useful when a native npm module fails to load.",
+    "example": "ldd node_modules/bcrypt/build/Release/bcrypt_lib.node",
+    "exampleExplained": "Prints each library and where it was found; not found lines point to missing system packages."
+  },
+  {
+    "id": "lx-279",
+    "name": "/proc",
+    "category": "Performance & debugging",
+    "level": "intermediate",
+    "summary": "A virtual folder exposing live kernel and process info as files.",
+    "example": "cat /proc/meminfo | head -5",
+    "exampleExplained": "Shows MemTotal, MemFree and MemAvailable straight from the kernel. /proc/<pid>/ has per-process details."
+  },
+  {
+    "id": "lx-280",
+    "name": "perf",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Linux's built-in profiler. Finds which functions burn CPU, even inside Node with the right flags.",
+    "example": "sudo perf top",
+    "exampleExplained": "Shows a live list of the hottest functions across the system."
+  },
+  {
+    "id": "lx-281",
+    "name": "iftop",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Shows network bandwidth use per connection in real time.",
+    "example": "sudo iftop -i eth0",
+    "exampleExplained": "Displays which remote hosts send or receive the most traffic on eth0."
+  },
+  {
+    "id": "lx-282",
+    "name": "ufw",
+    "category": "Security",
+    "level": "basic",
+    "summary": "Uncomplicated Firewall: Ubuntu's simple front end for firewall rules. Allow SSH before enabling it so you do not lock yourself out.",
+    "example": "sudo ufw allow OpenSSH && sudo ufw enable",
+    "exampleExplained": "Allows SSH first, then turns the firewall on. ufw status verbose shows the rules."
+  },
+  {
+    "id": "lx-283",
+    "name": "ufw allow",
+    "category": "Security",
+    "level": "basic",
+    "summary": "Opens a port or service through the firewall, optionally only from certain IPs.",
+    "example": "sudo ufw allow from 10.0.0.0/24 to any port 27017",
+    "exampleExplained": "Allows MongoDB's port only from the private subnet, keeping it closed to the internet."
+  },
+  {
+    "id": "lx-284",
+    "name": "iptables",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "The classic low-level Linux firewall tool. Many systems now use nftables underneath, but iptables commands are everywhere.",
+    "example": "sudo iptables -L -n -v",
+    "exampleExplained": "-L lists rules, -n shows numeric addresses, -v adds packet counters."
+  },
+  {
+    "id": "lx-285",
+    "name": "nft",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "The nftables tool, the modern replacement for iptables on current distros.",
+    "example": "sudo nft list ruleset",
+    "exampleExplained": "Prints all current firewall tables, chains and rules."
+  },
+  {
+    "id": "lx-286",
+    "name": "fail2ban-client",
+    "category": "Security",
+    "level": "intermediate",
+    "summary": "Controls fail2ban, which bans IPs after repeated failed logins. Install with apt install fail2ban.",
+    "example": "sudo fail2ban-client status sshd",
+    "exampleExplained": "Shows how many IPs are currently banned by the sshd jail."
+  },
+  {
+    "id": "lx-287",
+    "name": "sha256sum",
+    "category": "Security",
+    "level": "basic",
+    "summary": "Calculates a SHA-256 checksum to verify a download was not corrupted or tampered with.",
+    "example": "sha256sum -c SHASUMS256.txt --ignore-missing",
+    "exampleExplained": "-c checks files against the listed hashes; --ignore-missing skips entries for files you did not download."
+  },
+  {
+    "id": "lx-288",
+    "name": "md5sum",
+    "category": "Security",
+    "level": "intermediate",
+    "summary": "Computes an MD5 hash. Fine for spotting accidental changes, but not secure against tampering.",
+    "example": "md5sum backup.tar.gz",
+    "exampleExplained": "Prints a hash; compare it after copying to confirm the file arrived intact."
+  },
+  {
+    "id": "lx-289",
+    "name": "base64",
+    "category": "Security",
+    "level": "basic",
+    "summary": "Encodes data to base64 text or decodes it. Common with Kubernetes secrets and basic auth. It is encoding, not encryption.",
+    "example": "echo -n 'user:pass' | base64",
+    "exampleExplained": "-n stops echo adding a newline, which would change the result. base64 -d decodes."
+  },
+  {
+    "id": "lx-290",
+    "name": "openssl rand",
+    "category": "Security",
+    "level": "intermediate",
+    "summary": "Generates cryptographically random data, perfect for secrets like JWT keys.",
+    "example": "openssl rand -hex 32",
+    "exampleExplained": "Prints 32 random bytes as 64 hex characters."
+  },
+  {
+    "id": "lx-291",
+    "name": "openssl s_client",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Connects to a TLS server so you can inspect its certificate. Great for SSL errors.",
+    "example": "openssl s_client -connect myapp.com:443 -servername myapp.com < /dev/null",
+    "exampleExplained": "-servername sends SNI so you get the right certificate; /dev/null closes the session right away."
+  },
+  {
+    "id": "lx-292",
+    "name": "openssl x509",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Reads and displays certificate details such as issuer and expiry date.",
+    "example": "openssl x509 -in cert.pem -noout -dates",
+    "exampleExplained": "-noout hides the encoded cert, -dates prints notBefore and notAfter."
+  },
+  {
+    "id": "lx-293",
+    "name": "certbot",
+    "category": "Security",
+    "level": "intermediate",
+    "summary": "Gets and renews free Let's Encrypt TLS certificates, and can configure nginx for HTTPS.",
+    "example": "sudo certbot --nginx -d myapp.com",
+    "exampleExplained": "--nginx edits the nginx config for you, -d sets the domain."
+  },
+  {
+    "id": "lx-294",
+    "name": "gpg",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Encrypts, decrypts and signs files. Also used to verify signed packages.",
+    "example": "gpg -c secrets.txt",
+    "exampleExplained": "-c encrypts with a passphrase, creating secrets.txt.gpg. gpg -d decrypts it."
+  },
+  {
+    "id": "lx-295",
+    "name": "shred",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Overwrites a file several times before deleting it so it is hard to recover. Less effective on SSDs and journaling filesystems.",
+    "example": "shred -u -n 3 old-key.pem",
+    "exampleExplained": "-n 3 overwrites three times, -u deletes the file afterwards."
+  },
+  {
+    "id": "lx-296",
+    "name": "sudo -l",
+    "category": "Security",
+    "level": "intermediate",
+    "summary": "Lists which commands your user may run with sudo. Good for auditing access.",
+    "example": "sudo -l",
+    "exampleExplained": "Prints allowed commands, such as (ALL) ALL or a specific list."
+  },
+  {
+    "id": "lx-297",
+    "name": "chmod 600 keys",
+    "category": "Security",
+    "level": "basic",
+    "summary": "SSH refuses private keys and config readable by others. Setting tight permissions on ~/.ssh fixes unprotected private key file errors.",
+    "example": "chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_ed25519",
+    "exampleExplained": "700 lets only you use the folder; 600 lets only you read and write the key."
+  },
+  {
+    "id": "lx-298",
+    "name": "auth.log",
+    "category": "Security",
+    "level": "intermediate",
+    "summary": "On Ubuntu, /var/log/auth.log records logins, sudo use and SSH attempts. Checking it reveals brute-force attacks.",
+    "example": "sudo grep \"Failed password\" /var/log/auth.log | tail",
+    "exampleExplained": "Shows the latest failed SSH password attempts with their source IPs."
+  },
+  {
+    "id": "lx-299",
+    "name": "nmap",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Scans hosts for open ports and services. Only scan machines you own or have permission to test.",
+    "example": "nmap -sT -p 1-1000 myserver.com",
+    "exampleExplained": "-sT does a TCP connect scan, -p checks ports 1 to 1000, showing what is exposed."
+  },
+  {
+    "id": "lx-300",
+    "name": "setuid search",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Finding files with the setuid bit helps audit programs that run as their owner, often root.",
+    "example": "sudo find / -xdev -perm -4000 -type f 2>/dev/null",
+    "exampleExplained": "-perm -4000 matches files with setuid set; -xdev stays on one filesystem."
+  },
+  {
+    "id": "lx-301",
+    "name": "aa-status",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Shows the state of AppArmor, the Ubuntu security module that restricts what programs can access.",
+    "example": "sudo aa-status",
+    "exampleExplained": "Lists loaded profiles and which processes are confined in enforce or complain mode."
+  },
+  {
+    "id": "lx-302",
+    "name": "inotifywait",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Waits for file system events like changes or new files, so scripts can react instantly. Part of inotify-tools.",
+    "example": "inotifywait -m -e close_write ./config",
+    "exampleExplained": "-m keeps monitoring, -e close_write fires when a file finishes being written."
+  },
+  {
+    "id": "lx-303",
+    "name": "flock",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Uses a lock file so only one copy of a script runs at a time. Prevents overlapping cron jobs.",
+    "example": "flock -n /tmp/backup.lock ./backup.sh",
+    "exampleExplained": "-n gives up immediately if another run holds the lock instead of waiting."
+  },
+  {
+    "id": "lx-304",
+    "name": "logger",
+    "category": "Shell & scripting",
+    "level": "advanced",
+    "summary": "Writes a message to the system log from scripts, so it shows up in journalctl.",
+    "example": "logger -t deploy \"release v2 finished\"",
+    "exampleExplained": "-t sets the tag; view with journalctl -t deploy."
+  },
+  {
+    "id": "lx-305",
+    "name": "pv",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Shows a progress bar for data flowing through a pipe. Install with apt install pv.",
+    "example": "pv dump.sql.gz | gunzip | mongorestore --archive",
+    "exampleExplained": "pv shows speed, percent done and time left while the file streams to the next command."
+  },
+  {
+    "id": "lx-306",
+    "name": "socat",
+    "category": "Networking",
+    "level": "advanced",
+    "summary": "A Swiss army knife for relaying data between sockets, files and ports, more flexible than nc.",
+    "example": "socat TCP-LISTEN:8080,fork TCP:localhost:3000",
+    "exampleExplained": "Listens on 8080 and forwards each connection to port 3000; fork handles many clients."
+  },
+  {
+    "id": "lx-307",
+    "name": "ionice",
+    "category": "Performance & debugging",
+    "level": "advanced",
+    "summary": "Sets disk I/O priority so heavy jobs like backups do not slow the live app.",
+    "example": "ionice -c3 tar -czf backup.tar.gz /data",
+    "exampleExplained": "-c3 is the idle class: tar only uses the disk when nothing else needs it."
+  },
+  {
+    "id": "lx-308",
+    "name": "systemd-run",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Runs a command as a temporary systemd unit, with resource limits and journal logging.",
+    "example": "sudo systemd-run --scope -p MemoryMax=500M node script.js",
+    "exampleExplained": "--scope runs it in the foreground within its own cgroup; -p MemoryMax caps memory at 500 MB."
+  },
+  {
+    "id": "lx-309",
+    "name": "unshare",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Runs a program in new Linux namespaces, the building block of containers.",
+    "example": "sudo unshare --pid --fork --mount-proc bash",
+    "exampleExplained": "Starts bash in its own PID namespace; inside it, ps shows bash as PID 1."
+  },
+  {
+    "id": "lx-310",
+    "name": "nsenter",
+    "category": "System & services",
+    "level": "advanced",
+    "summary": "Enters the namespaces of another process, such as a running container, to debug from the inside.",
+    "example": "sudo nsenter -t 12345 -n ss -tlnp",
+    "exampleExplained": "-t picks the target PID, -n joins its network namespace, then ss shows that container's listening ports."
+  },
+  {
+    "id": "lx-311",
+    "name": "chroot",
+    "category": "Security",
+    "level": "advanced",
+    "summary": "Runs a command with a different folder treated as the root /. Used for system rescue and simple isolation.",
+    "example": "sudo chroot /mnt/rescue /bin/bash",
+    "exampleExplained": "Opens a shell where / is /mnt/rescue, e.g. to repair a broken system from a live disk."
+  }
+]

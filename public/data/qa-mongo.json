@@ -1,0 +1,402 @@
+[
+  {
+    "id": "mongo-01",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is NoSQL, and why did NoSQL databases appear?",
+    "answer": "NoSQL means 'not only SQL': databases that do not store data in fixed relational tables joined by foreign keys. They appeared because web-scale apps needed flexible data shapes, fast development, and easy horizontal scaling across many cheap servers. Most NoSQL systems trade some relational features (rigid schema, complex joins) for flexibility and scale. In practice, it means you design data around how the app reads it, not around normalization rules.",
+    "example": ""
+  },
+  {
+    "id": "mongo-02",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What are the main types of NoSQL databases? Give an example of each.",
+    "answer": "Document stores keep JSON-like documents (MongoDB, Couchbase). Key-value stores map a key to an opaque value and are very fast for lookups (Redis, DynamoDB). Wide-column stores group data into rows with flexible columns, built for huge write volumes (Cassandra, HBase). Graph databases store nodes and relationships, ideal for connected data like social networks or recommendations (Neo4j). Picking a type depends on your access pattern, not on hype.",
+    "example": ""
+  },
+  {
+    "id": "mongo-03",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is the document model in MongoDB?",
+    "answer": "In MongoDB, a record is a document: a set of field-value pairs, like a JSON object. Values can be strings, numbers, dates, arrays, or nested documents. Because related data can live inside one document, you often read everything you need in a single query without joins. This maps naturally to objects in JavaScript code, which is why it feels easy to use from Node.js.",
+    "example": "db.users.insertOne({\n  name: \"Asha\",\n  skills: [\"node\", \"mongo\"],\n  address: { city: \"Pune\", zip: \"411001\" }\n})"
+  },
+  {
+    "id": "mongo-04",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is BSON, and how is it different from JSON?",
+    "answer": "BSON (Binary JSON) is the binary format MongoDB uses to store documents and send them over the network. Unlike JSON, it supports extra types such as Date, ObjectId, 32/64-bit integers, Decimal128 and binary data. It also stores lengths up front, so the server can skip through fields quickly. JSON is text and human-readable; BSON is built for speed and rich types. This is why a date stays a real Date in MongoDB instead of a string.",
+    "example": ""
+  },
+  {
+    "id": "mongo-05",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "How do database, collection and document in MongoDB compare to SQL terms?",
+    "answer": "A MongoDB database is like a SQL database. A collection is like a table: a group of documents. A document is like a row, and a field is like a column. The big difference is that documents in one collection do not have to share the same fields, and they can contain nested objects and arrays instead of being split across many tables.",
+    "example": ""
+  },
+  {
+    "id": "mongo-06",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is the _id field, and what is an ObjectId?",
+    "answer": "Every document must have a unique _id field, which acts as the primary key and is always indexed. If you don't give one, the driver generates an ObjectId: a 12-byte value made of a 4-byte timestamp (seconds), a 5-byte random value, and a 3-byte counter. Because the timestamp comes first, ObjectIds roughly sort by creation time and you can extract the creation date. You can use any unique value as _id, such as an email or a UUID.",
+    "example": "const id = new ObjectId();\nid.getTimestamp(); // creation time\ndb.users.findOne({ _id: id })"
+  },
+  {
+    "id": "mongo-07",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "MongoDB is called 'schema-less'. Is that true? How does schema validation work?",
+    "answer": "MongoDB has a flexible schema: by default the server does not force documents in a collection to have the same shape. That helps when data evolves, but can lead to messy data. You can add server-side rules with a $jsonSchema validator on the collection to require fields and types, and choose whether invalid writes are rejected (validationAction 'error') or only logged ('warn'). Many Node apps enforce shape in Mongoose instead, but server validation also protects against other clients.",
+    "example": "db.createCollection(\"users\", {\n  validator: { $jsonSchema: {\n    required: [\"email\"],\n    properties: { email: { bsonType: \"string\" } }\n  }}\n})"
+  },
+  {
+    "id": "mongo-08",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "In Mongoose, what is the difference between a Schema and a Model?",
+    "answer": "A Schema describes the shape of documents: fields, types, defaults, validators, indexes, virtuals and middleware. A Model is a class compiled from a schema and bound to a collection; you use it to create, query, update and delete documents. An instance of a model is a document with methods like save(). Schema rules are enforced by Mongoose in your app, not by the MongoDB server.",
+    "example": "const userSchema = new Schema({\n  email: { type: String, required: true, unique: true },\n  age: { type: Number, min: 0 }\n});\nconst User = model(\"User\", userSchema); // collection: users\nawait User.create({ email: \"a@b.com\" });"
+  },
+  {
+    "id": "mongo-09",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What are the basic CRUD methods in MongoDB?",
+    "answer": "Create: insertOne and insertMany. Read: find (returns a cursor) and findOne (returns one document or null). Update: updateOne, updateMany and replaceOne. Delete: deleteOne and deleteMany. Each update and delete takes a filter to choose documents. The 'many' versions affect all matches, so an empty filter {} means every document, which is a common and costly mistake.",
+    "example": "db.orders.insertOne({ item: \"pen\", qty: 5 })\ndb.orders.find({ qty: { $gt: 2 } })\ndb.orders.updateOne({ item: \"pen\" }, { $set: { qty: 7 } })\ndb.orders.deleteMany({ qty: 0 })"
+  },
+  {
+    "id": "mongo-10",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What are the common comparison and logical query operators?",
+    "answer": "Comparison operators: $eq, $ne, $gt, $gte, $lt, $lte, $in (value in a list) and $nin (not in a list). Logical operators: $and, $or, $nor and $not. Writing several fields in one filter object already means AND, so explicit $and is mostly needed when you repeat the same field or combine $or clauses. $exists checks if a field is present, and $type checks its BSON type.",
+    "example": "db.users.find({\n  status: { $in: [\"active\", \"trial\"] },\n  $or: [{ age: { $gte: 18 } }, { verified: true }]\n})"
+  },
+  {
+    "id": "mongo-11",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What do the update operators $set, $unset and $inc do?",
+    "answer": "$set changes or adds a field to a given value without touching other fields. $unset removes a field. $inc adds a number to a field (use a negative number to subtract) and creates the field if missing. These operators change only part of a document atomically, so you don't need to read the document, edit it in code, and write it back, which avoids lost updates when two requests run at once.",
+    "example": "db.products.updateOne(\n  { _id: 1 },\n  { $set: { price: 99 }, $inc: { stock: -1 }, $unset: { tempFlag: \"\" } }\n)"
+  },
+  {
+    "id": "mongo-12",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What do the array update operators $push, $addToSet and $pull do?",
+    "answer": "$push appends a value to an array, and with $each, $slice and $sort it can add many values and keep the array trimmed. $addToSet adds a value only if it is not already present, so the array acts like a set. $pull removes all elements matching a value or condition. The positional operator $ lets you update the array element that matched the filter.",
+    "example": "db.posts.updateOne({ _id: 1 }, { $addToSet: { tags: \"mongo\" } })\ndb.posts.updateOne({ _id: 1 }, { $pull: { tags: \"old\" } })\ndb.posts.updateOne({ _id: 1 },\n  { $push: { comments: { $each: [c], $slice: -50 } } })"
+  },
+  {
+    "id": "mongo-13",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is a projection, and why use one?",
+    "answer": "A projection chooses which fields a query returns. Use 1 to include fields or 0 to exclude them (you can't mix both, except for excluding _id). Returning fewer fields means less data over the network and less memory in your app, and it can enable covered queries served only from an index. In Mongoose, the same idea is done with .select().",
+    "example": "db.users.find({ city: \"Pune\" }, { name: 1, email: 1, _id: 0 })\n// Mongoose\nUser.find({ city: \"Pune\" }).select(\"name email -_id\")"
+  },
+  {
+    "id": "mongo-14",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is an upsert?",
+    "answer": "An upsert is an update with the option upsert: true. If a document matches the filter, it is updated; if none matches, a new document is inserted built from the filter fields plus the update. $setOnInsert sets fields only when an insert happens. It is handy for counters or 'create if not exists' logic, but you should have a unique index on the filter field, or two concurrent upserts can create duplicates.",
+    "example": "db.stats.updateOne(\n  { page: \"/home\" },\n  { $inc: { views: 1 }, $setOnInsert: { createdAt: new Date() } },\n  { upsert: true }\n)"
+  },
+  {
+    "id": "mongo-15",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is an index in MongoDB, and why does it matter?",
+    "answer": "An index is a separate sorted structure (a B-tree) that stores the values of some fields with pointers to the documents. Without a suitable index, MongoDB does a collection scan, reading every document. With one, it can jump straight to matching entries and even return results already sorted. Indexes speed up reads but cost disk space, RAM, and extra work on every insert, update and delete, so add them for real query patterns only.",
+    "example": "db.users.createIndex({ email: 1 })\n// Mongoose\nuserSchema.index({ email: 1 })"
+  },
+  {
+    "id": "mongo-16",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What is the maximum document size in MongoDB, and what does it mean for design?",
+    "answer": "A single BSON document can be at most 16 MB. The limit exists to stop one document from using too much RAM or network bandwidth. In practice, if you get close to it you have a design problem, usually an array that grows without limit. For large files, use GridFS or object storage like S3, and store only a reference in the document.",
+    "example": ""
+  },
+  {
+    "id": "mongo-17",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "What does find() return, and what is a cursor?",
+    "answer": "find() returns a cursor, a pointer to the result set, not all documents at once. The driver fetches results in batches as you iterate, which keeps memory low for large results. You can chain sort(), limit(), skip() and project() before iterating, or call toArray() to load everything. Idle cursors on the server time out after about 10 minutes by default. In Mongoose, await Model.find() runs the query and returns an array.",
+    "example": "const cursor = db.collection(\"logs\").find({ level: \"error\" }).sort({ ts: -1 });\nfor await (const doc of cursor) {\n  console.log(doc.msg);\n}"
+  },
+  {
+    "id": "mongo-18",
+    "topic": "mongo",
+    "level": "basic",
+    "question": "When would you choose MongoDB over a SQL database, and when not?",
+    "answer": "MongoDB fits well when data is naturally hierarchical or varied, when the schema changes often, when you read whole objects together, and when you expect to scale horizontally. A relational database fits better for highly connected data with many-to-many relationships, complex ad-hoc joins and reporting, and strict multi-row consistency everywhere, like core accounting. MongoDB now has transactions and joins, so the real question is which model makes your main queries simple and fast.",
+    "example": ""
+  },
+  {
+    "id": "mongo-19",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is the difference between embedding and referencing?",
+    "answer": "Embedding puts related data inside the parent document (an address inside a user). Referencing stores the related data in another collection and keeps its _id (an order stores customerId). Embed when the data is read together, belongs only to the parent, and stays small and bounded. Reference when the data is large, grows without limit, is shared by many parents, or is often accessed on its own. The rule of thumb: data that is accessed together should be stored together.",
+    "example": "// embedded\n{ _id: 1, name: \"Asha\", address: { city: \"Pune\" } }\n// referenced\n{ _id: 99, customerId: 1, total: 450 }"
+  },
+  {
+    "id": "mongo-20",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What are the common patterns for one-to-many relationships in MongoDB?",
+    "answer": "One-to-few: embed the child documents in an array (a user's few addresses). One-to-many: store an array of child _ids in the parent, or a parent _id in each child (a product's parts). One-to-squillions: always store the parent _id in the child, because an array in the parent would grow without limit (log entries for a host). Choosing depends on how many children there are and from which side you usually query.",
+    "example": "// one-to-squillions: child points to parent\ndb.logs.insertOne({ hostId: hostId, msg: \"cpu high\", ts: new Date() })\ndb.logs.createIndex({ hostId: 1, ts: -1 })"
+  },
+  {
+    "id": "mongo-21",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is the difference between Mongoose populate() and the $lookup aggregation stage?",
+    "answer": "populate() is a Mongoose feature: it runs the main query, collects the referenced ids, then runs extra queries and stitches the results together in your Node app. $lookup is a server-side left outer join inside an aggregation pipeline, so it is one round trip and can be combined with filtering and grouping. populate is simple and readable for small results; $lookup is usually better for large sets, reports, or when you need to filter on joined fields.",
+    "example": "await Order.find().populate(\"customer\", \"name\");\n\ndb.orders.aggregate([\n  { $lookup: { from: \"customers\", localField: \"customer\",\n      foreignField: \"_id\", as: \"customer\" } }\n])"
+  },
+  {
+    "id": "mongo-22",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What does $elemMatch do, and why is it needed?",
+    "answer": "$elemMatch matches documents where at least one single array element meets all given conditions. Without it, conditions on an array of objects can be satisfied by different elements: one element meets the first condition and another meets the second. That gives surprising results. Use $elemMatch whenever several conditions must be true for the same array element. It can also be used in a projection to return only the first matching element.",
+    "example": "// one item that is BOTH sku A and qty > 5\ndb.orders.find({\n  items: { $elemMatch: { sku: \"A\", qty: { $gt: 5 } } }\n})"
+  },
+  {
+    "id": "mongo-23",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is Mongoose middleware, and what is the difference between document and query middleware?",
+    "answer": "Middleware (hooks) are functions that run before (pre) or after (post) certain operations. Document middleware runs on save() and validate(), and 'this' is the document; it is commonly used to hash passwords. Query middleware runs on operations like find, updateOne and findOneAndUpdate, and 'this' is the query. A common bug: pre('save') hooks do not run on updateOne or findOneAndUpdate, so logic placed only there is skipped by those calls.",
+    "example": "userSchema.pre(\"save\", async function () {\n  if (this.isModified(\"password\")) {\n    this.password = await bcrypt.hash(this.password, 10);\n  }\n});\nuserSchema.pre(\"find\", function () { this.where({ deleted: false }); });"
+  },
+  {
+    "id": "mongo-24",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What are single-field, compound and multikey indexes?",
+    "answer": "A single-field index covers one field and can be used in either sort direction. A compound index covers several fields in a set order; it can serve queries on its prefixes (an index on {a,b,c} helps queries on a, or a+b, but not on b alone). A multikey index is created automatically when an indexed field holds an array; MongoDB indexes each element. A compound index can contain at most one array field per document.",
+    "example": "db.orders.createIndex({ status: 1 })\ndb.orders.createIndex({ customerId: 1, createdAt: -1 })\ndb.posts.createIndex({ tags: 1 }) // multikey if tags is an array"
+  },
+  {
+    "id": "mongo-25",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What are unique, TTL and text indexes used for?",
+    "answer": "A unique index rejects duplicate values, the reliable way to enforce things like one account per email (Mongoose 'unique: true' only creates this index; it is not a validator). A TTL index on a date field deletes documents after a set number of seconds, good for sessions or OTPs; a background job runs about every 60 seconds, so deletion is not instant. A text index supports keyword search with $text; a collection can have only one. Partial and sparse indexes index only some documents.",
+    "example": "db.users.createIndex({ email: 1 }, { unique: true })\ndb.sessions.createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 })\ndb.articles.createIndex({ title: \"text\", body: \"text\" })"
+  },
+  {
+    "id": "mongo-26",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is the ESR rule for compound indexes?",
+    "answer": "ESR is a guideline for ordering fields in a compound index: Equality fields first, then Sort fields, then Range fields. Equality fields narrow to an exact slice of the index; sort fields next let MongoDB return results already in order without an in-memory sort; range fields ($gt, $lt, $in on many values) come last because they spread the scan. Following ESR usually reduces keys examined and avoids blocking sorts.",
+    "example": "// query: status = 'paid', createdAt > X, sort by total\ndb.orders.createIndex({ status: 1, total: -1, createdAt: 1 })"
+  },
+  {
+    "id": "mongo-27",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "How do you use explain(), and what is a covered query?",
+    "answer": "explain('executionStats') shows how a query ran: the winning plan (IXSCAN means index scan, COLLSCAN means full collection scan), keys examined, documents examined, and time. A good query examines close to as many keys and documents as it returns. A covered query is one where every field in the filter and projection is in the index, so MongoDB answers from the index alone and reads zero documents. You must exclude _id unless it is in the index.",
+    "example": "db.users.createIndex({ email: 1, name: 1 })\ndb.users.find({ email: \"a@b.com\" }, { name: 1, _id: 0 })\n  .explain(\"executionStats\") // totalDocsExamined: 0"
+  },
+  {
+    "id": "mongo-28",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is the aggregation pipeline? Explain $match, $group and $project.",
+    "answer": "The aggregation pipeline processes documents through a list of stages, each passing its output to the next, like Unix pipes. $match filters documents (put it early so it can use indexes and shrink data). $group groups by a key and computes values like $sum, $avg, $max or $push. $project reshapes documents: keeps, removes, renames or computes fields. It is MongoDB's tool for reports and data transformation on the server.",
+    "example": "db.orders.aggregate([\n  { $match: { status: \"paid\" } },\n  { $group: { _id: \"$customerId\", total: { $sum: \"$amount\" } } },\n  { $project: { customerId: \"$_id\", total: 1, _id: 0 } },\n  { $sort: { total: -1 } }\n])"
+  },
+  {
+    "id": "mongo-29",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What do $unwind and $lookup do in aggregation?",
+    "answer": "$unwind takes an array field and outputs one document per element, so you can group or filter by individual items (for example, sales per product from order line items). $lookup joins documents from another collection in the same database and adds them as an array field, like a left outer join. They are often used together: $lookup then $unwind to turn the joined array into a single embedded object. $unwind can multiply document counts, so filter first.",
+    "example": "db.orders.aggregate([\n  { $unwind: \"$items\" },\n  { $group: { _id: \"$items.sku\", sold: { $sum: \"$items.qty\" } } }\n])"
+  },
+  {
+    "id": "mongo-30",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is the $facet stage used for?",
+    "answer": "$facet runs several sub-pipelines on the same input documents in one stage and returns their results together in one document. A common use is a search page that needs the results page, the total count, and category counts at once. It saves round trips, but each sub-pipeline cannot use indexes on its own and the output must fit in the 16 MB document limit, so put a $match before it.",
+    "example": "db.products.aggregate([\n  { $match: { inStock: true } },\n  { $facet: {\n    page: [{ $sort: { price: 1 } }, { $skip: 0 }, { $limit: 20 }],\n    total: [{ $count: \"n\" }],\n    byBrand: [{ $group: { _id: \"$brand\", n: { $sum: 1 } } }]\n  } }\n])"
+  },
+  {
+    "id": "mongo-31",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "Compare skip/limit pagination with range-based (keyset) pagination.",
+    "answer": "skip/limit is simple and allows jumping to page N, but the server still has to walk past all skipped documents, so deep pages get slower and slower. It can also show duplicates or miss items when data changes between requests. Range-based pagination remembers the last seen value (like _id or createdAt plus _id) and asks for documents after it using an index. It stays fast at any depth and is stable, but you can only move next/previous, not jump to a page.",
+    "example": "// page 1\ndb.posts.find().sort({ _id: -1 }).limit(20)\n// next page: pass last _id from previous page\ndb.posts.find({ _id: { $lt: lastId } }).sort({ _id: -1 }).limit(20)"
+  },
+  {
+    "id": "mongo-32",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is the N+1 query problem, and how do you avoid it in MongoDB/Mongoose?",
+    "answer": "N+1 happens when you run one query to get a list, then one extra query per item to fetch related data, so 100 posts cause 101 database calls. Each call adds network latency, which makes pages slow under load. Fix it by fetching related data in one batch with $in, by using populate (which batches by ids per path), by using $lookup, or by embedding the data you always need. Watch for awaits inside loops as the warning sign.",
+    "example": "// bad: query inside loop\nfor (const p of posts) p.author = await User.findById(p.authorId);\n// good: one batched query\nconst users = await User.find({ _id: { $in: posts.map(p => p.authorId) } });"
+  },
+  {
+    "id": "mongo-33",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What are common MongoDB schema design anti-patterns?",
+    "answer": "Unbounded arrays: arrays that keep growing (all comments, all log events) make documents huge, slow to update, and can hit 16 MB. Massive documents: storing rarely used data with hot data wastes RAM and bandwidth; split it out. Too many collections or unnecessary indexes waste resources. Over-normalizing like SQL causes many lookups. Also, very low-cardinality fields used alone in an index help little. MongoDB Atlas Performance Advisor flags several of these.",
+    "example": ""
+  },
+  {
+    "id": "mongo-34",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is a replica set, and how do elections work?",
+    "answer": "A replica set is a group of mongod servers holding the same data: one primary that takes all writes, and secondaries that copy its operations log (oplog). It gives high availability and data redundancy. If the primary is unreachable for the election timeout (10 seconds by default), secondaries hold an election and a member with a majority of votes becomes the new primary, usually within seconds. Use an odd number of voting members (commonly 3) so a majority is always possible; at most 7 members can vote.",
+    "example": "rs.initiate({ _id: \"rs0\", members: [\n  { _id: 0, host: \"m1:27017\" },\n  { _id: 1, host: \"m2:27017\" },\n  { _id: 2, host: \"m3:27017\" }\n]})\nrs.status()"
+  },
+  {
+    "id": "mongo-35",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is write concern?",
+    "answer": "Write concern says how much acknowledgement a write needs before the server reports success. w:1 means the primary has applied it; w:'majority' means most data-bearing voting members have it, so it survives a failover; w:0 means no acknowledgement at all. j:true also waits for the on-disk journal. Since MongoDB 5.0 the default is usually w:'majority'. Stronger write concern means safer data but higher latency.",
+    "example": "db.payments.insertOne(\n  { amount: 500 },\n  { writeConcern: { w: \"majority\", j: true, wtimeout: 5000 } }\n)"
+  },
+  {
+    "id": "mongo-36",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is read concern?",
+    "answer": "Read concern controls how durable or consistent the data you read must be. 'local' (the default) returns the node's latest data, which could be rolled back after a failover. 'majority' returns only data acknowledged by a majority, so it will not be rolled back. 'linearizable' gives the most recent majority-committed data for single-document reads, at higher cost. 'snapshot' is used in transactions for a consistent point-in-time view.",
+    "example": "db.accounts.find({ userId: 1 }).readConcern(\"majority\")"
+  },
+  {
+    "id": "mongo-37",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is read preference in a replica set?",
+    "answer": "Read preference decides which members a client reads from. 'primary' (default) always reads the latest data. 'primaryPreferred', 'secondary' and 'secondaryPreferred' allow reads from secondaries, which can offload work or serve analytics, but secondaries may lag, so you can read stale data. 'nearest' picks the lowest-latency member, useful across regions. Reading from secondaries is not a good way to scale writes; sharding does that.",
+    "example": "mongoose.connect(uri, { readPreference: \"secondaryPreferred\" });\n// or in the URI: ?readPreference=secondaryPreferred"
+  },
+  {
+    "id": "mongo-38",
+    "topic": "mongo",
+    "level": "intermediate",
+    "question": "What is connection pooling in the MongoDB driver, and why does it matter?",
+    "answer": "Opening a TCP/TLS connection and authenticating is slow, so the driver keeps a pool of open connections and reuses them for operations. In Node.js the default maxPoolSize is 100 per server. You should create one client (or one mongoose.connect) at app startup and reuse it, not connect per request. Too many app instances each with large pools can exhaust the server's connection limit, especially in serverless functions, so size pools on purpose.",
+    "example": "// once, at startup\nawait mongoose.connect(uri, { maxPoolSize: 20, minPoolSize: 2 });\n// reuse the same connection in every request handler"
+  },
+  {
+    "id": "mongo-39",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "Are single-document operations atomic in MongoDB? Why does that matter for design?",
+    "answer": "Yes. A write to one document is atomic, even if it changes many fields, nested objects and arrays: other readers see all of it or none of it. This is why embedding related data is powerful: an order and its line items can be updated together without a transaction. Operators like $inc and findOneAndUpdate let you do safe read-modify-write in one step, for example decrementing stock only if stock > 0.",
+    "example": "db.products.findOneAndUpdate(\n  { _id: 1, stock: { $gt: 0 } },\n  { $inc: { stock: -1 } },\n  { returnDocument: \"after\" }\n) // null means sold out"
+  },
+  {
+    "id": "mongo-40",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "How do multi-document transactions and ACID work in MongoDB?",
+    "answer": "Since 4.0 (replica sets) and 4.2 (sharded clusters), MongoDB supports multi-document ACID transactions: several writes across documents and collections all commit or all abort, with snapshot isolation. They run inside a session, and by default must finish within 60 seconds. They cost more than single-document writes and can hit write conflicts that need a retry, so use them when you truly need cross-document consistency, like moving money between two accounts.",
+    "example": "const session = await mongoose.startSession();\nawait session.withTransaction(async () => {\n  await Account.updateOne({ _id: a }, { $inc: { bal: -100 } }, { session });\n  await Account.updateOne({ _id: b }, { $inc: { bal: 100 } }, { session });\n});\nsession.endSession();"
+  },
+  {
+    "id": "mongo-41",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What is sharding, and what are the parts of a sharded cluster?",
+    "answer": "Sharding splits a collection's data across several shards (each a replica set) so you can scale storage and write throughput horizontally. Data is divided into ranges (chunks) by a shard key, and a balancer moves chunks to keep shards even. Apps connect to mongos routers, which use metadata from the config servers (also a replica set) to send each query to the right shards. Queries that include the shard key are targeted; others are broadcast to all shards (scatter-gather).",
+    "example": "sh.enableSharding(\"shop\")\nsh.shardCollection(\"shop.orders\", { customerId: 1, _id: 1 })"
+  },
+  {
+    "id": "mongo-42",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "How do you choose a good shard key? Compare ranged and hashed sharding.",
+    "answer": "A good shard key has high cardinality (many distinct values), even frequency (no single value dominates), and does not increase monotonically, and it should appear in most queries so they are targeted. Ranged sharding keeps nearby values together, great for range queries but risky with keys like timestamps. Hashed sharding spreads writes evenly but turns range queries into scatter-gather. Since 5.0 you can reshard a collection, but it is expensive, so choose carefully.",
+    "example": "sh.shardCollection(\"app.events\", { deviceId: \"hashed\" })\n// compound ranged key\nsh.shardCollection(\"app.orders\", { tenantId: 1, createdAt: 1 })"
+  },
+  {
+    "id": "mongo-43",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What is a hot shard, and what causes it?",
+    "answer": "A hot shard is one shard that receives a much larger share of reads or writes than the others, so it becomes the bottleneck while the rest sit idle. A classic cause is a monotonically increasing shard key like a timestamp or ObjectId: all new inserts go to the chunk with the highest values, on one shard. Low-cardinality keys or one very popular value (a huge tenant) also cause it, and can create 'jumbo' chunks that cannot be split. Fixes are hashed or compound keys, or resharding.",
+    "example": ""
+  },
+  {
+    "id": "mongo-44",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "How does the CAP theorem apply to MongoDB?",
+    "answer": "CAP says that during a network partition, a distributed system must choose between consistency and availability. MongoDB is usually described as CP by default: if the primary cannot reach a majority, it steps down and the side without a majority accepts no writes until a new primary is elected. Reads from the primary with majority write and read concern give strong consistency. If you allow secondary reads or weaker concerns, you gain availability and latency but may read stale data. Settings let you tune the trade-off per operation.",
+    "example": ""
+  },
+  {
+    "id": "mongo-45",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What are change streams, and what are they used for?",
+    "answer": "Change streams let an app subscribe to real-time inserts, updates, deletes and other changes on a collection, a database or a whole deployment. They are built on the oplog, so they need a replica set or sharded cluster. Each event has a resume token, so after a crash you can continue exactly where you stopped. Use cases: syncing to a search index or cache, notifications, audit trails and event-driven microservices, without polling.",
+    "example": "const stream = Order.watch([{ $match: { operationType: \"insert\" } }]);\nstream.on(\"change\", (ev) => {\n  notify(ev.fullDocument);\n  saveToken(ev._id); // resume token\n});"
+  },
+  {
+    "id": "mongo-46",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What is a capped collection?",
+    "answer": "A capped collection has a fixed maximum size (and optionally a max number of documents). It keeps documents in insertion order, and when full it automatically overwrites the oldest documents, like a circular buffer. It is fast for high-volume inserts such as recent logs, and the replica set oplog is itself a capped collection. Capped collections cannot be sharded. For most expiry needs, MongoDB now recommends TTL indexes instead because they are more flexible.",
+    "example": "db.createCollection(\"recentLogs\", { capped: true, size: 10485760, max: 5000 })\ndb.recentLogs.find().sort({ $natural: -1 }).limit(10)"
+  },
+  {
+    "id": "mongo-47",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What is GridFS, and when would you use it?",
+    "answer": "GridFS is a specification for storing files larger than the 16 MB document limit in MongoDB. It splits a file into chunks (255 KB by default) stored in a chunks collection, and keeps metadata such as filename, length and upload date in a files collection. Drivers can stream files in and out and read byte ranges. It is useful when you want files backed up and replicated with your database; for most apps, object storage like S3 with a URL in the document is cheaper and simpler.",
+    "example": "const bucket = new GridFSBucket(db, { bucketName: \"uploads\" });\nfs.createReadStream(\"video.mp4\")\n  .pipe(bucket.openUploadStream(\"video.mp4\"));"
+  },
+  {
+    "id": "mongo-48",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What are the basic ways to back up and restore MongoDB?",
+    "answer": "mongodump creates a logical BSON export and mongorestore loads it back; they are simple and good for small databases or moving data, but slow for large ones and need care to get a consistent point in time (--oplog on a replica set). Filesystem or volume snapshots copy the data files quickly and suit large deployments. Managed services like Atlas provide continuous cloud backups with point-in-time restore. Whatever you use, regularly test restores; an untested backup is not a backup.",
+    "example": "mongodump --uri=\"$MONGO_URI\" --out=/backups/2026-10-05\nmongorestore --uri=\"$MONGO_URI\" --drop /backups/2026-10-05"
+  },
+  {
+    "id": "mongo-49",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What are the key security practices for MongoDB?",
+    "answer": "Always enable authentication (SCRAM, x.509, or LDAP/OIDC on enterprise and Atlas) so no one can connect anonymously. Use role-based access control and give each app user the least privilege it needs, such as readWrite on one database instead of root. Enable TLS for data in transit and encryption at rest, and never expose port 27017 to the public internet; use IP allowlists or private networking. Keep credentials in environment variables or a secrets manager, and enable auditing where needed.",
+    "example": "db.createUser({\n  user: \"orderService\",\n  pwd: passwordPrompt(),\n  roles: [{ role: \"readWrite\", db: \"shop\" }]\n})"
+  },
+  {
+    "id": "mongo-50",
+    "topic": "mongo",
+    "level": "advanced",
+    "question": "What is NoSQL (operator) injection in MongoDB, and how do you prevent it?",
+    "answer": "If you pass user input straight into a filter, an attacker can send an object instead of a string, such as {\"$ne\": null}, turning 'password equals X' into 'password is not null' and bypassing login. Prevent it by validating and casting input types (for example with Zod or Joi), rejecting keys starting with $ or containing dots, or using libraries like express-mongo-sanitize. Mongoose casts by schema type and offers the sanitizeFilter option. Also avoid $where and server-side JavaScript with user input.",
+    "example": "// attack body: { \"email\": \"a@b.com\", \"password\": { \"$ne\": null } }\nUser.findOne({ email, password }) // bypassed!\n// fix\nmongoose.set(\"sanitizeFilter\", true);\nconst email = String(req.body.email);"
+  }
+]

@@ -1,0 +1,402 @@
+[
+  {
+    "id": "sql-01",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is a relational database?",
+    "answer": "A relational database stores data in tables that are linked to each other through keys. Each table has a fixed set of columns, and relationships are expressed by storing one row's key in another table. You query it with SQL, and the database enforces structure and rules for you. Unlike MongoDB, where a document can nest related data, a relational DB usually splits related data into separate tables and joins them back at query time.",
+    "example": ""
+  },
+  {
+    "id": "sql-02",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What are tables, rows and columns, and how do they map to MongoDB?",
+    "answer": "A table holds one kind of entity, such as users. A row is one record in that table, and a column is one named, typed attribute that every row has. A table is like a MongoDB collection, a row is like a document, and a column is like a field, except that every row must follow the same column structure (a schema).",
+    "example": "CREATE TABLE users (\n  id    INT PRIMARY KEY,\n  name  VARCHAR(100),\n  email VARCHAR(255)\n);"
+  },
+  {
+    "id": "sql-03",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is a primary key?",
+    "answer": "A primary key is a column (or set of columns) that uniquely identifies each row in a table. It cannot be NULL and cannot repeat, and the database automatically creates an index on it. Most tables use an auto-increment integer or a UUID. It plays the same role as _id in MongoDB, except you choose its type and the DB does not create one for you.",
+    "example": "CREATE TABLE orders (\n  id BIGSERIAL PRIMARY KEY,\n  total NUMERIC(10,2)\n);"
+  },
+  {
+    "id": "sql-04",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is a foreign key?",
+    "answer": "A foreign key is a column whose value must match a primary key (or unique key) in another table. It links rows together and the database refuses inserts or deletes that would break the link, which protects data integrity. You can also set actions like ON DELETE CASCADE. In MongoDB you might store a userId reference, but nothing stops it from pointing to a missing document; a foreign key enforces that.",
+    "example": "CREATE TABLE orders (\n  id SERIAL PRIMARY KEY,\n  user_id INT REFERENCES users(id) ON DELETE CASCADE\n);"
+  },
+  {
+    "id": "sql-05",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What do the NOT NULL, UNIQUE, CHECK and DEFAULT constraints do?",
+    "answer": "Constraints are rules the database enforces on column values. NOT NULL means the column must always have a value; UNIQUE means no two rows can share the value; CHECK requires a condition to be true (like price > 0); DEFAULT fills in a value when none is given. They keep bad data out at the database level, similar to MongoDB schema validation or Mongoose validators but enforced for every client.",
+    "example": "CREATE TABLE products (\n  id SERIAL PRIMARY KEY,\n  sku TEXT NOT NULL UNIQUE,\n  price NUMERIC CHECK (price > 0),\n  in_stock BOOLEAN DEFAULT true\n);"
+  },
+  {
+    "id": "sql-06",
+    "topic": "sql",
+    "level": "basic",
+    "question": "Why do SQL columns have data types, and what are common ones?",
+    "answer": "Every column has a declared type, and the database rejects values that do not fit. Common types are INT/BIGINT for whole numbers, NUMERIC/DECIMAL for exact money values, VARCHAR/TEXT for strings, BOOLEAN, DATE/TIMESTAMP for time, and JSON/JSONB for semi-structured data. Choosing the right type saves space, speeds up comparisons and catches bugs early. In MongoDB a field can hold any type per document; in SQL the type is fixed for the whole column.",
+    "example": ""
+  },
+  {
+    "id": "sql-07",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is the difference between DDL, DML, DCL and TCL?",
+    "answer": "They are groups of SQL commands. DDL (Data Definition Language) defines structure: CREATE, ALTER, DROP. DML (Data Manipulation Language) works with the data: SELECT, INSERT, UPDATE, DELETE. DCL (Data Control Language) handles permissions: GRANT, REVOKE. TCL (Transaction Control Language) manages transactions: BEGIN, COMMIT, ROLLBACK, SAVEPOINT. Knowing the groups helps you reason about what a script changes and who is allowed to run it.",
+    "example": ""
+  },
+  {
+    "id": "sql-08",
+    "topic": "sql",
+    "level": "basic",
+    "question": "How do SELECT, WHERE, ORDER BY and LIMIT work together?",
+    "answer": "SELECT chooses which columns to return, WHERE filters which rows qualify, ORDER BY sorts the result, and LIMIT caps how many rows come back. Logically the database filters first, then sorts, then limits. This is like MongoDB's find(filter, projection).sort().limit(). Without ORDER BY, row order is not guaranteed, so always sort when you use LIMIT.",
+    "example": "SELECT name, email\nFROM users\nWHERE country = 'IN'\nORDER BY created_at DESC\nLIMIT 10;"
+  },
+  {
+    "id": "sql-09",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What are aggregate functions?",
+    "answer": "Aggregate functions take many rows and return one value: COUNT, SUM, AVG, MIN and MAX are the main ones. They are used for totals, averages and counts, usually together with GROUP BY. Most of them ignore NULL values (COUNT(*) counts all rows, but COUNT(column) skips NULLs). They are like the accumulators ($sum, $avg) in a MongoDB $group stage.",
+    "example": "SELECT COUNT(*), AVG(total), MAX(total)\nFROM orders;"
+  },
+  {
+    "id": "sql-10",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What does GROUP BY do?",
+    "answer": "GROUP BY collects rows that share the same value in one or more columns into a group, and aggregate functions are then computed per group. Every column in the SELECT must either be in the GROUP BY or be inside an aggregate. It is how you get answers like \"total sales per customer\". It is the SQL version of a $group stage in a MongoDB aggregation pipeline.",
+    "example": "SELECT user_id, SUM(total) AS spent\nFROM orders\nGROUP BY user_id;"
+  },
+  {
+    "id": "sql-11",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is HAVING, and how is it different from WHERE?",
+    "answer": "WHERE filters individual rows before grouping, so it cannot use aggregates. HAVING filters groups after GROUP BY, so it can use aggregates like SUM or COUNT. Put row-level conditions in WHERE (it is faster because fewer rows get grouped) and aggregate conditions in HAVING. In MongoDB terms, WHERE is a $match before $group and HAVING is a $match after $group.",
+    "example": "SELECT user_id, COUNT(*) AS n\nFROM orders\nWHERE status = 'paid'\nGROUP BY user_id\nHAVING COUNT(*) > 5;"
+  },
+  {
+    "id": "sql-12",
+    "topic": "sql",
+    "level": "basic",
+    "question": "How does NULL behave in SQL?",
+    "answer": "NULL means \"unknown or missing\", not zero or empty string. Any comparison with NULL, even NULL = NULL, gives unknown rather than true, so you must use IS NULL or IS NOT NULL. Use COALESCE(col, default) to replace NULLs. NULLs also affect aggregates, NOT IN subqueries and UNIQUE constraints, so they are a common source of bugs. In MongoDB a missing field and null are close; in SQL the column always exists but may hold NULL.",
+    "example": "SELECT name, COALESCE(phone, 'n/a')\nFROM users\nWHERE deleted_at IS NULL;"
+  },
+  {
+    "id": "sql-13",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is the difference between DELETE, TRUNCATE and DROP?",
+    "answer": "DELETE removes selected rows (with an optional WHERE), fires triggers and can be rolled back; it is slower on large tables because it works row by row. TRUNCATE removes all rows at once, is much faster, and usually resets identity counters, but cannot filter. DROP removes the whole table, including its structure, indexes and data. Roughly: deleteMany() vs deleteMany({}) done fast vs dropping the collection in MongoDB.",
+    "example": "DELETE FROM logs WHERE created_at < '2025-01-01';\nTRUNCATE TABLE logs;\nDROP TABLE logs;"
+  },
+  {
+    "id": "sql-14",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is a JOIN, and what does an INNER JOIN return?",
+    "answer": "A JOIN combines rows from two tables based on a related column, usually a foreign key matching a primary key. An INNER JOIN returns only the rows that have a match in both tables; unmatched rows on either side are dropped. Joins are how relational DBs put normalized data back together. It is like a $lookup in MongoDB followed by dropping documents with an empty result.",
+    "example": "SELECT o.id, u.name\nFROM orders o\nJOIN users u ON u.id = o.user_id;"
+  },
+  {
+    "id": "sql-15",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What are LEFT JOIN and RIGHT JOIN?",
+    "answer": "A LEFT JOIN returns every row from the left table plus matching rows from the right; where there is no match, the right-side columns are NULL. A RIGHT JOIN is the mirror image, keeping all rows from the right table. LEFT JOIN is common for \"show all users, even those with no orders\", and adding WHERE right.id IS NULL finds rows with no match. A LEFT JOIN behaves most like MongoDB's $lookup, which keeps documents even when nothing matches.",
+    "example": "SELECT u.name, o.id\nFROM users u\nLEFT JOIN orders o ON o.user_id = u.id;"
+  },
+  {
+    "id": "sql-16",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What are FULL OUTER JOIN and CROSS JOIN?",
+    "answer": "A FULL OUTER JOIN returns all rows from both tables, matching where possible and filling NULLs on whichever side has no match; it is useful for comparing two data sets. A CROSS JOIN returns every combination of rows (a Cartesian product), so 10 rows by 10 rows gives 100. CROSS JOIN is handy for generating combinations like sizes x colours, but can explode in size by accident. MySQL does not support FULL OUTER JOIN directly; you emulate it with a UNION of left and right joins.",
+    "example": "SELECT s.size, c.color\nFROM sizes s\nCROSS JOIN colors c;"
+  },
+  {
+    "id": "sql-17",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is a self join?",
+    "answer": "A self join joins a table to itself, using two different aliases so you can compare rows within the same table. A classic case is an employees table where manager_id points to another employee's id. It is useful for hierarchies, finding duplicates, or comparing a row with another row in the same table. In MongoDB you would do a $lookup on the same collection.",
+    "example": "SELECT e.name, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON m.id = e.manager_id;"
+  },
+  {
+    "id": "sql-18",
+    "topic": "sql",
+    "level": "basic",
+    "question": "What is the difference between UNION and UNION ALL?",
+    "answer": "Both stack the results of two SELECTs on top of each other; the queries must return the same number of columns with compatible types. UNION removes duplicate rows, which needs a sort or hash step and costs time. UNION ALL keeps every row and is faster. Use UNION ALL unless you really need de-duplication. It is similar to MongoDB's $unionWith stage, which also keeps duplicates.",
+    "example": "SELECT email FROM customers\nUNION ALL\nSELECT email FROM leads;"
+  },
+  {
+    "id": "sql-19",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a subquery?",
+    "answer": "A subquery is a SELECT nested inside another query, in the WHERE, FROM or SELECT part. It lets you use the result of one query as input to another, for example \"users who placed an order above the average\". Subqueries in FROM act like temporary tables. Often a JOIN or CTE can express the same logic more clearly, and the optimizer may rewrite them into joins anyway.",
+    "example": "SELECT name FROM users\nWHERE id IN (\n  SELECT user_id FROM orders WHERE total > 1000\n);"
+  },
+  {
+    "id": "sql-20",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a correlated subquery, and why can it be slow?",
+    "answer": "A correlated subquery refers to a column from the outer query, so conceptually it runs once for each outer row instead of once overall. That makes it powerful for row-by-row comparisons, such as \"orders above that customer's own average\". Because it may repeat work per row, it can be slow on large tables, though modern optimizers often turn it into a join. EXISTS (...) is a common and efficient correlated pattern.",
+    "example": "SELECT o.* FROM orders o\nWHERE o.total > (\n  SELECT AVG(total) FROM orders\n  WHERE user_id = o.user_id\n);"
+  },
+  {
+    "id": "sql-21",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a CTE (Common Table Expression)?",
+    "answer": "A CTE is a named temporary result defined with WITH at the start of a query, which the main query can then use like a table. It makes long queries readable by breaking them into steps, similar to stages in a MongoDB aggregation pipeline. A recursive CTE (WITH RECURSIVE) can walk hierarchies like org charts or category trees. A CTE only exists for that one statement.",
+    "example": "WITH big_spenders AS (\n  SELECT user_id, SUM(total) AS spent\n  FROM orders GROUP BY user_id\n  HAVING SUM(total) > 5000\n)\nSELECT u.name, b.spent\nFROM big_spenders b JOIN users u ON u.id = b.user_id;"
+  },
+  {
+    "id": "sql-22",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What are window functions, and how are they different from GROUP BY?",
+    "answer": "A window function computes a value across a set of related rows (the window) but still returns every individual row, unlike GROUP BY which collapses rows into one per group. You define the window with OVER (PARTITION BY ... ORDER BY ...). They are used for rankings, running totals, moving averages and comparing a row with the previous one (LAG/LEAD). MongoDB's closest equivalent is the $setWindowFields stage.",
+    "example": "SELECT user_id, total,\n  AVG(total) OVER (PARTITION BY user_id) AS user_avg\nFROM orders;"
+  },
+  {
+    "id": "sql-23",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is the difference between ROW_NUMBER, RANK and DENSE_RANK?",
+    "answer": "All three number rows inside a window based on an ORDER BY. ROW_NUMBER always gives unique numbers 1, 2, 3 even when values tie. RANK gives tied rows the same number and then skips (1, 1, 3). DENSE_RANK gives ties the same number without gaps (1, 1, 2). ROW_NUMBER is the usual choice for \"latest row per group\" or de-duplication; RANK and DENSE_RANK suit leaderboards.",
+    "example": "SELECT name, score,\n  ROW_NUMBER() OVER (ORDER BY score DESC) AS rn,\n  RANK()       OVER (ORDER BY score DESC) AS rnk,\n  DENSE_RANK() OVER (ORDER BY score DESC) AS drnk\nFROM players;"
+  },
+  {
+    "id": "sql-24",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "How do you compute a running total in SQL?",
+    "answer": "Use SUM as a window function with an ORDER BY inside OVER. The window then grows row by row, so each row shows the sum of all earlier rows plus itself. Add PARTITION BY to restart the total per group, such as per customer. This replaces slow self-joins or application loops for cumulative reports.",
+    "example": "SELECT order_date, total,\n  SUM(total) OVER (\n    PARTITION BY user_id ORDER BY order_date\n  ) AS running_total\nFROM orders;"
+  },
+  {
+    "id": "sql-25",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a view?",
+    "answer": "A view is a saved SELECT query that you can query like a table. It stores no data itself; each time you read it, the underlying query runs. Views hide complex joins, give a stable interface when tables change, and can limit which columns a user may see. They are similar to read-only views in MongoDB, which are defined by an aggregation pipeline.",
+    "example": "CREATE VIEW active_users AS\nSELECT id, name, email\nFROM users\nWHERE deleted_at IS NULL;"
+  },
+  {
+    "id": "sql-26",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a materialized view, and how is it different from a normal view?",
+    "answer": "A materialized view runs its query once and stores the result physically, so reading it is fast, like a cached table. The trade-off is that the data goes stale until you refresh it (in Postgres, REFRESH MATERIALIZED VIEW). Use it for expensive reports or dashboards where slightly old data is fine. A normal view is always fresh but recomputes every time. In MongoDB you would get a similar effect with $merge or $out into a collection.",
+    "example": "CREATE MATERIALIZED VIEW daily_sales AS\nSELECT order_date, SUM(total) AS revenue\nFROM orders GROUP BY order_date;\n\nREFRESH MATERIALIZED VIEW daily_sales;"
+  },
+  {
+    "id": "sql-27",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is an index, and how does a B-tree index work?",
+    "answer": "An index is a separate data structure that lets the database find rows without scanning the whole table, like a book's index. The default type is a B-tree: a balanced, sorted tree where each lookup goes down a few levels to the right leaf, so searches, range filters and ORDER BY on the indexed column are fast. Primary keys and UNIQUE columns get indexes automatically. MongoDB indexes are also B-tree based, so the idea carries over directly.",
+    "example": "CREATE INDEX idx_orders_user_id\nON orders (user_id);"
+  },
+  {
+    "id": "sql-28",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a composite index, and why does column order matter?",
+    "answer": "A composite index covers several columns, sorted by the first column, then the second within it, and so on. Because of this, it helps queries that filter on a leftmost prefix of its columns: an index on (user_id, created_at) helps WHERE user_id = ? and WHERE user_id = ? AND created_at > ?, but not WHERE created_at > ? alone. Put equality-filtered columns first and range or sort columns after. This is the same prefix rule as MongoDB compound indexes.",
+    "example": "CREATE INDEX idx_orders_user_date\nON orders (user_id, created_at);"
+  },
+  {
+    "id": "sql-29",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a covering index?",
+    "answer": "A covering index contains every column a query needs, so the database can answer from the index alone without reading the table rows (an \"index-only scan\"). This removes extra disk lookups and can make hot queries much faster. You build one by adding the selected columns to the index, or in Postgres by using INCLUDE. It is the same idea as a covered query in MongoDB.",
+    "example": "CREATE INDEX idx_orders_cover\nON orders (user_id) INCLUDE (total, status);"
+  },
+  {
+    "id": "sql-30",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "When can indexes hurt performance?",
+    "answer": "Every index must be updated on each INSERT, UPDATE and DELETE, so too many indexes slow down writes and use extra disk and memory. Indexes on low-selectivity columns (like a boolean) are rarely used, because scanning the table is cheaper. Indexes are also skipped when you wrap the column in a function (WHERE LOWER(email) = ?) or use a leading wildcard (LIKE '%abc'). Add indexes for real query patterns and remove unused ones.",
+    "example": ""
+  },
+  {
+    "id": "sql-31",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a query execution plan, and how do you use EXPLAIN?",
+    "answer": "The execution plan is the step-by-step strategy the database chooses to run a query: which indexes, which join method, what order. EXPLAIN shows the planned steps and estimated costs; EXPLAIN ANALYZE actually runs the query and shows real timings and row counts. Look for full table scans (Seq Scan) on large tables, bad row estimates and expensive sorts. It is the SQL version of MongoDB's explain('executionStats').",
+    "example": "EXPLAIN ANALYZE\nSELECT * FROM orders\nWHERE user_id = 42;"
+  },
+  {
+    "id": "sql-32",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is normalization, and what is First Normal Form (1NF)?",
+    "answer": "Normalization is organising tables to reduce duplicate data and avoid update anomalies, where the same fact stored in two places goes out of sync. 1NF is the first step: every column holds a single atomic value, there are no repeating groups like phone1, phone2, and each row is uniquely identifiable. Instead of a comma-separated list of tags, you create a separate table with one row per tag. This is the opposite of MongoDB's habit of embedding arrays inside a document.",
+    "example": ""
+  },
+  {
+    "id": "sql-33",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What are Second Normal Form (2NF) and Third Normal Form (3NF)?",
+    "answer": "2NF builds on 1NF: every non-key column must depend on the whole primary key, not just part of a composite key. For example, in an order_items table keyed by (order_id, product_id), product_name depends only on product_id, so it belongs in a products table. 3NF adds that non-key columns must not depend on other non-key columns; for example, city should not be stored next to zip_code if zip determines city. Simple rule: each fact depends on the key, the whole key, and nothing but the key.",
+    "example": ""
+  },
+  {
+    "id": "sql-34",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is denormalization, and when would you use it?",
+    "answer": "Denormalization is deliberately duplicating data or pre-joining tables to make reads faster, at the cost of extra storage and more work to keep copies consistent. Examples are storing an order_count on the users table or copying a product name into order rows. It is useful for read-heavy systems and reporting, once normalized joins become a proven bottleneck. Embedding related data in a MongoDB document is essentially denormalization by default.",
+    "example": ""
+  },
+  {
+    "id": "sql-35",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What does ACID mean?",
+    "answer": "ACID is the set of guarantees a transaction gives. Atomicity: all of its changes happen or none do. Consistency: the database moves from one valid state to another, respecting all constraints. Isolation: concurrent transactions do not see each other's half-finished work. Durability: once committed, the change survives crashes. Relational DBs have offered ACID for decades; MongoDB added multi-document ACID transactions in version 4.0.",
+    "example": ""
+  },
+  {
+    "id": "sql-36",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is a transaction, and how do you use one in SQL?",
+    "answer": "A transaction groups several statements into one all-or-nothing unit. You start with BEGIN, run your statements, then COMMIT to save or ROLLBACK to undo everything. SAVEPOINT lets you roll back part of a transaction. The classic example is a money transfer: debit one account and credit another, so a failure in the middle never loses money. In MongoDB this is like session.startTransaction() and commitTransaction().",
+    "example": "BEGIN;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;"
+  },
+  {
+    "id": "sql-37",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "What is SQL injection, and how do parameterized queries prevent it?",
+    "answer": "SQL injection happens when user input is concatenated into a SQL string, so an attacker can type something like ' OR '1'='1 and change the query's meaning, leaking or deleting data. Parameterized queries (prepared statements) send the SQL and the values separately; the database treats values strictly as data, never as code. Always use placeholders through your driver or ORM, and never build SQL with string concatenation. MongoDB has a similar risk called operator injection, e.g. passing {\"$ne\": null} as a password.",
+    "example": "-- Unsafe: \"... WHERE email = '\" + input + \"'\"\n-- Safe (node-postgres):\nclient.query(\n  'SELECT * FROM users WHERE email = $1',\n  [input]\n);"
+  },
+  {
+    "id": "sql-38",
+    "topic": "sql",
+    "level": "intermediate",
+    "question": "How do OFFSET pagination and keyset (cursor) pagination differ?",
+    "answer": "OFFSET pagination uses LIMIT 20 OFFSET 1000; it is simple and allows jumping to any page, but the database still reads and throws away the skipped rows, so deep pages get slow, and inserts can shift rows between pages. Keyset pagination remembers the last row seen and asks for rows after it (WHERE id > last_id ORDER BY id LIMIT 20); it uses an index and stays fast at any depth, but cannot jump to page N. Same trade-off as skip() vs range queries on _id in MongoDB.",
+    "example": "-- Keyset\nSELECT * FROM orders\nWHERE id > 10500\nORDER BY id\nLIMIT 20;"
+  },
+  {
+    "id": "sql-39",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What are dirty reads, non-repeatable reads and phantom reads?",
+    "answer": "These are anomalies that happen when transactions run at the same time. A dirty read is reading another transaction's uncommitted change, which may later be rolled back. A non-repeatable read is reading the same row twice and getting different values because someone committed an update in between. A phantom read is running the same range query twice and getting new or missing rows because someone inserted or deleted matching rows. Isolation levels decide which of these are allowed.",
+    "example": ""
+  },
+  {
+    "id": "sql-40",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What are the four standard transaction isolation levels?",
+    "answer": "READ UNCOMMITTED may allow dirty reads. READ COMMITTED only shows committed data but allows non-repeatable and phantom reads; it is the Postgres default. REPEATABLE READ keeps rows you have read stable; it is the MySQL InnoDB default, and both Postgres and InnoDB largely prevent phantoms here too. SERIALIZABLE makes transactions behave as if they ran one after another, but may abort some that must be retried. Higher isolation means fewer anomalies but more blocking or retries.",
+    "example": "BEGIN ISOLATION LEVEL SERIALIZABLE;\n-- statements\nCOMMIT;"
+  },
+  {
+    "id": "sql-41",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "How does locking work, and what is a deadlock?",
+    "answer": "Databases lock rows (or tables) so that two transactions do not change the same data at once; writers usually take row locks that other writers must wait for. A deadlock happens when transaction A holds a lock B needs while B holds a lock A needs, so both wait forever. The database detects this and aborts one of them with an error. To reduce deadlocks, keep transactions short, touch rows in a consistent order and be ready to retry.",
+    "example": ""
+  },
+  {
+    "id": "sql-42",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What is the difference between optimistic and pessimistic locking?",
+    "answer": "Pessimistic locking locks the row when you read it (SELECT ... FOR UPDATE) so nobody else can change it until you commit; it is safe under heavy contention but blocks others. Optimistic locking takes no lock; it stores a version number and the update only succeeds if the version is unchanged, otherwise you retry. Optimistic suits low-conflict workloads such as most web apps. Mongoose's versioning (__v) and conditional updates in MongoDB follow the optimistic pattern.",
+    "example": "UPDATE products\nSET stock = stock - 1, version = version + 1\nWHERE id = 7 AND version = 3;\n-- 0 rows updated => someone else won, retry"
+  },
+  {
+    "id": "sql-43",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What is MVCC (Multi-Version Concurrency Control)?",
+    "answer": "MVCC keeps multiple versions of a row so that readers see a consistent snapshot while writers create new versions, instead of overwriting in place. The big benefit is that readers do not block writers and writers do not block readers. Old versions must be cleaned up later, which is what VACUUM does in Postgres (MySQL InnoDB uses undo logs). MongoDB's WiredTiger storage engine also uses MVCC-style snapshots.",
+    "example": ""
+  },
+  {
+    "id": "sql-44",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What are stored procedures and triggers, and what are their trade-offs?",
+    "answer": "A stored procedure is named code stored and run inside the database, called explicitly (CALL or SELECT fn()). A trigger is code that runs automatically when an INSERT, UPDATE or DELETE happens on a table, for example to write an audit log or update updated_at. They reduce round trips and keep rules close to the data. The downsides are business logic hidden from the app, harder testing and versioning, and surprise side effects. MongoDB's closest feature to triggers is change streams.",
+    "example": "CREATE TRIGGER set_updated_at\nBEFORE UPDATE ON users\nFOR EACH ROW\nEXECUTE FUNCTION touch_updated_at();"
+  },
+  {
+    "id": "sql-45",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What is the N+1 query problem, and how do ORMs cause or fix it?",
+    "answer": "N+1 happens when code runs one query to fetch a list (1) and then one more query per item to fetch related data (N), so 100 posts trigger 101 queries. ORMs make this easy by lazy-loading relations inside a loop. The fix is to load related data in bulk with a JOIN or a single WHERE id IN (...) query, which ORMs offer as eager loading (e.g. include in Prisma or Sequelize). It is the same issue as calling findById in a loop instead of using $in or populate in Mongoose.",
+    "example": "-- Instead of one query per post:\nSELECT * FROM comments\nWHERE post_id IN (1, 2, 3, 4);"
+  },
+  {
+    "id": "sql-46",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What is connection pooling, and why is it important?",
+    "answer": "Opening a database connection is expensive: network handshake, authentication, and in Postgres a whole server process per connection. A connection pool keeps a set of open connections and lends them to requests, returning them after use. This cuts latency and protects the database from too many connections. Size the pool carefully, and in serverless setups use an external pooler like PgBouncer. The MongoDB Node driver pools connections too (maxPoolSize).",
+    "example": "const pool = new Pool({ max: 10 });\nconst { rows } = await pool.query(\n  'SELECT now()'\n);"
+  },
+  {
+    "id": "sql-47",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What is replication, and how are read replicas used?",
+    "answer": "Replication copies data from a primary database to one or more replicas, usually by streaming the write log. All writes go to the primary, while replicas can serve read-only queries to spread load, and a replica can be promoted if the primary fails. Most setups are asynchronous, so replicas may lag slightly and a read right after a write might see old data. This is like a MongoDB replica set with a secondary read preference.",
+    "example": ""
+  },
+  {
+    "id": "sql-48",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What is the difference between partitioning and sharding?",
+    "answer": "Partitioning splits one large table into smaller pieces (by range, list or hash, such as one partition per month) inside the same database server; queries can skip partitions they do not need and old data is easy to drop. Sharding spreads data across multiple separate servers by a shard key, so you can scale beyond one machine, but cross-shard joins and transactions become hard. Relational DBs support partitioning natively, while sharding usually needs extra tools like Citus or Vitess. MongoDB has sharding built in.",
+    "example": "CREATE TABLE events (\n  id BIGINT, created_at DATE\n) PARTITION BY RANGE (created_at);"
+  },
+  {
+    "id": "sql-49",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "What are the main differences between PostgreSQL and MySQL?",
+    "answer": "Both are popular, open-source relational databases. PostgreSQL is known for strict SQL standards, rich types (JSONB, arrays, ranges), powerful extensions like PostGIS, and advanced features such as partial indexes and transactional DDL. MySQL (with InnoDB) is known for simplicity, speed on simple read-heavy workloads and a huge hosting ecosystem. For new projects needing complex queries or JSON, Postgres is a common default; both are solid for typical web apps.",
+    "example": ""
+  },
+  {
+    "id": "sql-50",
+    "topic": "sql",
+    "level": "advanced",
+    "question": "When should you choose SQL over NoSQL like MongoDB, and vice versa?",
+    "answer": "Choose a relational database when data is highly related, you need joins, strong constraints and multi-row transactions, and the schema is fairly stable, as in finance, orders or billing. Choose a document database like MongoDB when data is naturally hierarchical and read together, the schema changes often, or you need easy horizontal scaling. Many systems use both. Model around your access patterns rather than picking by trend.",
+    "example": ""
+  }
+]

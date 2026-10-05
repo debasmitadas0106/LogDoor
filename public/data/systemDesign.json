@@ -1,0 +1,1235 @@
+[
+  {
+    "id": "sd-e01",
+    "level": "easy",
+    "title": "Design a URL shortener",
+    "prompt": "Build a service that turns a long URL into a short link (like sho.rt/aB3x9) and redirects people who open it. Assume 1 million new links per day and about 100 redirects for every link created (around 1,000 reads/sec on average). Links should work for at least 5 years.",
+    "keyConcepts": [
+      "Hashing / base62",
+      "Key-value store",
+      "Caching",
+      "Read-heavy traffic"
+    ],
+    "thinkAbout": [
+      "How do you generate unique short codes without collisions?",
+      "How many characters does a code need to cover 5 years of links?",
+      "Should a redirect use HTTP 301 or 302, and why does it matter for analytics?",
+      "Where would you put a cache, and what would it store?",
+      "What happens if two users shorten the same long URL?"
+    ],
+    "outline": "Use a stateless API service behind a load balancer and a key-value store (or MongoDB collection) mapping shortCode to longUrl, createdAt and owner. To create a link, take a number from a counter (or a random ID) and encode it in base62; 7 characters give about 3.5 trillion codes, which is plenty. On redirect, look up the code, return a 302 so every click reaches you for counting, or a 301 if you want browsers to cache it. Put Redis in front of the database because a few popular links get most of the traffic. Index shortCode as the primary key so lookups are O(1). Scale reads by adding API servers and cache replicas. The main trade-off is counter-based codes (no collisions, but guessable and need a shared counter) versus random codes (unguessable, but you must check for collisions)."
+  },
+  {
+    "id": "sd-e02",
+    "level": "easy",
+    "title": "Design a Pastebin",
+    "prompt": "Design a site where users paste text, get a link, and share it. Pastes can be up to 1 MB and may expire after a chosen time (1 hour, 1 day, never). Assume 100,000 new pastes per day and 10x more reads than writes.",
+    "keyConcepts": [
+      "Object storage",
+      "Metadata vs content",
+      "TTL / expiry",
+      "Unique IDs"
+    ],
+    "thinkAbout": [
+      "Should the paste text live in the database or in object storage?",
+      "How do you delete expired pastes without slowing down the system?",
+      "How do you create a short, unique ID for each paste?",
+      "How would you stop someone from using it to host spam or huge files?",
+      "What would you cache, and for how long?"
+    ],
+    "outline": "Split each paste into metadata and content. Metadata (id, createdAt, expiresAt, size, owner) goes in a database; the text itself goes in object storage like S3, keyed by the paste id, because blobs are cheap there and keep the database small. Generate ids the same way as a URL shortener (base62 of a random or counter value). On read, check metadata, reject if expired, then fetch the text, ideally through a CDN or cache since pastes never change after creation. For expiry, use a MongoDB TTL index on expiresAt for metadata plus a lifecycle rule or a nightly cleanup job for the blobs. Enforce a size limit and per-IP rate limits at the API. The trade-off is simplicity (all in one DB) versus cost and scale (DB plus object storage)."
+  },
+  {
+    "id": "sd-e03",
+    "level": "easy",
+    "title": "Design a to-do list REST API",
+    "prompt": "Design the backend for a to-do app where each user has lists, and each list has tasks with a title, due date, and done flag. Assume 50,000 users, each with up to a few hundred tasks, and mobile and web clients that sync often.",
+    "keyConcepts": [
+      "REST resource design",
+      "Data modeling",
+      "Authentication",
+      "Pagination"
+    ],
+    "thinkAbout": [
+      "What are your resources and URLs (e.g. /lists/:id/tasks)?",
+      "Would you embed tasks inside a list document or keep them in a separate collection?",
+      "How does a client fetch only what changed since its last sync?",
+      "How do you make sure one user cannot read another user's tasks?",
+      "Which fields need indexes?"
+    ],
+    "outline": "Expose resources like GET/POST /lists, GET/PATCH/DELETE /lists/:id, and GET/POST /lists/:id/tasks, using HTTP verbs and status codes the REST way. Use one Node.js API service with token auth (for example a JWT) and check that the resource's userId matches the caller on every request. In MongoDB, store tasks in their own collection with listId, userId, title, dueDate, done and updatedAt, instead of embedding, so lists can grow and tasks can be updated alone. Index { userId, listId } and { userId, updatedAt }. For sync, clients call GET /tasks?updatedSince=timestamp, and you use soft deletes so deletions also sync. Use cursor-based pagination for long lists. At this scale one database with a replica is enough; the trade-off is embedding (one read) versus separate collections (flexible, safer updates)."
+  },
+  {
+    "id": "sd-e04",
+    "level": "easy",
+    "title": "Design an in-memory key-value cache",
+    "prompt": "Design a single-server cache, like a tiny Redis, that supports get(key), set(key, value, ttl) and delete(key). It has 4 GB of memory, should answer in under 1 ms, and must throw out old data when full.",
+    "keyConcepts": [
+      "Hash map",
+      "LRU eviction",
+      "TTL expiry",
+      "Doubly linked list"
+    ],
+    "thinkAbout": [
+      "What data structure gives O(1) get and set?",
+      "When memory is full, which key do you remove and how do you find it fast?",
+      "How do you expire keys with a TTL without scanning everything?",
+      "What happens to the data if the server restarts?",
+      "How would clients talk to it (protocol, connections)?"
+    ],
+    "outline": "Keep a hash map from key to node, and a doubly linked list ordering nodes from most to least recently used; this combination gives O(1) get, set and eviction. On every get or set, move the node to the front; when memory is over the limit, remove nodes from the tail (LRU). For TTL, store expiresAt on each node and check it lazily on read, plus run a small background task that samples a few keys each second and deletes expired ones. Track memory use per entry so you know when to evict. Clients connect over TCP with a simple text or binary protocol, and one event loop (like Node or Redis) avoids locking. Optional persistence: periodic snapshots to disk. The trade-off is LRU (simple, good for most loads) versus LFU (better when some keys are always hot)."
+  },
+  {
+    "id": "sd-e05",
+    "level": "easy",
+    "title": "Design a basic rate limiter",
+    "prompt": "Design a rate limiter for a public API that allows each API key at most 100 requests per minute and returns HTTP 429 when the limit is passed. Start with a single API server handling about 2,000 requests/sec.",
+    "keyConcepts": [
+      "Token bucket",
+      "Fixed vs sliding window",
+      "Middleware",
+      "HTTP 429"
+    ],
+    "thinkAbout": [
+      "Which algorithm will you use: fixed window, sliding window, or token bucket?",
+      "Where does the limiter run: in the app, in middleware, or at a gateway?",
+      "What exactly do you store per API key?",
+      "What headers tell the client how many requests are left?",
+      "What goes wrong at the edge of a fixed window?"
+    ],
+    "outline": "Add the limiter as Express middleware that runs before the route handlers. Use a token bucket per API key: each bucket holds up to 100 tokens and refills at 100 per minute; each request takes one token, and if none are left you reply 429 with a Retry-After header. Store only tokens and lastRefillTime per key in a Map, and compute the refill lazily when a request arrives, so no timers are needed. Also return X-RateLimit-Remaining so clients can slow down. A fixed window counter is simpler but lets 200 requests through around a minute boundary; token bucket smooths that and allows small bursts. Clean up idle keys periodically to save memory. The trade-off: in-memory is fast but only works on one server; with many servers you move the state to Redis (a medium-level problem)."
+  },
+  {
+    "id": "sd-e06",
+    "level": "easy",
+    "title": "Design an image upload service",
+    "prompt": "Design a service where users upload profile pictures (up to 10 MB) and see them in several sizes (thumbnail, medium, original). Assume 20,000 uploads per day and many more views, mostly from mobile.",
+    "keyConcepts": [
+      "Object storage",
+      "Pre-signed URLs",
+      "Async processing",
+      "CDN"
+    ],
+    "thinkAbout": [
+      "Should files go through your API server or straight to storage?",
+      "When and where do you create the resized versions?",
+      "How does the client know the thumbnail is ready?",
+      "How do you stop people uploading non-images or huge files?",
+      "How do you serve images fast to users around the world?"
+    ],
+    "outline": "The client asks the API for an upload URL; the API checks auth and size limits and returns a pre-signed S3 URL, so the file goes directly to object storage and your servers never carry the bytes. When the upload finishes, S3 sends an event to a queue, and a worker downloads the original, checks it is a real image, and writes resized versions (for example 100px and 600px) back to storage. The database stores imageId, userId, status (pending/ready) and the keys of each size. The client polls or gets a push when status becomes ready. Images are served through a CDN with long cache headers, and a new upload gets a new key instead of overwriting, so caches never show stale pictures. The trade-off is async resizing (fast uploads, short delay) versus resizing on request (simpler, but slower first views)."
+  },
+  {
+    "id": "sd-e07",
+    "level": "easy",
+    "title": "Design a notification preferences service",
+    "prompt": "Design a small service that stores how each user wants to be notified (email, SMS, push) for each type of event (marketing, security, billing), plus quiet hours. Other services will call it about 5,000 times/sec before sending any message.",
+    "keyConcepts": [
+      "Data modeling",
+      "Defaults and overrides",
+      "Read caching",
+      "Internal API"
+    ],
+    "thinkAbout": [
+      "How do you store defaults so you do not need a row for every user and every setting?",
+      "What API do other services call, and what does it return?",
+      "How do you keep reads fast at 5,000 per second?",
+      "How do quiet hours and time zones work together?",
+      "Which settings must never be turned off (for example security alerts)?"
+    ],
+    "outline": "Keep one document per user holding only the settings they changed, plus their time zone and quiet hours; global defaults live in config. The internal API is GET /preferences/:userId?event=billing, which merges defaults with overrides and returns allowed channels, for example { email: true, sms: false }. Writes come from the settings page via PUT. Because reads far outnumber writes, cache the merged result in Redis keyed by userId and delete the cache entry on every update. Quiet hours are checked using the user's time zone at call time. Some event types, like password resets, are marked mandatory in config and always allowed. One small service and a database replica handle this load easily. The trade-off is storing only overrides (small, easy to change defaults) versus storing every setting (simple queries, lots of rows)."
+  },
+  {
+    "id": "sd-e08",
+    "level": "easy",
+    "title": "Design a game leaderboard",
+    "prompt": "Design a leaderboard for a mobile game where players submit scores and can see the top 100 and their own rank. Assume 1 million players, 500 score updates/sec, and a new board each week.",
+    "keyConcepts": [
+      "Sorted set",
+      "Ranking queries",
+      "Caching",
+      "Time-based partitioning"
+    ],
+    "thinkAbout": [
+      "Which data structure gives fast \"top N\" and \"rank of player X\" queries?",
+      "How do you reset the leaderboard each week?",
+      "Do you keep the best score or the latest score?",
+      "How would you stop cheaters from posting fake scores?",
+      "What needs to be stored permanently, and what can live only in memory?"
+    ],
+    "outline": "Use a Redis sorted set per week, keyed like leaderboard:2026-W40, with playerId as the member and score as the value. ZADD with the GT option keeps only a player's best score, ZREVRANGE 0 99 returns the top 100, and ZREVRANK returns a player's rank, all in O(log n). Game servers (not clients) submit scores, so players cannot fake them directly; add simple checks for impossible scores. Also write every score to MongoDB so you can rebuild the board if Redis is lost. A new week simply uses a new key, and old keys get a TTL. Cache the top-100 response for a few seconds because everyone asks for it. The trade-off is Redis speed and simplicity versus needing the DB copy for durability."
+  },
+  {
+    "id": "sd-e09",
+    "level": "easy",
+    "title": "Design a unique ID generator",
+    "prompt": "Design a service that hands out unique 64-bit IDs to other services, about 10,000 IDs/sec. The IDs should roughly sort by creation time, and the system should keep working if one server goes down.",
+    "keyConcepts": [
+      "Snowflake IDs",
+      "Clock skew",
+      "Coordination-free design",
+      "Bit layout"
+    ],
+    "thinkAbout": [
+      "Why not just use an auto-increment column in one database?",
+      "How would you split 64 bits between time, machine and a counter?",
+      "What happens if a server's clock moves backwards?",
+      "How do you make sure two machines never get the same machine ID?",
+      "How do UUIDs compare to your design?"
+    ],
+    "outline": "Use a Snowflake-style layout: about 41 bits of milliseconds since a custom start date, 10 bits of machine ID, and 12 bits of sequence number within one millisecond. Each server builds IDs on its own with no network calls, so it is fast and there is no single point of failure; one machine can make 4,096 IDs per millisecond. Machine IDs are assigned once at startup, for example from config or a small coordination store. If the clock goes backwards, the server waits or refuses until time catches up, so it never repeats an ID. IDs sort roughly by time, which keeps database indexes efficient. Compared with this, UUIDv4 needs no coordination at all but is 128 bits and random, which hurts index locality. The trade-off is needing machine-ID management versus fully random IDs."
+  },
+  {
+    "id": "sd-e10",
+    "level": "easy",
+    "title": "Design an online poll and voting service",
+    "prompt": "Design a service where anyone can create a poll with a few options and people vote once each, seeing live results. Most polls are small, but a viral poll might get 5,000 votes/sec for a few minutes.",
+    "keyConcepts": [
+      "Counters",
+      "Idempotency / one vote per user",
+      "Hot keys",
+      "Eventual consistency"
+    ],
+    "thinkAbout": [
+      "How do you make sure each person votes only once?",
+      "Where do you store the vote counts, and how do you update them safely?",
+      "What happens when one poll suddenly gets thousands of votes per second?",
+      "Do results need to be exact in real time, or can they be a few seconds behind?",
+      "How do clients see results update live?"
+    ],
+    "outline": "Store polls (id, question, options, closesAt) in MongoDB and record each vote as a document with a unique index on { pollId, voterId }; the unique index is what blocks double voting. For counts, increment a per-option counter in Redis on each accepted vote, and periodically save totals to the database. For a viral poll, split each counter into several sub-keys (for example 10 shards) and add them up when reading, so one key is not overloaded. Results are allowed to lag a second or two, so clients poll every few seconds or get updates over a WebSocket or server-sent events. Voter identity comes from login, or from a cookie plus IP for anonymous polls, which is weaker. The trade-off is exact live counts (expensive) versus slightly delayed, cheap counts."
+  },
+  {
+    "id": "sd-e11",
+    "level": "easy",
+    "title": "Design a website page-view counter",
+    "prompt": "Design a service that counts page views for a blog platform and shows \"views today\" and \"total views\" on each post. Assume 2,000 page views/sec spread over 500,000 posts.",
+    "keyConcepts": [
+      "Write batching",
+      "Counters",
+      "Approximate vs exact counts",
+      "Background jobs"
+    ],
+    "thinkAbout": [
+      "Should each page view write directly to the database?",
+      "How can you batch counts to reduce database writes?",
+      "How do you count unique visitors, not just views?",
+      "How fresh do the numbers on the page need to be?",
+      "What happens to counts if a server crashes before saving?"
+    ],
+    "outline": "Each page view sends a small beacon to a counter service, which increments in memory or in Redis (INCR views:postId:date) instead of writing to MongoDB each time. Every few seconds a background job reads and resets those counters and does bulk $inc updates in the database, so thousands of views become one write per post. Show counts read from the cache; being a few seconds behind is fine. For unique visitors, use a Redis HyperLogLog per post per day, which gives a close estimate using about 12 KB no matter how many visitors. If a server crashes you might lose a few seconds of counts, which is acceptable for view numbers. The trade-off is perfect accuracy (one write per view) versus speed and lower cost (batching and estimates)."
+  },
+  {
+    "id": "sd-e12",
+    "level": "easy",
+    "title": "Design a feature flag service",
+    "prompt": "Design a service that lets teams turn features on or off without deploying, and roll a feature out to a percentage of users (for example 10%). About 30 backend services check flags, each up to thousands of times per second.",
+    "keyConcepts": [
+      "Configuration management",
+      "Consistent hashing of users",
+      "Client-side caching",
+      "Push vs pull updates"
+    ],
+    "thinkAbout": [
+      "Should services call the flag service on every check, or keep a local copy?",
+      "How do you put the same user in the same 10% every time?",
+      "How quickly must a flag change reach all services?",
+      "What should happen if the flag service is down?",
+      "How do you keep a history of who changed what?"
+    ],
+    "outline": "Store flags in a database with name, enabled, rolloutPercent, targeting rules, and an audit log of changes. Each backend service uses a small SDK that downloads all flags at startup and keeps them in memory, so checking a flag is a local function call with no network. The SDK refreshes every 30 seconds, or listens on a stream (server-sent events or Redis pub/sub) for near-instant updates. For percentage rollouts, hash flagName + userId to a number from 0 to 99 and enable the flag if it is below rolloutPercent, so a user always gets the same result. If the flag service is down, SDKs keep using the last known values and safe defaults. An admin UI handles edits with permissions. The trade-off is local evaluation (fast, resilient, slightly stale) versus server evaluation (always fresh, slower and a dependency)."
+  },
+  {
+    "id": "sd-e13",
+    "level": "easy",
+    "title": "Design a login session store",
+    "prompt": "Design how a web app keeps users logged in across requests. Assume 2 million active sessions, 10,000 requests/sec needing a session check, and the ability to log a user out of all devices.",
+    "keyConcepts": [
+      "Stateful vs stateless sessions",
+      "JWT",
+      "Redis",
+      "Expiry and revocation"
+    ],
+    "thinkAbout": [
+      "Will you use server-side sessions, signed tokens (JWT), or both?",
+      "Where do you store session data so any server can read it?",
+      "How do you log someone out everywhere right away?",
+      "How long should a session live, and how is it refreshed?",
+      "How do you protect the session cookie from theft?"
+    ],
+    "outline": "Use server-side sessions in Redis: on login, create a random session ID, store { userId, createdAt, device } under session:ID with a TTL such as 7 days, and send the ID in an HttpOnly, Secure, SameSite cookie. Every app server reads the session from Redis, so servers stay stateless and can scale freely. Also keep a set user:sessions:userId listing session IDs, so \"log out everywhere\" just deletes them all. Refresh the TTL on activity (sliding expiry). A pure JWT approach avoids the Redis lookup but cannot be revoked until it expires, so a common mix is a short-lived JWT (15 minutes) plus a long-lived refresh token checked in storage. Add Redis replicas so losing one node does not log everyone out. The trade-off is easy revocation (stateful) versus fewer lookups (stateless)."
+  },
+  {
+    "id": "sd-e14",
+    "level": "easy",
+    "title": "Design a simple blog with comments",
+    "prompt": "Design the backend for a blogging site where authors publish posts and readers leave comments, including replies to comments. Assume 10,000 posts, 1 million page views per day, and comments growing over time.",
+    "keyConcepts": [
+      "Data modeling for trees",
+      "Embedding vs referencing",
+      "Caching rendered pages",
+      "Pagination"
+    ],
+    "thinkAbout": [
+      "How do you store nested replies so you can show them in order?",
+      "Should comments be embedded in the post document?",
+      "What part of the page can be cached, and when do you clear it?",
+      "How do you load a post with 5,000 comments without being slow?",
+      "How would you handle spam comments?"
+    ],
+    "outline": "Store posts in one collection and comments in another with postId, parentId (null for top level), authorId, text and createdAt, because embedding thousands of comments would hit MongoDB's 16 MB document limit and make updates heavy. To show replies, either load comments by postId sorted by time and build the tree in code, or store a path field like \"root/c12/c45\" so a whole thread sorts in one query. Index { postId, createdAt }. Posts rarely change, so cache the rendered post (or put it behind a CDN) and clear it when the author edits. Load comments in pages of 50, top level first, and fetch replies when expanded. Run new comments through a spam filter and rate limit per user. The trade-off is easy reading (embedding) versus unbounded growth and safe updates (separate collection)."
+  },
+  {
+    "id": "sd-e15",
+    "level": "easy",
+    "title": "Design password reset and email verification tokens",
+    "prompt": "Design the flow that sends users a link to verify their email or reset their password. Tokens must expire after 30 minutes, work only once, and be safe even if the database is leaked. Assume 50,000 such emails per day.",
+    "keyConcepts": [
+      "Secure random tokens",
+      "Hashing secrets",
+      "Single-use / idempotency",
+      "Async email sending"
+    ],
+    "thinkAbout": [
+      "How do you generate a token that cannot be guessed?",
+      "Why store a hash of the token instead of the token itself?",
+      "How do you make sure a token works only once?",
+      "How do you avoid telling attackers which emails have accounts?",
+      "Should sending the email happen inside the HTTP request?"
+    ],
+    "outline": "When the user asks for a reset, create 32 random bytes with crypto.randomBytes, send the raw token in a link, and store only its SHA-256 hash with userId, purpose, expiresAt and usedAt. A leaked database then does not reveal working tokens. The API always replies \"if this email exists, we sent a link\" so attackers learn nothing. Put the email job on a queue and let a worker send it, so the request stays fast and retries are automatic. When the link is clicked, hash the token, find a matching unused, unexpired record, and mark it used in the same atomic update (findOneAndUpdate with usedAt: null in the filter). After a password reset, end the user's other sessions. A TTL index removes old tokens. The trade-off is a stored token (revocable, single-use) versus a signed stateless token (no DB, but hard to make single-use)."
+  },
+  {
+    "id": "sd-e16",
+    "level": "easy",
+    "title": "Design a call recording storage and playback service",
+    "prompt": "Design a service for a voice-AI company that stores recordings of phone calls and lets customers play them back and download them from a dashboard. Assume 200,000 calls per day, about 3 minutes each, kept for 90 days.",
+    "keyConcepts": [
+      "Object storage",
+      "Storage estimation",
+      "Pre-signed URLs",
+      "Retention / lifecycle rules",
+      "Access control"
+    ],
+    "thinkAbout": [
+      "Roughly how much storage do you need per day and for 90 days?",
+      "Which audio format and bitrate would you pick, and why?",
+      "How do you let a customer stream a file without making it public?",
+      "How do you delete recordings automatically after 90 days?",
+      "How do you make sure one customer can never hear another customer's calls?"
+    ],
+    "outline": "When a call ends, the telephony service uploads the audio to object storage under a key like tenantId/date/callId.mp3; at about 32 kbps mono, 3 minutes is roughly 0.7 MB, so about 140 GB per day and 13 TB for 90 days. A metadata record (callId, tenantId, duration, storageKey, createdAt) goes in the database and links the recording to the call log. To play a recording, the dashboard asks the API, which checks that the caller belongs to that tenant and returns a short-lived pre-signed URL; the browser streams directly from storage using HTTP range requests. A lifecycle rule deletes or archives objects after 90 days, and a TTL index cleans up metadata. Encrypt at rest because calls can hold personal data. The trade-off is compressed audio (cheap) versus lossless audio (better quality for later transcription)."
+  },
+  {
+    "id": "sd-e17",
+    "level": "easy",
+    "title": "Design a shopping cart service",
+    "prompt": "Design the cart for an online store: add or remove items, change quantities, and keep the cart for guests and logged-in users. Assume 100,000 active carts at peak and 1,000 cart updates/sec.",
+    "keyConcepts": [
+      "Session vs persistent state",
+      "Data modeling",
+      "Merging state",
+      "Price consistency"
+    ],
+    "thinkAbout": [
+      "Where do you store a guest's cart before they log in?",
+      "What happens to the guest cart when the user logs in?",
+      "Do you store prices in the cart, or look them up each time?",
+      "How long should an abandoned cart be kept?",
+      "What happens if two tabs update the cart at the same time?"
+    ],
+    "outline": "Store each cart as one MongoDB document keyed by cartId, with ownerId (userId or a guest ID from a cookie), a list of { productId, quantity } and updatedAt. Add, remove and change quantity are atomic updates on that document ($push, $pull, positional $set), so two tabs do not overwrite each other. Do not trust stored prices: look up current prices and stock when showing the cart and again at checkout. On login, merge the guest cart into the user's cart, adding quantities for items in both. Use a TTL index to delete guest carts after 30 days of no activity, while keeping user carts longer. Optionally cache carts in Redis for speed. The trade-off is one document per cart (simple, atomic) versus one row per item (more flexible queries, more writes)."
+  },
+  {
+    "id": "sd-e18",
+    "level": "easy",
+    "title": "Design a caching proxy for a third-party weather API",
+    "prompt": "Your app shows weather for cities, but the outside weather API is slow (800 ms), costs money per call, and allows only 50 calls/sec. Design a proxy that serves 3,000 requests/sec from your users while respecting those limits.",
+    "keyConcepts": [
+      "Cache-aside",
+      "TTL selection",
+      "Request coalescing",
+      "Graceful degradation"
+    ],
+    "thinkAbout": [
+      "What cache key would you use, and how long should data live?",
+      "What happens when 500 users ask for the same city at the same moment and the cache is empty?",
+      "How do you stay under the 50 calls/sec limit?",
+      "What do you show users if the outside API is down?",
+      "Can you pre-load popular cities?"
+    ],
+    "outline": "Put a small Node service between your app and the weather API, using cache-aside with Redis: the key is the city ID (or rounded latitude/longitude) and the TTL is around 10 minutes, since weather changes slowly. On a miss, only one request per key goes to the outside API; other requests for the same key wait on that same promise (request coalescing), which stops a stampede. Wrap outgoing calls in a rate limiter set below 50/sec, and queue or reject extra misses. Keep a second \"stale\" copy with a longer TTL, and if the outside API fails or is slow, return the stale data with a flag rather than an error. A background job refreshes the top 500 cities before they expire. The trade-off is data freshness versus cost and staying within the limit."
+  },
+  {
+    "id": "sd-e19",
+    "level": "easy",
+    "title": "Design a contacts service with search",
+    "prompt": "Design a service that stores each user's address book (name, phone numbers, emails, company) and supports search-as-you-type by name or phone. Assume 1 million users with about 500 contacts each.",
+    "keyConcepts": [
+      "Indexing",
+      "Prefix search",
+      "Normalization",
+      "Per-user partitioning"
+    ],
+    "thinkAbout": [
+      "What indexes do you need for search by name prefix and by phone number?",
+      "How do you normalize phone numbers so \"+1 (555) 010\" and \"555010\" match?",
+      "Since a user only searches their own contacts, how does that help you?",
+      "How do you import 5,000 contacts from a CSV without blocking?",
+      "How do you detect duplicate contacts?"
+    ],
+    "outline": "Store each contact as a document with userId, displayName, a lowercased nameSearch field, phones normalized to E.164 format, emails and company. Every query includes userId, so a compound index on { userId, nameSearch } makes a prefix query like /^deb/ fast, and { userId, phones } serves phone lookups. Because each user has only about 500 contacts, the search space per query is tiny, and you could even shard by userId later. For bigger needs (typo tolerance, searching anywhere in a word), add MongoDB Atlas Search or Elasticsearch. CSV imports run as background jobs that normalize, dedupe by phone or email, and bulk insert. Debounce search requests on the client (about 200 ms). The trade-off is simple database indexes (cheap, prefix only) versus a search engine (flexible, more to run)."
+  },
+  {
+    "id": "sd-e20",
+    "level": "easy",
+    "title": "Design a background email-sending job queue",
+    "prompt": "Design a system so your API can say \"send this email\" and return right away, while workers send emails in the background. Assume 1 million emails per day, peaks of 500/sec after marketing campaigns, and an email provider that sometimes fails.",
+    "keyConcepts": [
+      "Message queue",
+      "Workers",
+      "Retries with backoff",
+      "Idempotency",
+      "Dead-letter queue"
+    ],
+    "thinkAbout": [
+      "Why not send the email inside the HTTP request?",
+      "What happens if a worker crashes while sending?",
+      "How do you retry failures without sending duplicates?",
+      "How do you keep password resets fast while a huge campaign is sending?",
+      "How do you see which emails failed for good?"
+    ],
+    "outline": "The API writes a job { jobId, to, template, data } to a queue such as BullMQ on Redis, SQS or RabbitMQ, and responds 202 Accepted. A pool of workers takes jobs, renders the template and calls the email provider. A job is acknowledged only after success; if a worker crashes, the job becomes visible again and another worker picks it up. That means delivery is at-least-once, so store jobId as the provider's idempotency key, or record sent jobIds, to avoid duplicates. Failures retry with exponential backoff (for example 1 min, 5 min, 30 min); after the last try the job goes to a dead-letter queue for inspection. Use separate queues for transactional and marketing mail so important emails are never stuck behind a campaign. Scale by adding workers within the provider's rate limit. The trade-off is at-least-once delivery (needs idempotency) versus losing messages."
+  },
+  {
+    "id": "sd-m01",
+    "level": "medium",
+    "title": "Design a chat app (1:1 and group chat)",
+    "prompt": "Design a messaging app like WhatsApp: one-to-one and group chats (up to 200 people), online status, delivered/read ticks, and message history. Assume 10 million daily users, 1 million online at once, and 50,000 messages/sec at peak.",
+    "keyConcepts": [
+      "WebSockets",
+      "Message ordering",
+      "Fan-out",
+      "Presence",
+      "Offline delivery"
+    ],
+    "thinkAbout": [
+      "How do clients get new messages instantly (polling, long polling, WebSockets)?",
+      "If user A is connected to server 1 and user B to server 7, how does a message get from A to B?",
+      "How do you keep messages in the right order within a chat?",
+      "What happens when the receiver is offline?",
+      "How do you store billions of messages so loading chat history is fast?"
+    ],
+    "outline": "Clients keep a WebSocket open to a chat gateway server; a registry in Redis maps userId to the gateway they are connected to. When A sends a message, the gateway gives it to a chat service, which assigns a per-conversation sequence number, saves it, then looks up each member's gateway and forwards it, often through a pub/sub layer such as Redis or Kafka. Offline members get a push notification and fetch missed messages using their last seen sequence number. Store messages in a wide-column store like Cassandra, partitioned by conversationId and sorted by sequence, so \"latest 50 messages\" is one fast read. Presence uses heartbeats with short TTLs in Redis. Delivered and read ticks are small receipt messages sent back the same way. The trade-off is strong ordering per conversation (easy) versus global ordering (expensive and not needed)."
+  },
+  {
+    "id": "sd-m02",
+    "level": "medium",
+    "title": "Design a social media news feed",
+    "prompt": "Design the home feed for a social app where users follow others and see recent posts from people they follow, newest or ranked first. Assume 50 million daily users, an average of 300 follows each, some celebrities with 10 million followers, and 20 feed loads per user per day.",
+    "keyConcepts": [
+      "Fan-out on write vs read",
+      "Timeline cache",
+      "Celebrity problem",
+      "Pagination / cursors"
+    ],
+    "thinkAbout": [
+      "When someone posts, do you push it to every follower's feed now, or build feeds when they are read?",
+      "What do you do for an account with 10 million followers?",
+      "What do you store in a precomputed feed: full posts or just post IDs?",
+      "How do you paginate a feed that keeps changing?",
+      "How would ranking (not just time order) change the design?"
+    ],
+    "outline": "Use a hybrid model. For normal users, fan-out on write: when they post, a worker adds the post ID to each follower's feed list in Redis (kept to about the latest 800 IDs). For celebrities, skip fan-out; at read time, fetch their recent posts and merge them into the follower's cached feed. Feeds store only post IDs; full post data and author info come from a post cache, so edits show up everywhere. Pages use a cursor (the last post ID or timestamp) instead of offset numbers, so new posts do not cause duplicates. Inactive users' feeds are not maintained and get rebuilt when they return. Ranking adds a step that scores a few hundred candidates using signals like recency and engagement. The trade-off is fast reads (write fan-out) versus cheap writes (read fan-out)."
+  },
+  {
+    "id": "sd-m03",
+    "level": "medium",
+    "title": "Design a multi-channel notification system",
+    "prompt": "Design a platform that other teams use to send notifications by push, SMS and email, respecting user preferences and quiet hours. Assume 100 million notifications per day, spikes of 50,000/sec, and outside providers that can be slow or down.",
+    "keyConcepts": [
+      "Message queues",
+      "Priority queues",
+      "Provider failover",
+      "Templating",
+      "Delivery tracking"
+    ],
+    "thinkAbout": [
+      "What does the API for other teams look like?",
+      "How do you keep urgent notifications (OTP codes) fast during a big marketing blast?",
+      "How do you handle a provider being down?",
+      "How do you avoid sending the same notification twice?",
+      "How do you track whether each message was delivered or opened?"
+    ],
+    "outline": "Teams call POST /notify with userId, type, template and data, plus an idempotency key. The API checks the key, looks up user preferences and quiet hours, renders templates, and puts one job per channel on a queue such as Kafka or SQS, with separate high-priority and bulk queues. Channel workers (push, SMS, email) pull jobs, apply provider rate limits and call providers such as APNs, FCM, an SMS gateway or an email service; if one provider keeps failing, a circuit breaker switches to a backup. Each attempt is logged with a status (queued, sent, delivered, failed), and provider callbacks update it. Retries use backoff, and final failures go to a dead-letter queue. Store logs in a time-partitioned store for analytics. The trade-off is strong delivery guarantees (more tracking and dedupe work) versus simplicity."
+  },
+  {
+    "id": "sd-m04",
+    "level": "medium",
+    "title": "Design search autocomplete",
+    "prompt": "Design the search box that suggests the top 5 completions as the user types, like a search engine does. Assume 10 million daily users, 20,000 keystroke requests/sec at peak, and suggestions under 100 ms that reflect popular searches from the last day or so.",
+    "keyConcepts": [
+      "Trie",
+      "Top-K precomputation",
+      "Caching at edge",
+      "Batch data pipeline"
+    ],
+    "thinkAbout": [
+      "What data structure finds completions for a prefix quickly?",
+      "Do you compute the top 5 at query time or ahead of time?",
+      "How do new trending searches get into the suggestions?",
+      "How do you cut requests (debounce, browser cache, CDN)?",
+      "How do you filter offensive suggestions?"
+    ],
+    "outline": "Build a trie of popular queries in which each node stores its top 5 completions, so a lookup is just walking the prefix and returning a stored list. Build it offline: search logs go to a data pipeline (for example Kafka into a batch or streaming job) that counts queries over a time window, weighting recent ones more, and rebuilds the trie every hour or so. Serve the trie from memory on many read-only servers, split by prefix range if it is too large for one machine, and swap in new versions without downtime. Clients debounce typing, and short prefix results are cached in the browser and CDN since everyone types \"a\", \"ap\" and so on. A blocklist filters bad terms during the build. The trade-off is precomputed results (very fast, a bit stale) versus computing at query time (fresh, slow)."
+  },
+  {
+    "id": "sd-m05",
+    "level": "medium",
+    "title": "Design a web crawler",
+    "prompt": "Design a crawler that downloads 1 billion web pages per month to feed a search index, following links from seed URLs. It must be polite (not overload any site), avoid duplicates, and keep running for weeks.",
+    "keyConcepts": [
+      "URL frontier",
+      "Politeness / robots.txt",
+      "Deduplication",
+      "Distributed workers",
+      "Bloom filters"
+    ],
+    "thinkAbout": [
+      "How do you decide which URL to crawl next?",
+      "How do you make sure you hit any one site at most once every few seconds?",
+      "How do you avoid crawling the same URL or the same content twice?",
+      "How do you split work across hundreds of machines?",
+      "How do you deal with crawler traps (endless calendar pages)?"
+    ],
+    "outline": "The URL frontier is a set of queues: a priority stage orders URLs by importance, then URLs are routed to per-host queues so each host is fetched by only one worker with a delay between requests and robots.txt rules applied. Fetcher workers download pages with a DNS cache, store the raw HTML in object storage, and pass it to parsers that extract links. New links are normalized and checked against a Bloom filter or a distributed \"seen\" store before entering the frontier; content hashes catch duplicate pages at different URLs. Partition the frontier by hashing the host name so workers own whole sites. Limit depth and URLs per site to escape traps. About 1 billion pages a month is roughly 400 pages/sec. The trade-off is crawl freshness and coverage versus politeness and cost."
+  },
+  {
+    "id": "sd-m06",
+    "level": "medium",
+    "title": "Design a file storage and sync service like Dropbox",
+    "prompt": "Design a service where users store files in the cloud and keep them in sync across laptop and phone, including offline edits. Assume 50 million users, files up to 10 GB, and many small edits to large files.",
+    "keyConcepts": [
+      "Chunking",
+      "Content hashing / dedup",
+      "Metadata service",
+      "Sync and conflict handling",
+      "Object storage"
+    ],
+    "thinkAbout": [
+      "Why split files into chunks, and how big should chunks be?",
+      "How does a client upload only the part of a file that changed?",
+      "How do other devices find out that a file changed?",
+      "What happens if two devices edit the same file offline?",
+      "Where do metadata and file data each live?"
+    ],
+    "outline": "The client splits files into chunks of about 4 MB and hashes each chunk; it uploads only chunks whose hash the server does not have yet, which saves bandwidth and dedupes identical data across users. Chunks live in object storage keyed by hash. A metadata service with a relational or document database stores file trees, versions and each version's ordered chunk list. After an upload, the metadata service commits a new version and publishes a change event; other devices hold a long poll or WebSocket and pull changes since their last cursor. If two devices change the same base version, the second commit is rejected and the client saves a \"conflicted copy\" instead of losing data. Old versions are kept for a while for undo. The trade-off is smaller chunks (better dedup, more metadata) versus bigger chunks (less overhead)."
+  },
+  {
+    "id": "sd-m07",
+    "level": "medium",
+    "title": "Design basic ride matching (one city)",
+    "prompt": "Design the core of a ride-hailing app for one large city: drivers send their location every 4 seconds, and riders request a ride and get matched with a nearby driver in a few seconds. Assume 50,000 active drivers and 2,000 ride requests per minute at peak.",
+    "keyConcepts": [
+      "Geospatial indexing (geohash / grid)",
+      "High write rate",
+      "Matching logic",
+      "State machines"
+    ],
+    "thinkAbout": [
+      "How do you store driver locations so \"find drivers within 2 km\" is fast?",
+      "How do you handle 12,500 location updates per second?",
+      "How do you stop two riders from being matched to the same driver?",
+      "What are the states of a trip, and who can change them?",
+      "What happens if the chosen driver does not respond?"
+    ],
+    "outline": "Drivers send locations to a location service that keeps only the latest position in memory, for example Redis GEO or a grid of geohash cells mapping cell to driver IDs; at 12,500 updates/sec this fits in memory, and history is written to a log asynchronously. When a rider requests, the matching service searches the rider's cell and its neighbors, ranks available drivers by ETA, and offers the trip to the best one. To avoid double booking, it atomically flips the driver from available to offered (a compare-and-set in Redis or the database) before sending the offer; if the driver declines or 10 seconds pass, it is released and the next driver is tried. Trips follow a state machine (requested, matched, arriving, in progress, completed, cancelled) stored in a database. The trade-off is perfect matches versus speed."
+  },
+  {
+    "id": "sd-m08",
+    "level": "medium",
+    "title": "Design a distributed job scheduler",
+    "prompt": "Design a service where teams schedule jobs to run once at a time or on a cron schedule (for example \"every day at 9:00\"), with results and retries. Assume 10 million scheduled jobs and up to 5,000 jobs starting in the same minute.",
+    "keyConcepts": [
+      "Time-based partitioning",
+      "Leader election / locking",
+      "At-least-once execution",
+      "Worker pools"
+    ],
+    "thinkAbout": [
+      "How do you find which jobs are due right now without scanning 10 million rows?",
+      "How do you make sure a job runs once, not zero or two times, when there are several scheduler nodes?",
+      "What happens if a worker dies mid-job?",
+      "How do you handle a burst of 5,000 jobs due at midnight?",
+      "How do users see job history and failures?"
+    ],
+    "outline": "Store job definitions (schedule, payload, owner, retry policy) in a database, and keep a nextRunAt field indexed. Scheduler nodes each own a set of partitions (for example by hash of jobId) and every few seconds query \"nextRunAt <= now\" in their partitions, claim jobs with an atomic update that sets status to queued and moves nextRunAt forward, then push them to a queue. Worker pools pull from the queue and send heartbeats; if a heartbeat stops, the job is requeued after a timeout. Because execution is at-least-once, jobs should be idempotent or take a run ID. Big bursts are smoothed by the queue and by adding workers. Each run is recorded in a history table with status, logs link and duration. The trade-off is exact timing versus spreading the load."
+  },
+  {
+    "id": "sd-m09",
+    "level": "medium",
+    "title": "Design payment webhook processing",
+    "prompt": "Your app receives webhooks from a payment provider (payment succeeded, refunded, disputed) and must update orders correctly. Assume up to 2,000 webhooks/sec during sales, events that can arrive twice or out of order, and the provider retrying if you do not answer within 10 seconds.",
+    "keyConcepts": [
+      "Idempotency",
+      "Signature verification",
+      "Queue-based processing",
+      "Out-of-order events",
+      "Reconciliation"
+    ],
+    "thinkAbout": [
+      "How do you confirm a webhook really came from the provider?",
+      "How do you avoid processing the same event twice?",
+      "Why should you reply 200 quickly and do the work later?",
+      "What if \"refunded\" arrives before \"succeeded\"?",
+      "How do you catch events you never received?"
+    ],
+    "outline": "The webhook endpoint does very little: it verifies the signature with the shared secret, saves the raw event with a unique index on eventId (a duplicate insert means it was already received), puts it on a queue, and returns 200 within milliseconds. Workers process events from the queue. For each order they load the current state and apply changes only when the transition is valid (for example pending to paid, paid to refunded), using a version field or a transaction so concurrent events do not clash. If an event arrives too early, the worker fetches the latest object from the provider's API and uses that as the truth. A nightly reconciliation job lists recent payments from the provider and fixes any missing updates. Failed events retry and then go to a dead-letter queue with alerts. The trade-off is fast acknowledgment (async) versus immediate consistency."
+  },
+  {
+    "id": "sd-m10",
+    "level": "medium",
+    "title": "Design a distributed rate limiter",
+    "prompt": "Design a rate limiter shared by 50 API servers so that each customer gets exactly their plan limit (for example 1,000 requests/minute) no matter which server handles them. Assume 200,000 requests/sec in total, and the limiter may add at most a couple of milliseconds.",
+    "keyConcepts": [
+      "Centralized counters (Redis)",
+      "Sliding window",
+      "Atomic operations / Lua",
+      "Fail-open vs fail-closed"
+    ],
+    "thinkAbout": [
+      "Why does a per-server in-memory limiter fail with 50 servers?",
+      "How do you make \"check and increment\" atomic in Redis?",
+      "How do you keep latency low at 200,000 checks per second?",
+      "What should happen if Redis is unreachable?",
+      "How do you support different limits per plan and per endpoint?"
+    ],
+    "outline": "Each API server calls a shared Redis cluster for each request. A small Lua script runs atomically on Redis: it trims old entries and counts requests in the window (sliding log) or updates a token bucket, then returns allow or deny, so two servers can never both take the last token. Keys look like rl:customerId:endpoint and are sharded across the Redis cluster by key hash. To cut latency, keep connections open, use a nearby Redis, or let each server take small batches of tokens locally and sync often, which is a little less exact. Limits per plan come from config cached in each server. If Redis is down, most APIs fail open (allow traffic) to stay available, while sensitive endpoints like login fail closed. The trade-off is exact global limits versus extra latency and a shared dependency."
+  },
+  {
+    "id": "sd-m11",
+    "level": "medium",
+    "title": "Design a ticket booking system",
+    "prompt": "Design a system to sell tickets for concerts with numbered seats. When popular shows open, 200,000 people may try to buy 20,000 seats in the first few minutes. No seat may ever be sold twice, and a held seat should be released if payment is not finished in 10 minutes.",
+    "keyConcepts": [
+      "Concurrency control",
+      "Seat holds with TTL",
+      "Virtual waiting room",
+      "Transactions",
+      "Idempotency"
+    ],
+    "thinkAbout": [
+      "How do you make sure two people cannot buy the same seat?",
+      "How do you hold a seat during checkout and release it after 10 minutes?",
+      "How do you protect the system when 200,000 users arrive at once?",
+      "What happens if payment succeeds but your server crashes before saving?",
+      "How do you show seat availability without hammering the database?"
+    ],
+    "outline": "Put a virtual waiting room in front so users enter the booking flow at a controlled rate. Seats live in a database with status (available, held, sold), holdOwner and holdExpiresAt. Holding a seat is a conditional update: set status to held only where status is available or the hold has expired; if no row changes, someone else got it. That condition gives correctness without global locks. Checkout creates an order with an idempotency key and calls the payment provider; on success, a transaction marks seats sold and the order paid. If the server crashes, the payment webhook or a reconciliation job finishes the order. Expired holds become available again automatically by the expiry check. Seat maps are served from a cache updated every second or two, accepting that they may be slightly stale. The trade-off is fairness and correctness versus throughput."
+  },
+  {
+    "id": "sd-m12",
+    "level": "medium",
+    "title": "Design an outbound AI call campaign dialer",
+    "prompt": "Design the system a voice-AI company uses to run outbound call campaigns: a customer uploads 500,000 phone numbers, and AI agents call them within allowed hours, respecting per-customer concurrency limits (say 300 calls at once), retries for no-answer, and do-not-call lists.",
+    "keyConcepts": [
+      "Job scheduling",
+      "Concurrency limits / semaphores",
+      "Time zones and compliance",
+      "Telephony provider integration",
+      "Retry policies"
+    ],
+    "thinkAbout": [
+      "How do you keep exactly at most 300 live calls per customer, across many dialer servers?",
+      "How do you only call people during legal hours in their own time zone?",
+      "What should happen on no-answer, busy, or voicemail?",
+      "How do you check do-not-call lists quickly for every number?",
+      "How do you show live campaign progress to the customer?"
+    ],
+    "outline": "Uploads are validated, normalized to E.164, checked against do-not-call lists and stored as contact rows with campaignId, status, attempts and nextAttemptAt. A scheduler picks contacts that are due and whose local time (from the number's area code or stored time zone) is inside allowed hours, and pushes them to a per-campaign queue. Dialer workers take a contact only after getting a slot from a per-customer concurrency counter in Redis (increment if below 300, release when the call ends, with a TTL in case a worker dies). The worker asks the telephony provider to place the call and connects the audio to an AI agent session. Call outcome webhooks update the contact: answered, voicemail, no-answer (retry later with backoff) or opted out (add to DNC). Counters stream to a live dashboard. The trade-off is maximum speed versus compliance and caller reputation."
+  },
+  {
+    "id": "sd-m13",
+    "level": "medium",
+    "title": "Design a photo sharing app like Instagram",
+    "prompt": "Design an app where users upload photos with captions, follow others, like and comment, and browse a feed. Assume 20 million daily users, 5 million photo uploads per day, and 100 times more photo views than uploads.",
+    "keyConcepts": [
+      "Media pipeline",
+      "CDN",
+      "Feed generation",
+      "Counters at scale",
+      "Sharding by user"
+    ],
+    "thinkAbout": [
+      "How do uploads flow from phone to storage to feed?",
+      "Which image sizes do you create, and when?",
+      "How do you count likes on a viral post without a hot row?",
+      "How do you shard user, post and follow data?",
+      "How does the feed relate to the news-feed design you already know?"
+    ],
+    "outline": "Clients upload straight to object storage using pre-signed URLs; an event triggers workers that create several sizes and formats (for example WebP thumbnails), then mark the post ready. Images are always served through a CDN. Post metadata (postId, userId, caption, media keys) is sharded by userId so a profile grid is a single-shard query; follows are stored in both directions (followers and following) for quick lookups. The feed uses the hybrid fan-out from the news feed problem, storing post IDs per user in a cache. Likes are written as rows (userId, postId) for \"did I like this\", while the shown count is kept in a sharded counter updated asynchronously. Comments are paged by time. The trade-off is fast, slightly delayed counts versus exact counts that slow down hot posts."
+  },
+  {
+    "id": "sd-m14",
+    "level": "medium",
+    "title": "Design a metrics and monitoring system",
+    "prompt": "Design a system that collects metrics (CPU, request latency, error counts) from 10,000 servers every 10 seconds, stores them, draws dashboards, and sends alerts when values cross thresholds. Assume about 5 million distinct time series.",
+    "keyConcepts": [
+      "Time-series data",
+      "Push vs pull collection",
+      "Downsampling",
+      "Alerting rules",
+      "Write-heavy storage"
+    ],
+    "thinkAbout": [
+      "Should servers push metrics to you, or should you pull (scrape) them?",
+      "How many data points per second does this create, and how will you store them?",
+      "How do you keep a year of data without huge storage costs?",
+      "How does the alerting engine check rules without overloading the database?",
+      "How do you avoid alert storms when one problem causes 100 alerts?"
+    ],
+    "outline": "Each server runs an agent that collects metrics and either exposes them for scraping (pull, like Prometheus) or sends batches to collectors (push); 5 million series every 10 seconds is about 500,000 points per second. Collectors write into a queue such as Kafka, and ingest workers store data in a time-series database that compresses consecutive values well and partitions by time and series ID. Recent data is kept at full detail; older data is downsampled into 1-minute and 1-hour averages, maxes and counts, and raw data is deleted. Dashboards query the time-series DB with caching. An alert engine evaluates rules every 30 seconds on recent data held in memory, and an alert manager groups, dedupes and routes alerts to on-call. The trade-off is detail and retention versus storage cost."
+  },
+  {
+    "id": "sd-m15",
+    "level": "medium",
+    "title": "Design food delivery order tracking",
+    "prompt": "Design the part of a food delivery app that takes an order, sends it to the restaurant, assigns a courier, and shows the customer live status and the courier on a map. Assume 1 million orders per day and 100,000 couriers sending locations every 5 seconds.",
+    "keyConcepts": [
+      "Order state machine",
+      "Event-driven architecture",
+      "Real-time updates",
+      "Location streaming"
+    ],
+    "thinkAbout": [
+      "What are the states of an order, and which service changes each one?",
+      "How do the restaurant, courier and customer apps all get updates fast?",
+      "How do you push courier locations to the customer without storing every point forever?",
+      "What happens if the restaurant never accepts the order?",
+      "How do you calculate and update the ETA?"
+    ],
+    "outline": "An order service owns the order state machine (placed, accepted, preparing, picked up, delivered, cancelled) and publishes an event for every change to a message bus such as Kafka. Other services react: a restaurant gateway notifies the restaurant tablet, a dispatch service assigns a courier when food is nearly ready, and a notification service sends pushes. Courier apps send locations to a location service that keeps the latest point in Redis and only samples history to cold storage. Customers tracking an order hold a WebSocket to a gateway, which subscribes to that order's status events and the assigned courier's location. Timers detect stuck states, for example no restaurant acceptance in 5 minutes, and trigger a call or cancellation. An ETA service combines prep time, distance and traffic. The trade-off is loosely coupled events versus harder end-to-end debugging."
+  },
+  {
+    "id": "sd-m16",
+    "level": "medium",
+    "title": "Design an online code judge",
+    "prompt": "Design a platform like LeetCode where users submit code in several languages, it runs against hidden test cases, and they see results within a few seconds. Assume 50,000 submissions per hour normally, and 10x during weekly contests.",
+    "keyConcepts": [
+      "Sandboxing / isolation",
+      "Job queue",
+      "Autoscaling workers",
+      "Resource limits",
+      "Leaderboards"
+    ],
+    "thinkAbout": [
+      "How do you run untrusted user code safely?",
+      "How do you limit CPU time, memory and network for each run?",
+      "What happens when submissions spike during a contest?",
+      "How does the user get the result: polling, WebSocket, or something else?",
+      "How do you keep hidden test cases secret?"
+    ],
+    "outline": "The API saves the submission and puts a job on a queue, returning a submission ID. Judge workers take jobs and run the code inside an isolated sandbox such as a container or micro-VM with no network, a read-only file system, and strict CPU time and memory limits, killing it if it goes over. Test cases are fetched by the worker from private storage and never sent to the client. The worker compiles, runs each test, compares output, and writes the verdict (accepted, wrong answer, time limit exceeded, runtime error) back to the database. The client receives the result over a WebSocket or by polling. Workers autoscale based on queue length, with warm pools before contests and a separate contest queue so practice traffic does not slow it. Contest rankings use a sorted set. The trade-off is strong isolation (VMs, safer, slower start) versus containers (faster, weaker)."
+  },
+  {
+    "id": "sd-m17",
+    "level": "medium",
+    "title": "Design a \"nearby places\" search like Yelp",
+    "prompt": "Design a service where users search for restaurants or shops near them, filter by category and rating, and see results sorted by distance. Assume 100 million places worldwide, 10,000 searches/sec, and place data that changes rarely.",
+    "keyConcepts": [
+      "Geohash / quadtree",
+      "Read-heavy design",
+      "Read replicas",
+      "Search filters"
+    ],
+    "thinkAbout": [
+      "How do you find places within 1 km without checking all 100 million?",
+      "How do you handle dense cities versus empty countryside?",
+      "How do you combine location search with filters like \"open now\" and \"4+ stars\"?",
+      "Since data changes rarely, how can you take advantage of that?",
+      "How do reviews and ratings get updated?"
+    ],
+    "outline": "Split the map into cells using geohash (or a quadtree that splits busy areas into smaller cells) and index each place by its cell. A search computes the user's cell and its neighbors, fetches candidate places from those cells, filters by category, rating and opening hours, then sorts by exact distance. A search engine with geo support (Elasticsearch, MongoDB 2dsphere indexes) can do this in one query. Because places change rarely, build the index once and serve it from many read replicas or in-memory copies, plus a cache for popular areas. Business details and reviews live in a separate service; a new review updates the stored average rating asynchronously, and the index is refreshed in batches. The trade-off is fixed grid cells (simple) versus adaptive quadtrees (balanced, but more complex)."
+  },
+  {
+    "id": "sd-m18",
+    "level": "medium",
+    "title": "Design an API gateway",
+    "prompt": "Design the single entry point for 40 internal microservices: it routes requests, checks authentication, applies rate limits, and logs every call. Assume 100,000 requests/sec and that it must add less than 10 ms and never be a single point of failure.",
+    "keyConcepts": [
+      "Reverse proxy",
+      "Authentication / JWT validation",
+      "Service discovery",
+      "Circuit breakers",
+      "Observability"
+    ],
+    "thinkAbout": [
+      "How does the gateway know which service and which instance should get a request?",
+      "Where do you check tokens, and how do you do it without calling an auth service every time?",
+      "How do you stop one slow service from tying up all gateway connections?",
+      "How do you deploy gateway config changes safely?",
+      "How do you avoid the gateway itself going down?"
+    ],
+    "outline": "Run many stateless gateway instances behind a load balancer in each region. A route table maps paths (like /billing/*) to service names, and service discovery (DNS, Consul or Kubernetes) returns healthy instances, with the gateway load balancing between them. Authentication validates JWT signatures locally using cached public keys, so no network call is needed per request, then passes the user ID downstream in a header. Rate limits use a shared Redis store. Each upstream gets timeouts, connection pool limits and a circuit breaker so a failing service gets fast errors instead of piling up requests. Access logs and trace IDs are sent asynchronously to the logging pipeline. Config changes roll out gradually with validation and rollback. The trade-off is central control and consistency versus an extra hop and a critical shared component."
+  },
+  {
+    "id": "sd-m19",
+    "level": "medium",
+    "title": "Design an e-commerce product catalog with inventory",
+    "prompt": "Design the catalog and stock system for an online store with 10 million products, rich filters (brand, price, size), and inventory across 20 warehouses. Assume 30,000 catalog reads/sec and 500 orders/sec, and overselling should be very rare.",
+    "keyConcepts": [
+      "Search index",
+      "CQRS (separate read and write models)",
+      "Inventory reservation",
+      "Cache invalidation"
+    ],
+    "thinkAbout": [
+      "Where do product details live versus search and filter data?",
+      "How do changes in the main database reach the search index?",
+      "How do you reserve stock when an order is placed, so two orders do not take the last item?",
+      "How fresh must \"in stock\" on the product page be?",
+      "How do you handle products with many variants (size, color)?"
+    ],
+    "outline": "Keep the source of truth in a product database: product documents with embedded variants (SKU, size, color, price). A change stream (CDC) sends updates to a search engine such as Elasticsearch, which serves browsing, filtering and sorting; this split of write model and read model is CQRS. Product pages are cached at the CDN and in Redis and refreshed on change events. Inventory lives in its own service with one row per SKU per warehouse. Placing an order reserves stock with a conditional decrement (only if available >= quantity), and the reservation expires if payment fails. The product page shows \"in stock\" from a cache that can be a minute old, but checkout always checks the inventory service. The trade-off is fast eventually consistent browsing versus strict checks only where money is involved."
+  },
+  {
+    "id": "sd-m20",
+    "level": "medium",
+    "title": "Design live comments for a live video stream",
+    "prompt": "Design the comment feed that appears next to a live video, where viewers post comments and everyone watching sees them within about 2 seconds. Most streams have a few hundred viewers, but a big event can have 2 million viewers and 10,000 comments/sec.",
+    "keyConcepts": [
+      "Pub/sub",
+      "Fan-out at scale",
+      "Connection gateways",
+      "Sampling / throttling"
+    ],
+    "thinkAbout": [
+      "How do you deliver each new comment to every viewer of that stream?",
+      "Can 2 million people really read 10,000 comments a second?",
+      "How do you route a comment to the gateway servers that have viewers of that stream?",
+      "How do you handle moderation and spam before comments go out?",
+      "Do you need to save comments, and for how long?"
+    ],
+    "outline": "Viewers keep a WebSocket or SSE connection to a gateway; each gateway tracks which streams its viewers watch and subscribes to those stream channels in a pub/sub layer (Redis pub/sub, Kafka or a custom broker). A posted comment goes to a comment service that checks rate limits and runs a quick moderation filter, saves it to storage, and publishes it to the stream's channel. Each gateway receives the comment once and sends it to its local viewers, so fan-out happens in two stages: the broker sends to hundreds of gateways, and gateways send to thousands of sockets each. For huge streams, no human can read 10,000 comments a second, so the service samples or batches (for example 20 per second, preferring friends or popular comments) before broadcasting. Replays read comments from storage by stream and time offset. The trade-off is showing every comment versus readability and cost."
+  },
+  {
+    "id": "sd-h01",
+    "level": "hard",
+    "title": "Design a video streaming platform like YouTube",
+    "prompt": "Design a platform where creators upload videos and hundreds of millions of viewers watch them on any device and network speed. Assume 500 hours of video uploaded per minute, 1 billion views per day, and smooth playback that adapts to bandwidth.",
+    "keyConcepts": [
+      "Transcoding pipeline",
+      "Adaptive bitrate streaming (HLS/DASH)",
+      "CDN and edge caching",
+      "Object storage at scale",
+      "Popularity-based caching"
+    ],
+    "thinkAbout": [
+      "What happens to a video between upload and \"ready to watch\"?",
+      "Why split a video into small segments at several bitrates?",
+      "How does the player choose quality as the network changes?",
+      "How do you serve the long tail of rarely watched videos cheaply?",
+      "How would you estimate storage and bandwidth per day?"
+    ],
+    "outline": "Uploads go to object storage via resumable, chunked uploads. A transcoding pipeline splits each video into chunks and processes them in parallel on many workers, producing several resolutions and codecs, each cut into 2 to 6 second segments with HLS or DASH manifests. Metadata such as title, owner and processing state lives in a sharded database; thumbnails and captions are produced in the same pipeline. Players download the manifest, then fetch segments over HTTP, switching bitrate based on measured throughput and buffer level. Popular videos are cached in CDN edge servers near users, often pre-pushed when they trend; long-tail videos are fetched from origin on demand, with fewer stored formats to save cost. View counts and watch time flow through an event pipeline. The trade-off is many formats (better experience) versus storage and compute cost."
+  },
+  {
+    "id": "sd-h02",
+    "level": "hard",
+    "title": "Design real-time collaborative editing like Google Docs",
+    "prompt": "Design a document editor where several people type in the same document at the same time and see each other's changes and cursors almost instantly. Assume 10 million documents edited daily, up to 50 editors in one document, and offline edits that sync later.",
+    "keyConcepts": [
+      "Operational Transformation (OT)",
+      "CRDTs",
+      "WebSockets",
+      "Document sessions",
+      "Snapshots and version history"
+    ],
+    "thinkAbout": [
+      "If two people type at the same position at the same time, how do both end up with the same text?",
+      "Should one server own each active document, and how do clients find it?",
+      "How do you store a document: as full text, as a list of operations, or both?",
+      "How do you handle a user who edited offline for an hour?",
+      "How do you show cursors and presence without overloading storage?"
+    ],
+    "outline": "Each active document is assigned to one collaboration server, and all editors of that document connect to it over WebSockets. Clients apply their edits locally right away, then send operations with the version they were based on. With OT, the server orders operations, transforms each one against operations it has not seen yet so the meaning is kept, applies it, and broadcasts it; with CRDTs, every character has a unique ID so edits merge in any order without a central transform. Operations are appended to a log, and snapshots are taken every few hundred operations so loading is fast and version history is possible. Offline clients send their buffered operations on reconnect and they are merged. Cursors and presence are sent as short-lived messages and never stored. The trade-off is OT (needs a central server, smaller data) versus CRDT (works peer-to-peer and offline, more metadata)."
+  },
+  {
+    "id": "sd-h03",
+    "level": "hard",
+    "title": "Design a ride-hailing platform at global scale",
+    "prompt": "Extend basic ride matching to a global service in 600 cities: 5 million drivers sending location every 4 seconds, 30 million trips per day, surge pricing, accurate ETAs, and payments. The system must keep working if a whole data center fails.",
+    "keyConcepts": [
+      "Geo-sharding by city/region",
+      "Stream processing",
+      "Multi-region failover",
+      "Surge pricing",
+      "Consistency for trip state"
+    ],
+    "thinkAbout": [
+      "How do you split the world so each city is handled by a set of servers?",
+      "How do you process over a million location updates per second?",
+      "How is surge pricing computed for each area, and how often?",
+      "What data must be strongly consistent (trip state, payments) and what can be eventually consistent (locations)?",
+      "What happens to in-progress trips if a region goes down?"
+    ],
+    "outline": "Partition by geography: each city maps to a cell of services (location, matching, trips) in the nearest data center, using H3 hexagons as the geo index. Location updates go into a streaming system (Kafka with stream processors), which keeps the latest driver positions in memory and feeds ETA models and supply-demand counts per hexagon. Surge pricing is calculated every minute or so from supply and demand per hexagon, then cached for quotes. Trip state is stored in a strongly consistent, replicated database, and every state change is an event used by billing, notifications and analytics. Payments happen asynchronously after the trip, with idempotent charges. Each region replicates trip data to a standby region; on failure, a global router sends the city's traffic there and apps resend their state. The trade-off is local, fast cells versus global features like cross-city accounts."
+  },
+  {
+    "id": "sd-h04",
+    "level": "hard",
+    "title": "Design a distributed message queue like Kafka",
+    "prompt": "Design a durable, high-throughput log-based message system: producers write events to topics, many consumer groups read them at their own pace, and data is kept for 7 days. Assume 2 million messages/sec, 1 KB each, and no data loss if one broker dies.",
+    "keyConcepts": [
+      "Partitioned append-only log",
+      "Replication and leaders",
+      "Consumer groups and offsets",
+      "Sequential disk I/O",
+      "Delivery semantics"
+    ],
+    "thinkAbout": [
+      "Why is an append-only log on disk fast?",
+      "How do partitions let you scale, and what do they cost you in ordering?",
+      "How do replicas stay in sync, and when is a write considered safe?",
+      "How does a consumer group split partitions and track progress?",
+      "How do you get exactly-once processing, or something close?"
+    ],
+    "outline": "A topic is split into partitions; each partition is an append-only log on disk divided into segment files, so writes and reads are sequential and the OS page cache helps a lot. Each partition has a leader broker and followers; producers write to the leader, followers copy from it, and a write is acknowledged once all in-sync replicas have it (acks=all), so losing one broker loses nothing. A Raft-based controller tracks brokers and elects new leaders. Messages with the same key go to the same partition, which keeps per-key order; there is no order across partitions. In a consumer group, each partition is read by one consumer, which commits its offset; on failure, partitions are rebalanced. Old segments are deleted after 7 days or compacted by key. Exactly-once uses idempotent producers plus transactions. The trade-off is more partitions (throughput) versus ordering and overhead."
+  },
+  {
+    "id": "sd-h05",
+    "level": "hard",
+    "title": "Design a global payments ledger",
+    "prompt": "Design the ledger at the heart of a payments company: it records every movement of money between accounts in many currencies, must never lose or double-count a cent, and must support audits. Assume 10,000 transactions/sec at peak, and users in several regions.",
+    "keyConcepts": [
+      "Double-entry bookkeeping",
+      "ACID transactions",
+      "Idempotency keys",
+      "Immutable append-only records",
+      "Reconciliation and auditing"
+    ],
+    "thinkAbout": [
+      "Why use double-entry (every debit has a matching credit) instead of just updating balances?",
+      "How do you make sure a retried request does not move money twice?",
+      "How do you get account balances quickly if the ledger is append-only?",
+      "How do you scale writes beyond one database while keeping transactions correct?",
+      "How do you prove to auditors that the ledger is right?"
+    ],
+    "outline": "Every money movement is a journal transaction made of entries that sum to zero per currency, for example debit user wallet 100, credit merchant 97, credit fees 3. Entries are immutable; mistakes are fixed with new reversing entries, never edits. The API needs an idempotency key, and a unique constraint makes retries return the original result. Use a strongly consistent ACID database (Postgres, or distributed SQL like Spanner) and shard by account, keeping a transaction inside one shard where possible; cross-shard moves use a two-phase or saga pattern via internal clearing accounts. Balances are kept as cached running totals updated in the same transaction, with a version number for optimistic locking. Daily jobs reconcile against banks and check that the whole ledger sums to zero. The trade-off is strong consistency (correct, slower) versus throughput."
+  },
+  {
+    "id": "sd-h06",
+    "level": "hard",
+    "title": "Design an ad click aggregation system",
+    "prompt": "Design a system that counts ad clicks and impressions in real time so advertisers see per-ad, per-minute numbers and are billed correctly. Assume 1 billion clicks per day, 50 billion impressions, late or duplicate events, and click fraud.",
+    "keyConcepts": [
+      "Stream processing",
+      "Windowed aggregation",
+      "Exactly-once / deduplication",
+      "Lambda or Kappa architecture",
+      "OLAP storage"
+    ],
+    "thinkAbout": [
+      "How do you count clicks per ad per minute at about 600,000 events per second at peak?",
+      "What happens to events that arrive several minutes late?",
+      "How do you remove duplicate clicks, for example from retries?",
+      "Why might billing use a different, slower pipeline than the live dashboard?",
+      "How do you filter fraudulent clicks?"
+    ],
+    "outline": "Click and impression events go from ad servers into Kafka, partitioned by adId. A stream processor (such as Flink) dedupes events by clickId within a time window, uses event time with watermarks to place each event in the right 1-minute window, and keeps windows open a few minutes for late events. Aggregates (adId, minute, clicks, impressions) are written to an OLAP store (such as ClickHouse, Druid or Pinot) that powers the dashboards. Raw events are also saved to object storage, and a nightly batch job recomputes exact totals for billing and corrects any streaming errors; this is the Lambda pattern. Fraud checks (too many clicks per IP or device, bot signals) run inline as filters plus later in batch. Hot ads can be split across sub-keys and combined later. The trade-off is fast, approximate numbers versus slower, exact billing totals."
+  },
+  {
+    "id": "sd-h07",
+    "level": "hard",
+    "title": "Design a distributed key-value database with consensus",
+    "prompt": "Design a database like a simpler DynamoDB or etcd that stores billions of keys across hundreds of machines, keeps 3 copies of data, survives machine failures, and offers both strongly consistent and faster eventually consistent reads.",
+    "keyConcepts": [
+      "Consistent hashing / sharding",
+      "Replication",
+      "Raft consensus",
+      "Quorums",
+      "CAP trade-offs"
+    ],
+    "thinkAbout": [
+      "How do you decide which machines store a given key, and how do you add machines?",
+      "How do 3 replicas agree on the order of writes?",
+      "What happens during a network split between replicas?",
+      "How do quorums (for example W=2, R=2 with N=3) give consistency?",
+      "How do you rebalance data when a node is added or dies?"
+    ],
+    "outline": "Split the key space into many small ranges or virtual nodes and map them to machines with consistent hashing, so adding a machine only moves a small part of the data. Each range is replicated on 3 nodes in different racks or zones. For strong consistency, each range runs its own Raft group: one leader takes writes, appends them to a replicated log, and commits once a majority has them; strongly consistent reads go through the leader. For eventual consistency, a leaderless Dynamo-style design writes to W replicas and reads from R, repairing differences with versions and read repair. Each node stores data in an LSM tree with a write-ahead log for durability. A metadata service tracks range placement and moves ranges when load or membership changes. The trade-off (CAP) is that during a partition you choose between staying available and staying consistent."
+  },
+  {
+    "id": "sd-h08",
+    "level": "hard",
+    "title": "Design a real-time voice AI call platform for 100k concurrent calls",
+    "prompt": "Design a platform where AI agents handle phone calls: callers speak, speech is turned into text, an LLM decides the reply, and text-to-speech speaks back, with under 1 second of response delay. Assume 100,000 concurrent calls at peak, several telephony providers, and calls that must not drop if a server fails.",
+    "keyConcepts": [
+      "Media servers / SIP and WebRTC",
+      "Streaming STT, LLM and TTS",
+      "Latency budgets",
+      "Stateful session routing",
+      "GPU capacity planning"
+    ],
+    "thinkAbout": [
+      "How does audio get from the phone network to your servers and back?",
+      "How would you split a 1-second latency budget between speech-to-text, LLM and text-to-speech?",
+      "How do you handle \"barge-in\" when the caller interrupts the AI?",
+      "Where does call state live, and what happens if the server running a call crashes?",
+      "How many GPUs or provider calls do you need for 100,000 calls, and how do you autoscale?"
+    ],
+    "outline": "Calls arrive from carriers over SIP into media servers placed in regions near carriers; each call's audio stream is pinned to one media server and one agent worker. The worker runs a streaming pipeline: audio frames go to streaming STT with voice activity detection, partial transcripts start the LLM early, LLM tokens are streamed into streaming TTS, and audio plays as soon as the first chunk is ready; a rough budget is 200 ms STT, 400 ms to the first LLM tokens, 200 ms TTS, 100 ms network. If the caller speaks, barge-in stops TTS and cancels the LLM request. Conversation state is checkpointed to Redis after each turn, so another worker can take over a call. STT, LLM and TTS run as GPU pools sized from peak concurrency, with headroom and a fallback provider. Call events stream to Kafka for transcripts and analytics. The trade-off is latency versus cost and model quality."
+  },
+  {
+    "id": "sd-h09",
+    "level": "hard",
+    "title": "Design a stock exchange matching engine",
+    "prompt": "Design the core of a stock exchange: traders send buy and sell orders, the engine matches them by price-time priority, and everyone gets fills and market data. Assume 1 million orders/sec at peak, matching latency in microseconds, and perfect fairness and recoverability.",
+    "keyConcepts": [
+      "Order book data structures",
+      "Single-threaded deterministic processing",
+      "Event sourcing / sequencer",
+      "Market data multicast",
+      "Low-latency networking"
+    ],
+    "thinkAbout": [
+      "What data structure holds the order book so the best bid and ask are found instantly?",
+      "Why do many exchanges run matching for one symbol on a single thread?",
+      "How do you recover the exact order book after a crash?",
+      "How do you make sure no trader gets an unfair speed advantage?",
+      "How do you send market data to thousands of subscribers quickly?"
+    ],
+    "outline": "Orders arrive through gateways that check format and risk limits, then go to a sequencer that gives every message a global sequence number and writes it to a replicated journal. Each symbol (or group of symbols) is handled by one single-threaded matching engine kept entirely in memory: the order book holds price levels in sorted arrays or trees, each level a FIFO queue of orders, so the best price and time order are found in O(1). Single-threaded processing avoids locks and makes results deterministic, so replaying the journal rebuilds the same state; hot standby engines replay the same stream and can take over in milliseconds. Fills go back to traders, and market data updates are sent via UDP multicast. Fairness comes from equal network paths and strict sequencing. The trade-off is extreme speed and determinism versus very specialized, hard-to-scale components."
+  },
+  {
+    "id": "sd-h10",
+    "level": "hard",
+    "title": "Design a global content delivery network (CDN)",
+    "prompt": "Design a CDN that serves images, scripts and video segments for thousands of customer websites from about 200 edge locations, cutting latency for users everywhere. Assume 100 Tbps of peak traffic and customers who need to purge content within seconds.",
+    "keyConcepts": [
+      "Anycast / DNS routing",
+      "Edge caching tiers",
+      "Cache keys and TTLs",
+      "Origin shielding",
+      "Purge propagation"
+    ],
+    "thinkAbout": [
+      "How does a user get sent to the closest healthy edge location?",
+      "What happens on a cache miss at the edge, and how do you protect the customer's origin server?",
+      "What goes into the cache key, and how do headers like Cache-Control affect it?",
+      "How do you purge one file from 200 locations within seconds?",
+      "How do you handle a location going down or being overloaded?"
+    ],
+    "outline": "Users reach the edge through anycast IP addresses or geo-aware DNS, which routes them to the nearest healthy point of presence (PoP). Each PoP runs many cache servers; a request is hashed to the server that owns that URL, which serves from memory or SSD. On a miss, the PoP asks a regional \"shield\" cache before the customer's origin, so the origin sees one request instead of 200. Cache keys include host, path and selected headers or query parameters, and TTLs follow Cache-Control or customer rules, with stale-while-revalidate to hide origin slowness. A control plane pushes config and purge commands to all PoPs through a fast pub/sub tree, and each PoP confirms. Health checks pull broken PoPs out of anycast or DNS. Edge servers also terminate TLS. The trade-off is cache hit ratio (longer TTLs) versus freshness (faster updates)."
+  },
+  {
+    "id": "sd-h11",
+    "level": "hard",
+    "title": "Design a web search engine",
+    "prompt": "Design search for the web: given a query, return the 10 most relevant pages out of 50 billion within 200 ms. Assume 100,000 queries/sec, a crawler that already provides pages, and an index that must be refreshed continuously.",
+    "keyConcepts": [
+      "Inverted index",
+      "Index sharding (by document)",
+      "Scatter-gather queries",
+      "Ranking (BM25, PageRank, ML)",
+      "Tiered and cached results"
+    ],
+    "thinkAbout": [
+      "What is an inverted index, and how do you build it from crawled pages?",
+      "Do you shard the index by word or by document, and why?",
+      "How does one query get answered by thousands of machines within 200 ms?",
+      "How do you combine text relevance with page quality signals?",
+      "How do new pages get into the index quickly?"
+    ],
+    "outline": "Crawled pages go through a pipeline that parses text, extracts links, computes quality signals such as PageRank, and builds an inverted index mapping each term to a posting list of document IDs with positions and scores. The index is sharded by document, so each shard holds a full mini-index for its set of pages, and every shard is replicated for load and failure. A query frontend parses and expands the query, checks a results cache, then scatters it to one replica of every shard; each shard returns its top results using fast scoring such as BM25 plus static quality, and the frontend merges them and reranks the best few hundred with a more costly ML model. Slow shards are handled by sending a backup request to another replica. A fresh small index for new pages is merged with the main index regularly. The trade-off is index freshness versus build cost and query speed."
+  },
+  {
+    "id": "sd-h12",
+    "level": "hard",
+    "title": "Design a distributed tracing system",
+    "prompt": "Design a system that follows each user request across 300 microservices, records how long every step took, and lets engineers find slow or failing paths. Assume 1 million requests/sec, each touching about 20 services, and traces kept for 14 days.",
+    "keyConcepts": [
+      "Context propagation",
+      "Spans and traces",
+      "Sampling (head vs tail)",
+      "High-volume ingestion",
+      "Columnar / time-partitioned storage"
+    ],
+    "thinkAbout": [
+      "How does a trace ID travel from one service to the next?",
+      "If you recorded every span, how much data per day would that be?",
+      "What is the difference between head-based and tail-based sampling, and which keeps the interesting traces?",
+      "How do you put together spans that arrive out of order from different services?",
+      "What queries do engineers need, and how does that shape storage?"
+    ],
+    "outline": "Each service uses a tracing library (such as OpenTelemetry) that creates spans with traceId, spanId, parentId, timings and tags, and passes the trace context in request headers (W3C traceparent) and message metadata. Recording everything would be about 20 million spans/sec, so sampling is necessary. Head sampling decides at the start (cheap, but may miss rare errors); tail sampling buffers all spans of a trace for a few seconds in collectors partitioned by traceId and keeps traces that are slow, failed, or randomly chosen. Collectors send kept spans through Kafka into storage partitioned by time, with indexes on service, operation, duration and tags, plus a lookup by traceId. A UI rebuilds the span tree as a waterfall. Aggregate metrics such as latency per service are computed from all spans before sampling. The trade-off is completeness versus cost."
+  },
+  {
+    "id": "sd-h13",
+    "level": "hard",
+    "title": "Design a flash sale system",
+    "prompt": "Design an e-commerce flash sale where 5 million users try to buy 10,000 discounted items released at exactly 12:00, mostly within the first 10 seconds. You must never sell more than 10,000, the site must stay up, and bots should not win everything.",
+    "keyConcepts": [
+      "Traffic shaping / queues",
+      "Pre-loaded atomic stock counters",
+      "Static content offload",
+      "Bot protection",
+      "Asynchronous order processing"
+    ],
+    "thinkAbout": [
+      "How do you serve 5 million page loads at 12:00 without melting your servers?",
+      "Where do you keep the stock count so decrements are atomic and very fast?",
+      "How do you stop selling at exactly 10,000 even with thousands of concurrent requests?",
+      "What happens to the order after the stock is reserved but before payment?",
+      "How do you keep bots and scripts from taking all the items?"
+    ],
+    "outline": "Serve the sale page as static content from a CDN, with the \"buy\" button enabled by a server time signal so origin servers only see purchase attempts. Requests pass through bot checks (captcha, device fingerprinting, per-account limits) and then a rate-limited admission layer that drops or queues requests far beyond the stock size. Stock is pre-loaded into Redis; each buy attempt runs an atomic Lua script that checks user eligibility and decrements stock only if it is above zero, so it can never go negative. Winners get a reservation token, and an order message is put on a queue; order workers create the real order in the database at a steady pace and start payment. Unpaid reservations expire and return stock. The database is never on the hot path. The trade-off is strict fairness versus survival under huge load."
+  },
+  {
+    "id": "sd-h14",
+    "level": "hard",
+    "title": "Design a multi-region active-active user data service",
+    "prompt": "Design the service that stores user profiles and settings for an app used worldwide, with users served from the nearest of 4 regions for low latency, writes allowed in every region, and the app staying online if a full region fails.",
+    "keyConcepts": [
+      "Multi-leader replication",
+      "Conflict resolution (LWW, CRDTs)",
+      "Data residency",
+      "Global routing / failover",
+      "Consistency models"
+    ],
+    "thinkAbout": [
+      "Why not just keep one primary database in one region?",
+      "If a user updates their profile in two regions at nearly the same time, which update wins?",
+      "Which data needs strong consistency (for example usernames must be unique) and which does not?",
+      "How do you meet laws that say some users' data must stay in a certain country?",
+      "How does traffic move when a region goes down?"
+    ],
+    "outline": "Run a full copy of the service and database in each region, with geo-DNS sending users to the closest one. Each region accepts writes and replicates them asynchronously to the others, usually within a second. Most fields use last-writer-wins with hybrid logical clocks, while sets such as linked devices use CRDT-style merges so concurrent changes are combined, not lost. Data that needs global uniqueness, such as usernames or emails, goes through a strongly consistent store using consensus across regions, accepting higher latency for those rare writes. A home-region tag keeps users with residency rules stored only in allowed regions. Health checks remove a failed region from DNS; users move to another region and may miss the last second of unreplicated writes. The trade-off is low latency and availability versus occasional conflicts and short staleness."
+  },
+  {
+    "id": "sd-h15",
+    "level": "hard",
+    "title": "Design a low-latency live streaming platform like Twitch",
+    "prompt": "Design live video streaming where creators broadcast from their computer and millions watch with 2 to 5 seconds of delay. Assume 100,000 live channels at once, the top channel with 3 million viewers, and viewers on all kinds of devices and networks.",
+    "keyConcepts": [
+      "RTMP/SRT/WebRTC ingest",
+      "Real-time transcoding",
+      "Low-latency HLS / chunked segments",
+      "CDN fan-out",
+      "Hot-channel handling"
+    ],
+    "thinkAbout": [
+      "How does the creator's video reach your servers, and what if their connection is shaky?",
+      "How do you transcode 100,000 live streams into several qualities in real time?",
+      "Why does normal HLS have 15-30 seconds of delay, and how do you cut that to a few seconds?",
+      "How do you deliver one channel to 3 million viewers?",
+      "How is live different from on-demand video in caching and storage?"
+    ],
+    "outline": "Creators push video over RTMP, SRT or WebRTC to the nearest ingest server, which handles jitter and reconnects. The stream goes to a transcoder pool (GPU or specialized hardware) that produces several bitrates live; smaller channels may get fewer qualities to save cost. Output is packaged into low-latency HLS or DASH using small partial segments (around 200 to 500 ms) and pushed through a CDN tree: origin, regional mid-tier caches, then edge servers, so each layer requests a segment once and serves it to many viewers. The manifest is updated constantly, and players use short buffers with catch-up logic. For a top channel, segments are pre-pushed to all edges before viewers ask. Recordings are saved to object storage for replays. Chat runs as a separate pub/sub system. The trade-off is lower delay versus more stalls and higher CDN load."
+  },
+  {
+    "id": "sd-h16",
+    "level": "hard",
+    "title": "Design a distributed cache cluster",
+    "prompt": "Design a shared cache tier (like a Memcached or Redis cluster) used by hundreds of services: 5 TB of data in memory across 200 nodes, 10 million operations/sec, sub-millisecond latency, and nodes that join, leave or fail without causing outages.",
+    "keyConcepts": [
+      "Consistent hashing",
+      "Replication and failover",
+      "Hot key mitigation",
+      "Cache stampede / thundering herd",
+      "Client-side routing"
+    ],
+    "thinkAbout": [
+      "How do clients know which node holds a key?",
+      "What happens to the hit rate when a node dies, and how do you limit the damage?",
+      "How do you handle one key getting 500,000 reads per second?",
+      "How do you stop thousands of requests from hitting the database when a popular key expires?",
+      "Should the cache be the only copy of anything?"
+    ],
+    "outline": "Keys are placed with consistent hashing using many virtual nodes per server (or fixed hash slots as in Redis Cluster), and clients or a thin proxy keep the slot map so each request goes straight to the right node. Each primary has one or two replicas; a cluster manager detects failure through heartbeats and promotes a replica, then updates the slot map. Adding a node moves only some slots, and they move gradually to avoid a sudden miss storm. For hot keys, clients keep a tiny local cache for a second or two, or the key is copied under several suffixes and reads are spread across them. To prevent stampedes, use request coalescing or locks so only one caller rebuilds a missing value, add random jitter to TTLs, and refresh popular keys early. The cache is never the source of truth. The trade-off is memory cost versus database load."
+  },
+  {
+    "id": "sd-h17",
+    "level": "hard",
+    "title": "Design a maps routing and ETA service",
+    "prompt": "Design the routing part of a maps app: given a start and an end, return the fastest driving route and an accurate arrival time in under 300 ms, using live traffic. Assume a road graph of 500 million edges worldwide and 50,000 route requests/sec.",
+    "keyConcepts": [
+      "Graph algorithms (Dijkstra, A*)",
+      "Contraction hierarchies / precomputation",
+      "Graph partitioning",
+      "Live traffic ingestion",
+      "ML for ETA"
+    ],
+    "thinkAbout": [
+      "Why is plain Dijkstra too slow on a planet-sized graph?",
+      "How can precomputing shortcuts make queries much faster?",
+      "How do you include live traffic without redoing all the precomputation?",
+      "How do you split the graph across machines?",
+      "Beyond the route's total time, what makes an ETA accurate?"
+    ],
+    "outline": "Store the road network as a graph where nodes are intersections and edges are road segments with base travel times. Because Dijkstra or A* over 500 million edges is too slow, precompute speed-ups: contraction hierarchies add shortcut edges so a query only explores a small part of the graph, and customizable variants (such as CRP) split the graph into cells whose internal shortcuts can be recomputed in seconds when traffic changes. Live speeds from phones and partners flow through a streaming pipeline that map-matches GPS points to road segments and updates edge weights every minute or so. Routing servers keep the graph for a region in memory, and cross-region trips combine results across boundaries. An ML model then adjusts the ETA using time of day, history and events. The trade-off is precomputation speed versus how fast traffic changes show up."
+  },
+  {
+    "id": "sd-h18",
+    "level": "hard",
+    "title": "Design a real-time fraud detection system",
+    "prompt": "Design a system that scores every card payment for fraud before it is approved, within 100 ms, for a payment company handling 20,000 transactions/sec. It should use recent behavior (for example 5 purchases in 2 minutes) and let analysts update rules without deploying code.",
+    "keyConcepts": [
+      "Feature store (online and offline)",
+      "Stream processing for windowed features",
+      "Rules engine plus ML model",
+      "Low-latency serving",
+      "Feedback loop / labels"
+    ],
+    "thinkAbout": [
+      "Which signals can you compute ahead of time, and which must be computed live?",
+      "How do you count \"transactions by this card in the last 10 minutes\" quickly?",
+      "How do rules and an ML model work together in one decision?",
+      "What should happen if the scoring service is slow or down?",
+      "How do confirmed fraud reports flow back to improve the model?"
+    ],
+    "outline": "The payment service calls a scoring API synchronously with the transaction. The API reads features from an online feature store (such as Redis or another low-latency store): slow-changing ones like account age and usual countries are computed in batch, and fast ones like counts and amounts per card or device over 1, 10 and 60 minute windows are kept up to date by a stream processor reading every transaction from Kafka. The scorer runs a rules engine (analyst-editable rules stored as config) and an ML model, combining them into approve, review or decline. Strict timeouts apply, and if scoring is late, a fallback rule set decides so payments are never blocked by an outage. Every decision and its features are logged; chargebacks and analyst reviews become labels for retraining offline, using the same feature definitions. The trade-off is catching more fraud versus blocking good customers."
+  },
+  {
+    "id": "sd-h19",
+    "level": "hard",
+    "title": "Design a distributed file system like GFS/HDFS",
+    "prompt": "Design a file system that stores petabytes of very large files (many GB each) across thousands of cheap machines, built for big batch jobs that read and append in large chunks. Machines fail every day, and no data may be lost.",
+    "keyConcepts": [
+      "Master/metadata server",
+      "Large chunks",
+      "Replication and re-replication",
+      "Rack awareness",
+      "Data locality for compute"
+    ],
+    "thinkAbout": [
+      "Why use large chunks (for example 64 to 128 MB) instead of small blocks?",
+      "What does the metadata server store, and how do you keep it from becoming a bottleneck?",
+      "How do you notice a dead machine and restore the missing copies?",
+      "Where should you place the 3 copies of a chunk?",
+      "How do you keep the metadata server itself from being a single point of failure?"
+    ],
+    "outline": "Files are split into large chunks (for example 128 MB), and each chunk is stored as a normal file on 3 chunk servers. A metadata server (master) keeps the namespace, the file-to-chunk mapping and chunk locations in memory; clients ask it only where chunks are, then read and write data directly with chunk servers, so the master is not in the data path. Large chunks keep metadata small and suit sequential batch reads. Copies are placed on at least two racks so a rack switch failure does not lose data. Chunk servers send heartbeats and checksums; when one is missing, the master tells others to copy its chunks until there are 3 copies again. Metadata changes go to a replicated operation log with checkpoints, and a standby master can take over. Batch jobs are scheduled near their data. The trade-off is great throughput for big files versus poor support for many small files."
+  },
+  {
+    "id": "sd-h20",
+    "level": "hard",
+    "title": "Design a recommendation system at scale",
+    "prompt": "Design the system that picks \"recommended for you\" items (videos, products or songs) for 200 million users from a catalog of 50 million items, returning results in under 150 ms and updating soon after users interact.",
+    "keyConcepts": [
+      "Candidate generation",
+      "Ranking models",
+      "Embeddings and approximate nearest neighbor search",
+      "Feature store",
+      "Online/offline training split"
+    ],
+    "thinkAbout": [
+      "Why do you need a cheap stage that picks a few thousand candidates before a costly ranking stage?",
+      "How can embeddings find similar items or users quickly?",
+      "Which features does the ranker need at request time, and where do they come from?",
+      "How do recent clicks affect results within minutes?",
+      "How do you measure success and avoid always showing the same popular items?"
+    ],
+    "outline": "Use a multi-stage funnel. Candidate generation pulls a few thousand items from several sources: approximate nearest neighbor search over item embeddings (for example a two-tower model, served by a vector index such as FAISS), \"people who liked X also liked Y\" lists, trending items and new releases. A ranking service then scores those candidates with a heavier model using user features, item features and context from an online feature store, and a final step re-ranks for diversity, freshness and business rules. Interaction events stream through Kafka to update recent-history features within minutes, while full models retrain daily on logged data in an offline pipeline. Results for very active users can be precomputed and cached. Success is measured with online A/B tests on watch time or purchases, not only offline accuracy. The trade-off is model quality versus latency and compute cost."
+  }
+]

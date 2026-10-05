@@ -1,56 +1,19 @@
-const userSchema = require("../../Schema/users");
+const userSchema = require("../../Schema/user");
 const dbConnect = require("../../utils/connectionSetup");
+const { ACCOUNTS_DB } = require("../../utils/connectionSetup");
 
-const createUserService = async (data, dbUrl = "LogDoor") => {
-  try {
-    const conn = await dbConnect(dbUrl);
-    const userDetails = await conn.model("Users", userSchema, "Users");
-    const userDetailsCreate = await userDetails.create(data);
-    return userDetailsCreate;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
+const getModel = async () => {
+  const conn = await dbConnect(ACCOUNTS_DB());
+  return conn.models.Users || conn.model("Users", userSchema, "Users");
 };
 
-const findUserService = async (condition, dbUrl = "LogDoor") => {
-  try {
-    const conn = await dbConnect(dbUrl);
-    const userDetails = await conn.model("Users", userSchema, "Users");
-    const userDetailsCreate = await userDetails.findOne(condition).lean();
-    return userDetailsCreate;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
+const findUserService = async (condition) => (await getModel()).findOne(condition).lean();
 
-const findAllUserService = async (condition, dbUrl = "LogDoor") => {
-  try {
-    const conn = await dbConnect(dbUrl);
-    const userDetails = await conn.model("Users", userSchema, "Users");
-    const userDetailsCreate = await userDetails.find(condition);
-    return userDetailsCreate;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
+const createUserService = async (data) => (await (await getModel()).create(data)).toObject();
 
-const updateUserService = async (condition, data, dbUrl = "LogDoor") => {
-  try {
-    const conn = await dbConnect(dbUrl);
-    const userDetails = await conn.model("Users", userSchema, "Users");
-    const userDetailsUpdate = await userDetails.updateOne(condition, data);
-    return userDetailsUpdate;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-module.exports = {
-  createUserService,
-  findUserService,
-  findAllUserService,
-  updateUserService,
-};
+const updateUserService = async (id, set = {}, unset = {}) =>
+  (await getModel())
+    .findByIdAndUpdate(id, { $set: set, ...(Object.keys(unset).length ? { $unset: unset } : {}) }, { returnDocument: "after" })
+    .lean();
+
+module.exports = { findUserService, createUserService, updateUserService };

@@ -1,0 +1,402 @@
+[
+  {
+    "id": "net-01",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is a computer network?",
+    "answer": "A computer network is two or more devices connected so they can send data to each other, over cables or wireless. It matters because almost everything a web developer builds depends on it: your browser, your Node server and your MongoDB database are often on different machines talking over a network. Even when all three run on your laptop, they still talk using network rules, just without leaving the machine.",
+    "example": "Browser  --(request)-->  Node server :3000\nBrowser  <--(response)-- Node server\nNode     --(query)---->  MongoDB :27017"
+  },
+  {
+    "id": "net-02",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between a LAN, a WAN and the internet?",
+    "answer": "A LAN (Local Area Network) connects devices in a small area, like your home or office Wi-Fi. A WAN (Wide Area Network) connects networks across cities or countries, for example a company linking its offices. The internet is the biggest WAN of all: a global network of networks that agree to use the same protocols (TCP/IP). Your laptop sits on a LAN, and your router connects that LAN to the internet.",
+    "example": "Laptop + phone + printer  -> LAN (home Wi-Fi)\nOffice in Delhi <-> Office in London -> WAN\nAll networks joined together -> the internet"
+  },
+  {
+    "id": "net-03",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between client-server and peer-to-peer?",
+    "answer": "In client-server, one side (the client) asks and a central machine (the server) answers; a browser calling your Express API is client-server. In peer-to-peer (P2P), every device can act as both client and server and talk directly to others, like BitTorrent or a WebRTC video call. Client-server is easier to control and secure; P2P spreads load and can cut out the middle server.",
+    "example": "Client-server: browser -> api.myapp.com -> browser\nPeer-to-peer:  peer A <----> peer B (direct, e.g. WebRTC)"
+  },
+  {
+    "id": "net-04",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is an IP address?",
+    "answer": "An IP address is a number that identifies a device on a network, like a postal address for a house. Packets carry a source IP and a destination IP so routers know where to deliver them. When your app's domain is looked up, DNS turns the name into an IP, and that IP is what the browser actually connects to.",
+    "example": "IPv4 example: 142.250.183.14\nIPv6 example: 2404:6800:4009:82b::200e"
+  },
+  {
+    "id": "net-05",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between IPv4 and IPv6?",
+    "answer": "IPv4 addresses are 32 bits, written as four numbers 0-255 separated by dots, giving about 4.3 billion addresses, which is not enough for today's devices. IPv6 addresses are 128 bits, written in hexadecimal groups separated by colons, giving a practically unlimited supply. Both run side by side today. In Node you may see '::1' (IPv6 localhost) instead of '127.0.0.1' when a server listens on all interfaces.",
+    "example": "IPv4: 192.168.1.10        (32 bits)\nIPv6: fe80::1c2b:3aff:fe4d (128 bits, :: = run of zeros)\nIPv4 localhost: 127.0.0.1\nIPv6 localhost: ::1"
+  },
+  {
+    "id": "net-06",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between a public IP and a private IP?",
+    "answer": "A public IP is unique on the whole internet and can be reached from anywhere, like the IP of your deployed server. A private IP is only valid inside a local network and is reused in millions of homes; the reserved ranges are 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16. Your laptop usually has a private IP, and your router shares one public IP for the whole house. That is why a friend cannot open http://192.168.1.10:3000 from their own home.",
+    "example": "Private: 10.x.x.x, 172.16-31.x.x, 192.168.x.x\nPublic:  your router's address seen by websites\nCheck public IP: curl https://ifconfig.me"
+  },
+  {
+    "id": "net-07",
+    "topic": "network",
+    "level": "basic",
+    "question": "What are localhost and 127.0.0.1?",
+    "answer": "localhost is a name that always means 'this same machine', and 127.0.0.1 is the IPv4 loopback address it maps to (::1 in IPv6). Traffic sent there never leaves your computer; the operating system loops it straight back. That is why http://localhost:3000 reaches the Node server on your laptop, and why a server bound only to 127.0.0.1 cannot be reached from other devices on your Wi-Fi.",
+    "example": "app.listen(3000, '127.0.0.1') // only this machine\napp.listen(3000, '0.0.0.0')   // all network interfaces\n// open http://localhost:3000"
+  },
+  {
+    "id": "net-08",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is a port?",
+    "answer": "A port is a number from 0 to 65535 that identifies a specific program on a machine. The IP address gets data to the right computer; the port gets it to the right process on that computer. That is why one laptop can run React dev server on 3000, an API on 5000 and MongoDB on 27017 at the same time. If two programs try to use the same port you get the familiar EADDRINUSE error.",
+    "example": "IP + port = socket address\n127.0.0.1:3000   -> Node app\n127.0.0.1:27017  -> MongoDB\nError: listen EADDRINUSE :::3000"
+  },
+  {
+    "id": "net-09",
+    "topic": "network",
+    "level": "basic",
+    "question": "Which common port numbers should a web developer know?",
+    "answer": "Ports 0-1023 are 'well-known' and reserved for standard services. Key ones: 80 HTTP, 443 HTTPS, 22 SSH, 53 DNS, 25/587 email (SMTP), 5060 SIP. Common dev ports are just conventions: 3000 (Node/React), 5432 PostgreSQL, 3306 MySQL, 27017 MongoDB, 6379 Redis. When a URL has no port, the browser uses 80 for http and 443 for https.",
+    "example": "https://myapp.com       -> port 443 (implied)\nhttp://localhost:3000   -> port 3000\nmongodb://localhost:27017\nredis://localhost:6379"
+  },
+  {
+    "id": "net-10",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is a MAC address?",
+    "answer": "A MAC address is a hardware address burned into a network card (Wi-Fi or Ethernet), written as six pairs of hex digits. It is used only inside the local network to deliver frames from one device to the next, while the IP address is used for end-to-end delivery across networks. A simple way to remember: the IP is like the destination city address, the MAC is like the name of the next person who hands the parcel on.",
+    "example": "MAC example: 3c:22:fb:9a:10:4e\nSee yours: ip link   (Linux)\n           ifconfig  (macOS)"
+  },
+  {
+    "id": "net-11",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between a switch, a router and a modem?",
+    "answer": "A switch connects devices inside one LAN and forwards frames using MAC addresses. A router connects different networks (for example your home LAN and the internet) and forwards packets using IP addresses. A modem converts signals between your home and your internet provider's line (fibre, cable, DSL). A home 'Wi-Fi router' box usually combines all three plus a Wi-Fi access point.",
+    "example": "Laptop --+\n         +-- switch -- router -- modem -- ISP -- internet\nPhone ---+\n(MAC, same LAN) (IP, between networks) (signal)"
+  },
+  {
+    "id": "net-12",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is a packet?",
+    "answer": "A packet is a small chunk of data sent across a network, with a header (source and destination IP, ports, sequence info) and a payload (part of your actual data). Large data, like a 5 MB JSON response, is split into many packets that may travel different routes and are put back together at the other end. Thinking in packets explains why networks can lose, delay or reorder pieces of your data.",
+    "example": "[ IP header | TCP header | payload: part of HTTP response ]\n5 MB response -> thousands of ~1500-byte packets"
+  },
+  {
+    "id": "net-13",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is DNS?",
+    "answer": "DNS (Domain Name System) is the internet's phone book: it translates human names like api.myapp.com into IP addresses like 34.120.10.5. Every fetch to a domain needs a DNS answer before any connection can start. When you deploy and point your domain to a server, you are editing DNS records; a wrong record means users cannot reach your app even if the server is perfectly healthy.",
+    "example": "fetch('https://api.myapp.com/users')\n  1. DNS: api.myapp.com -> 34.120.10.5\n  2. connect to 34.120.10.5:443\n  3. send HTTP request"
+  },
+  {
+    "id": "net-14",
+    "topic": "network",
+    "level": "basic",
+    "question": "What does an HTTP request and response look like?",
+    "answer": "An HTTP request has a start line (method, path, version), headers (key: value pairs like Host, Content-Type, Authorization), a blank line, and an optional body. A response has a status line (version, status code like 200 or 404), headers, a blank line and a body. fetch() and Express hide this text format, but it is exactly what travels over the network, and curl -v lets you see it.",
+    "example": "POST /api/users HTTP/1.1\nHost: api.myapp.com\nContent-Type: application/json\n\n{\"name\":\"Asha\"}\n---\nHTTP/1.1 201 Created\nContent-Type: application/json"
+  },
+  {
+    "id": "net-15",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between HTTP and HTTPS?",
+    "answer": "HTTP sends data as plain text, so anyone on the path (public Wi-Fi, an ISP) can read or change it. HTTPS is HTTP sent inside a TLS-encrypted connection, which gives privacy, protects data from tampering, and proves the server is really who it claims to be via a certificate. HTTPS uses port 443 by default. Browsers now warn on plain HTTP and many features (service workers, geolocation) need HTTPS, though localhost is treated as secure.",
+    "example": "http://myapp.com   -> port 80, plain text\nhttps://myapp.com  -> port 443, TLS encrypted\nHTTPS = HTTP + TLS"
+  },
+  {
+    "id": "net-16",
+    "topic": "network",
+    "level": "basic",
+    "question": "What are ping and ICMP?",
+    "answer": "ICMP (Internet Control Message Protocol) is a helper protocol used for network status and error messages, such as 'destination unreachable'. ping uses ICMP echo request and echo reply to check whether a host is reachable and how long a round trip takes. It is a quick first check when 'the API is down': if ping works but your app doesn't, the problem is likely your service, not the network. Note that some servers block ICMP, so a failed ping does not always mean the host is down.",
+    "example": "$ ping -c 3 google.com\n64 bytes from 142.250.183.14: time=12.4 ms\n64 bytes from 142.250.183.14: time=11.9 ms\n3 packets transmitted, 3 received, 0% packet loss"
+  },
+  {
+    "id": "net-17",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is the difference between latency, bandwidth and throughput?",
+    "answer": "Latency is how long one piece of data takes to travel from A to B, measured in milliseconds. Bandwidth is the maximum amount of data the link could carry per second, like the width of a pipe. Throughput is how much data actually gets through per second, which is often lower due to loss, congestion or slow servers. Many small API calls suffer from latency; a large file download is limited more by bandwidth.",
+    "example": "Latency:    40 ms round trip\nBandwidth:  100 Mbps (max capacity)\nThroughput: 62 Mbps (what you really get)"
+  },
+  {
+    "id": "net-18",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is a firewall?",
+    "answer": "A firewall is software or hardware that allows or blocks network traffic based on rules, such as source IP, destination port and protocol. Cloud 'security groups' are firewalls. A classic deployment bug is an app listening on port 3000 that nobody can reach because the firewall only allows 22, 80 and 443. Databases like MongoDB on 27017 should normally be blocked from the public internet.",
+    "example": "Rule: allow TCP 443 from anywhere\nRule: allow TCP 22  from office IP only\nRule: deny  TCP 27017 from anywhere"
+  },
+  {
+    "id": "net-19",
+    "topic": "network",
+    "level": "basic",
+    "question": "What is DHCP?",
+    "answer": "DHCP (Dynamic Host Configuration Protocol) automatically gives a device its network settings when it joins a network: an IP address, subnet mask, default gateway and DNS servers. Without it, you would type these by hand for every device. It is why your laptop's private IP can change after reconnecting to Wi-Fi, which can break a phone that was testing your app at http://192.168.1.10:3000.",
+    "example": "Laptop: 'I need an address!' (DHCP Discover)\nRouter: 'Use 192.168.1.23, gateway 192.168.1.1,\n         DNS 1.1.1.1, valid 24h' (Offer/Ack)"
+  },
+  {
+    "id": "net-20",
+    "topic": "network",
+    "level": "basic",
+    "question": "Is CORS a networking feature?",
+    "answer": "No. CORS (Cross-Origin Resource Sharing) is a browser security policy, not a network protocol. The request usually reaches your server and the server responds normally; the browser then checks response headers like Access-Control-Allow-Origin and decides whether your JavaScript may read the result. That is why the same request works in curl or Postman but fails in the browser. Fix CORS on the server's headers, not in network settings.",
+    "example": "curl https://api.myapp.com/data   -> works (no CORS in curl)\nfetch from https://other.com       -> blocked by browser\nFix: res.set('Access-Control-Allow-Origin',\n             'https://other.com')"
+  },
+  {
+    "id": "net-21",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is the OSI model and what are its 7 layers?",
+    "answer": "The OSI model is a teaching model that splits networking into 7 layers, each with one job, so problems can be reasoned about one layer at a time. From bottom to top: 1 Physical (bits on wire/radio), 2 Data Link (frames, MAC), 3 Network (IP, routing), 4 Transport (TCP/UDP, ports), 5 Session, 6 Presentation (formats, encryption), 7 Application (HTTP, DNS). Real systems don't follow it strictly, but people still say 'L4' or 'L7' load balancer.",
+    "example": "7 Application   HTTP, DNS\n6 Presentation  encoding, TLS (roughly)\n5 Session       connection sessions\n4 Transport     TCP, UDP, ports\n3 Network       IP, routers\n2 Data Link     Ethernet, Wi-Fi, MAC, switches\n1 Physical      cables, radio signals"
+  },
+  {
+    "id": "net-22",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is the TCP/IP model and how does it relate to OSI?",
+    "answer": "The TCP/IP model is the simpler 4-layer model the internet actually uses. Link layer (OSI 1-2: Ethernet, Wi-Fi), Internet layer (OSI 3: IP), Transport layer (OSI 4: TCP, UDP), Application layer (OSI 5-7: HTTP, DNS, TLS, SSH). Each layer wraps the data from the layer above with its own header, called encapsulation. Your Express route lives at the application layer and relies on all the layers below.",
+    "example": "Application: HTTP request text\nTransport:   [TCP hdr | HTTP]\nInternet:    [IP hdr | TCP hdr | HTTP]\nLink:        [Eth hdr | IP | TCP | HTTP | Eth trailer]"
+  },
+  {
+    "id": "net-23",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is the difference between TCP and UDP?",
+    "answer": "TCP is connection-based and reliable: it sets up a connection, numbers the data, resends anything lost and delivers bytes in order. UDP just sends independent datagrams with no setup, no ordering and no retransmission, so it is faster and lighter but can lose data. HTTP/1.1, HTTP/2, MongoDB and SSH use TCP. DNS queries, live voice/video (RTP) and HTTP/3 (via QUIC) use UDP, because a late packet is often worse than a lost one.",
+    "example": "TCP: like a phone call - connect, confirm, in order\nUDP: like shouting messages - fast, no guarantee\nTCP: HTTP/1.1, HTTP/2, MongoDB, SSH\nUDP: DNS, RTP voice, QUIC/HTTP/3"
+  },
+  {
+    "id": "net-24",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is the TCP three-way handshake?",
+    "answer": "Before any data is sent, TCP opens a connection with three messages. The client sends SYN (I want to connect, my starting sequence number is X). The server replies SYN-ACK (OK, I got X, my starting number is Y). The client replies ACK (got Y). This costs one round trip before your HTTP request can even start, which is why reusing connections (keep-alive) and being close to users (CDNs) speeds up apps.",
+    "example": "Client                Server\n  | ---- SYN (seq=x) ----> |\n  | <-- SYN-ACK (y, x+1) - |\n  | ---- ACK (y+1) ------> |\n  | ==== HTTP data ======> |"
+  },
+  {
+    "id": "net-25",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "How does TCP make delivery reliable?",
+    "answer": "TCP gives every byte a sequence number. The receiver sends acknowledgements (ACKs) saying which bytes it has received. If the sender doesn't get an ACK within a timeout, or sees repeated ACKs showing a gap, it retransmits the missing data. The receiver also reorders out-of-order segments and drops duplicates, so your app just sees a clean, ordered byte stream. The cost is extra delay whenever packets are lost.",
+    "example": "Sender: seg 1, seg 2, seg 3, seg 4\nseg 3 lost\nReceiver: ACK 2, ACK 2, ACK 2 (still missing 3)\nSender: resend seg 3\nReceiver: ACK 4 (all good)"
+  },
+  {
+    "id": "net-26",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is the difference between TCP flow control and congestion control?",
+    "answer": "Flow control protects the receiver: the receiver advertises a window, meaning how much more data it can buffer, and the sender must not send beyond it. Congestion control protects the network: the sender starts slowly ('slow start'), speeds up while things go well, and cuts its rate when packet loss or delay suggests the routers in between are overloaded. Both explain why a fresh connection is slower at first than a warmed-up one.",
+    "example": "Flow control:       'My buffer has 64 KB free'\n                    (receiver -> sender)\nCongestion control: loss seen -> halve sending rate\n                    (sender guesses network state)"
+  },
+  {
+    "id": "net-27",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "How does a DNS lookup work step by step?",
+    "answer": "Your device asks a recursive resolver (from your ISP, or 8.8.8.8 / 1.1.1.1). If it has no cached answer, the resolver asks a root server, which points to the TLD servers for '.com'. The TLD server points to the domain's authoritative name servers (e.g. at Cloudflare or Route 53). The authoritative server returns the actual record, e.g. the A record's IP. The resolver caches the answer for its TTL and returns it to you.",
+    "example": "api.myapp.com?\nyou -> resolver (cache miss)\nresolver -> root:          'ask .com servers'\nresolver -> .com TLD:      'ask ns1.cloudflare.com'\nresolver -> authoritative: 'A 34.120.10.5'\nresolver -> you: 34.120.10.5 (cached for TTL)"
+  },
+  {
+    "id": "net-28",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What are the common DNS record types A, AAAA, CNAME, MX and TXT?",
+    "answer": "A maps a name to an IPv4 address. AAAA maps a name to an IPv6 address. CNAME makes one name an alias of another name, e.g. www.myapp.com -> myapp.netlify.app. MX says which mail servers receive email for the domain. TXT holds free text, often used to prove domain ownership or for email security (SPF, DKIM). A common rule: a CNAME cannot sit alongside other records on the same name, so the bare root domain usually can't be a plain CNAME.",
+    "example": "myapp.com.      A     34.120.10.5\nmyapp.com.      AAAA  2600:1f18::5\nwww.myapp.com.  CNAME myapp.netlify.app.\nmyapp.com.      MX 10 mail.myapp.com.\nmyapp.com.      TXT   \"v=spf1 include:_spf.google.com ~all\""
+  },
+  {
+    "id": "net-29",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is DNS TTL and why does caching matter?",
+    "answer": "TTL (Time To Live) is the number of seconds a DNS answer may be cached by resolvers, browsers and operating systems. Caching makes lookups fast and reduces load, but it also means changes are not instant: if your A record has a TTL of 86400 (24 hours), some users may hit the old server for up to a day after you migrate. A good habit is to lower the TTL (e.g. to 300) a day before a planned change.",
+    "example": "$ dig myapp.com A\nmyapp.com.  300  IN  A  34.120.10.5\n            ^ TTL = 300 s (5 minutes)"
+  },
+  {
+    "id": "net-30",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What happens when you type a URL into the browser and press Enter?",
+    "answer": "1) The browser parses the URL (scheme, host, port, path). 2) It resolves the host to an IP via DNS (using caches first). 3) It opens a TCP connection to that IP and port (443 for https), or QUIC for HTTP/3. 4) It runs a TLS handshake and checks the certificate. 5) It sends the HTTP request. 6) The server responds with HTML. 7) The browser parses it, fetches CSS/JS/images (more requests), and renders the page.",
+    "example": "https://myapp.com/login\n -> DNS: myapp.com = 34.120.10.5\n -> TCP connect 34.120.10.5:443\n -> TLS handshake + cert check\n -> GET /login HTTP/1.1, Host: myapp.com\n -> 200 OK + HTML -> render, load assets"
+  },
+  {
+    "id": "net-31",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is HTTP keep-alive?",
+    "answer": "Keep-alive (persistent connections) means reusing one TCP (and TLS) connection for many HTTP requests instead of opening a new one each time. This skips repeated handshakes, saving round trips and CPU. HTTP/1.1 keeps connections open by default. In Node, outgoing requests reuse connections through an HTTP Agent with keepAlive, and recent Node versions enable it by default, which matters when your server calls other APIs thousands of times.",
+    "example": "Without: [TCP+TLS handshake] GET /a  [handshake] GET /b\nWith:    [TCP+TLS handshake] GET /a  GET /b  GET /c\n\nconst agent = new https.Agent({ keepAlive: true });"
+  },
+  {
+    "id": "net-32",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is NAT (Network Address Translation)?",
+    "answer": "NAT lets many devices with private IPs share one public IP. When your laptop (192.168.1.10) sends a request, the router rewrites the source to its public IP and a port, remembers the mapping, and translates replies back. It saved IPv4 from running out but means devices behind NAT cannot be reached directly from the internet unless you set up port forwarding. This is why WebRTC and VoIP need extra tricks (STUN/TURN) to connect two peers.",
+    "example": "Laptop 192.168.1.10:51000 -> router\nrouter rewrites -> 203.0.113.7:62001 -> server\nserver reply -> 203.0.113.7:62001\nrouter looks up table -> 192.168.1.10:51000"
+  },
+  {
+    "id": "net-33",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is ARP?",
+    "answer": "ARP (Address Resolution Protocol) finds the MAC address that belongs to an IP address on the local network. Your laptop broadcasts 'Who has 192.168.1.1?' and the router replies with its MAC. The answer is cached in an ARP table. ARP is needed because packets are addressed by IP, but on a LAN the actual frame must be sent to a MAC address.",
+    "example": "Laptop (broadcast): Who has 192.168.1.1? Tell 192.168.1.10\nRouter: 192.168.1.1 is at a4:2b:b0:11:22:33\n$ ip neigh   # view ARP cache on Linux"
+  },
+  {
+    "id": "net-34",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is a subnet and a subnet mask?",
+    "answer": "A subnet is a smaller block of IP addresses that forms one local network. The subnet mask tells you which part of an IP is the network part and which part is the host (device) part. With mask 255.255.255.0, the first three numbers are the network, so 192.168.1.10 and 192.168.1.50 are on the same subnet and can talk directly, while 192.168.2.5 is on another subnet and needs a router. Cloud VPCs are divided into subnets the same way.",
+    "example": "IP:    192.168.1.10\nMask:  255.255.255.0\nNet:   192.168.1.0    (network part)\nHost:  .10            (device part)"
+  },
+  {
+    "id": "net-35",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What does CIDR notation like /24 mean, and how many hosts does it allow?",
+    "answer": "The number after the slash is how many leading bits are the network part out of 32 in IPv4. /24 means 24 network bits and 8 host bits, so 2^8 = 256 addresses. Two are reserved: the network address (all host bits 0) and the broadcast address (all 1), leaving 254 usable hosts. /26 leaves 6 host bits: 64 addresses, 62 usable. Fewer slash bits means a bigger network: /16 has 65,536 addresses.",
+    "example": "192.168.1.0/24  (mask 255.255.255.0)\n  network:   192.168.1.0\n  usable:    192.168.1.1 - 192.168.1.254 (254)\n  broadcast: 192.168.1.255\n192.168.1.0/26 -> 64 addresses, 62 usable\nformula: usable = 2^(32 - prefix) - 2"
+  },
+  {
+    "id": "net-36",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is a default gateway?",
+    "answer": "The default gateway is the router your device sends traffic to when the destination is not on its own subnet. If you fetch api.myapp.com from home, your laptop sees the IP is outside 192.168.1.0/24 and hands the packet to the gateway (usually 192.168.1.1), which forwards it toward the internet. If the gateway is wrong or missing, you can still reach local devices but nothing on the internet.",
+    "example": "$ ip route\ndefault via 192.168.1.1 dev wlan0\n192.168.1.0/24 dev wlan0  (local, no gateway needed)"
+  },
+  {
+    "id": "net-37",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What does traceroute do?",
+    "answer": "traceroute shows each router (hop) a packet passes through on its way to a destination, plus the delay to each hop. It works by sending packets with a TTL (hop limit) of 1, 2, 3 and so on; each router that drops a packet because its TTL ran out sends back an ICMP 'time exceeded' message, revealing itself. It helps find where along the path delay or loss begins. On Windows the command is tracert.",
+    "example": "$ traceroute myapp.com\n 1  192.168.1.1     1.2 ms   (home router)\n 2  10.20.0.1       8.4 ms   (ISP)\n 3  * * *                    (hop hides itself)\n 4  34.120.10.5    22.7 ms   (destination)"
+  },
+  {
+    "id": "net-38",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What are curl, nslookup/dig and netstat/ss used for?",
+    "answer": "curl sends HTTP (and other) requests from the terminal; -v shows headers and the TLS handshake, great for debugging APIs without the browser or CORS. nslookup and dig query DNS to see what a domain resolves to and its TTL. netstat and its modern Linux replacement ss list open connections and listening ports, so you can find what is using port 3000. ping and traceroute check reachability and path.",
+    "example": "curl -v https://api.myapp.com/health\ndig api.myapp.com +short\nnslookup api.myapp.com\nss -tlnp | grep 3000        # who listens on 3000?\nlsof -i :3000               # macOS alternative"
+  },
+  {
+    "id": "net-39",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is the difference between a forward proxy and a reverse proxy?",
+    "answer": "A forward proxy sits in front of clients and makes requests on their behalf, for example a company proxy that filters employees' web traffic; the server sees the proxy, not the user. A reverse proxy sits in front of servers and receives requests on their behalf, like Nginx in front of your Node app on port 3000; the client only sees the proxy. Reverse proxies commonly handle TLS, caching, compression and routing to multiple backends.",
+    "example": "Forward: users -> [proxy] -> internet sites\nReverse: users -> [Nginx :443] -> Node :3000\n                              -> Node :3001"
+  },
+  {
+    "id": "net-40",
+    "topic": "network",
+    "level": "intermediate",
+    "question": "What is a TLS certificate and what does a certificate authority (CA) do?",
+    "answer": "A TLS certificate is a file that binds a domain name (e.g. myapp.com) to a public key, plus validity dates and the issuer. A certificate authority (CA), like Let's Encrypt, checks that you control the domain and digitally signs the certificate. Browsers and operating systems ship with a list of trusted root CAs, so they can verify the chain of signatures. If the cert is expired, for the wrong domain, or self-signed, the browser shows a warning.",
+    "example": "Root CA (trusted by browser)\n  -> Intermediate CA (signed by root)\n    -> myapp.com cert (signed by intermediate)\n$ openssl s_client -connect myapp.com:443 -servername myapp.com"
+  },
+  {
+    "id": "net-41",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What is the difference between symmetric and asymmetric encryption?",
+    "answer": "Symmetric encryption uses one shared secret key for both encrypting and decrypting (e.g. AES); it is very fast but both sides must somehow get the same key safely. Asymmetric encryption uses a key pair: a public key anyone can have and a private key kept secret (e.g. RSA, elliptic curve); it solves key sharing and enables signatures but is much slower. HTTPS uses both: asymmetric crypto during the handshake to authenticate and agree on a key, then symmetric encryption for the actual data.",
+    "example": "Symmetric:  same key K encrypts and decrypts (AES)\nAsymmetric: public key -> encrypt / verify\n            private key -> decrypt / sign\nTLS: asymmetric to agree on K, then AES with K"
+  },
+  {
+    "id": "net-42",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What happens in a TLS handshake, at a basic level?",
+    "answer": "After TCP connects, the client sends a ClientHello with supported TLS versions, ciphers, a random value and its key share, plus the domain name (SNI). The server replies with its choice, its own key share and its certificate, and proves it holds the matching private key. Both sides combine the key shares (Diffie-Hellman) into the same session keys without ever sending them. The client verifies the certificate chain, then all HTTP data is encrypted symmetrically. TLS 1.3 needs just one round trip.",
+    "example": "Client -> ClientHello (versions, ciphers, key share, SNI)\nServer -> ServerHello (key share) + Certificate\n          + proof of private key + Finished\nClient -> verify cert, Finished\n== encrypted HTTP traffic (1 RTT in TLS 1.3) =="
+  },
+  {
+    "id": "net-43",
+    "topic": "network",
+    "level": "advanced",
+    "question": "How do HTTP/1.1, HTTP/2 and HTTP/3 differ?",
+    "answer": "HTTP/1.1 is text-based and handles one request at a time per connection, so browsers open several connections and a slow response blocks the ones behind it (head-of-line blocking). HTTP/2 is binary and multiplexes many requests as streams over a single TCP connection, with header compression. HTTP/3 keeps those ideas but runs over QUIC on UDP, so one lost packet only delays its own stream rather than all of them, and connection setup is faster. Your fetch code is the same; the browser and server negotiate the version.",
+    "example": "HTTP/1.1: TCP, text, 1 request at a time per connection\nHTTP/2:   TCP, binary, many streams on 1 connection\nHTTP/3:   QUIC over UDP, streams + built-in TLS 1.3\ncurl -I --http2 https://myapp.com"
+  },
+  {
+    "id": "net-44",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What is QUIC and why does HTTP/3 use it?",
+    "answer": "QUIC is a transport protocol built on top of UDP that provides what TCP does (reliability, ordering, congestion control) plus TLS 1.3 encryption built in. It combines the transport and TLS handshakes, so a new connection usually takes one round trip, and resumed connections can send data immediately (0-RTT). Streams are independent, avoiding TCP's head-of-line blocking. Connections are identified by an ID rather than IP+port, so a phone switching from Wi-Fi to mobile data can keep the connection.",
+    "example": "TCP + TLS 1.3: TCP handshake (1 RTT) + TLS (1 RTT)\nQUIC:          combined handshake (1 RTT), 0-RTT on resume\nRuns on UDP port 443"
+  },
+  {
+    "id": "net-45",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What is a load balancer, and what is the difference between L4 and L7 load balancing?",
+    "answer": "A load balancer spreads incoming traffic across several servers so no single one is overloaded, and stops sending to unhealthy ones using health checks. An L4 (transport layer) balancer routes based on IPs and ports only, forwarding TCP/UDP connections without reading the content; it is fast and protocol-agnostic. An L7 (application layer) balancer understands HTTP, so it can route by path, host or headers (e.g. /api to one service), terminate TLS and add cookies for sticky sessions. Example: AWS NLB is L4, ALB is L7.",
+    "example": "L4: TCP :443 -> server A or B (round robin)\nL7: /api/*    -> api-service\n    /static/* -> static-service\n    Host: admin.myapp.com -> admin-service"
+  },
+  {
+    "id": "net-46",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What is a CDN and how does it speed up a website?",
+    "answer": "A CDN (Content Delivery Network) is a large set of servers spread around the world (edge locations) that cache and serve your content close to users. A user in Mumbai gets your JS bundle from a nearby edge instead of your origin server in the US, cutting latency and round trips for TCP and TLS handshakes. CDNs also absorb traffic spikes and attacks. You control caching with HTTP headers like Cache-Control, and DNS usually routes users to the nearest edge.",
+    "example": "User (Mumbai) -> CDN edge (Mumbai) -- cache hit --> fast\n                       |\n                   cache miss -> origin (US) -> cache it\nCache-Control: public, max-age=31536000, immutable"
+  },
+  {
+    "id": "net-47",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What is a VPN?",
+    "answer": "A VPN (Virtual Private Network) creates an encrypted tunnel between your device and a VPN server, and your traffic goes through that tunnel. To the outside world your traffic appears to come from the VPN server's IP. Companies use VPNs so remote staff can reach private resources, like an internal database on 10.0.5.20, as if they were in the office. A VPN can change routing and DNS, so 'works on my machine' bugs sometimes come from being connected to one.",
+    "example": "Laptop --[encrypted tunnel over internet]--> VPN server\n                                          -> 10.0.5.20:27017 (private DB)\nProtocols: WireGuard, OpenVPN, IPsec"
+  },
+  {
+    "id": "net-48",
+    "topic": "network",
+    "level": "advanced",
+    "question": "How do WebSockets work at the network level?",
+    "answer": "A WebSocket starts as a normal HTTP/1.1 request with an 'Upgrade: websocket' header. If the server agrees, it replies 101 Switching Protocols, and the same TCP connection is then used for two-way messages framed by the WebSocket protocol, without new HTTP requests. The connection stays open, so the server can push data any time, which suits chat, live dashboards and streaming call transcripts. Load balancers and proxies must allow upgrades and long-lived connections, and wss:// runs it over TLS.",
+    "example": "GET /socket HTTP/1.1\nUpgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Key: dGhlIHNhbXBsZQ==\n---\nHTTP/1.1 101 Switching Protocols\n(now full-duplex frames on the same TCP connection)"
+  },
+  {
+    "id": "net-49",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What are jitter and packet loss, and why do they matter for voice calls?",
+    "answer": "Packet loss is when some packets never arrive; jitter is variation in packet arrival times, so packets that were sent evenly arrive bunched up or spaced out. Voice is real-time: a packet arriving late is useless, so voice apps use UDP and don't wait for resends. Loss causes gaps or robotic audio; jitter is smoothed by a jitter buffer, which holds packets briefly but adds delay. Rough targets for good calls: one-way latency under 150 ms, jitter under 30 ms, loss under 1%.",
+    "example": "Sent every 20 ms:   1   2   3   4   5\nArrived (jitter):   1 2      3 4    (5 lost)\nJitter buffer waits ~40-60 ms to replay smoothly\nMOS drops as loss and jitter rise"
+  },
+  {
+    "id": "net-50",
+    "topic": "network",
+    "level": "advanced",
+    "question": "What are SIP and RTP in voice-over-IP calls?",
+    "answer": "SIP (Session Initiation Protocol) is the signalling protocol: it sets up, modifies and ends calls with text messages that look like HTTP (INVITE, 180 Ringing, 200 OK, BYE), usually on port 5060 (5061 with TLS). It carries an SDP description saying which codecs and which IP/ports to use for media. RTP (Real-time Transport Protocol) then carries the actual audio packets, usually over UDP, with sequence numbers and timestamps so the receiver can reorder and time playback. In short: SIP is the call control, RTP is the voice.",
+    "example": "Caller            Callee\n  -- INVITE (SDP) -->\n  <-- 180 Ringing ---\n  <-- 200 OK (SDP) --\n  -- ACK ----------->\n  <== RTP audio (UDP) ==>\n  -- BYE ----------->"
+  }
+]

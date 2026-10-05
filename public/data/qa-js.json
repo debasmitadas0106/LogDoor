@@ -1,0 +1,402 @@
+[
+  {
+    "id": "js-01",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is the difference between dynamic typing and static typing? Which one is JavaScript?",
+    "answer": "Typing is about when a language checks the type of a value. In static typing (Java, TypeScript) types are checked before the code runs, at compile time. In dynamic typing (JavaScript, Python) types are checked while the code runs, and a variable can hold a number now and a string later. JavaScript is dynamically typed: this makes it quick to write, but some type mistakes only show up in production.",
+    "example": "let x = 5;      // number\nx = 'hello';    // now a string, no error\n// TypeScript would reject this line"
+  },
+  {
+    "id": "js-02",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is the difference between weak typing and strong typing? Where does JavaScript sit?",
+    "answer": "This is about how strict a language is when you mix types. A strongly typed language (Python) refuses to combine unrelated types and throws an error. A weakly typed language quietly converts one value to another so the operation can go ahead. JavaScript is weakly typed, so '5' + 1 gives '51' instead of an error. Knowing this explains many strange bugs in form inputs and query strings.",
+    "example": "'5' + 1   // '51'  (number turned into string)\n'5' - 1   // 4     (string turned into number)\n// Python: '5' + 1 -> TypeError"
+  },
+  {
+    "id": "js-03",
+    "topic": "js",
+    "level": "basic",
+    "question": "What are primitive types and how are they different from objects in JavaScript?",
+    "answer": "JavaScript has 7 primitives: string, number, bigint, boolean, undefined, null and symbol. Everything else (objects, arrays, functions) is an object. Primitives are immutable and are copied by value, so changing a copy never affects the original. Objects are passed by reference, so two variables can point to the same object and a change through one is visible through the other.",
+    "example": "let a = 1; let b = a; b = 2;        // a is still 1\nconst o1 = { n: 1 }; const o2 = o1;\no2.n = 2;                           // o1.n is now 2 too"
+  },
+  {
+    "id": "js-04",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is the difference between == and === ?",
+    "answer": "=== is strict equality: it returns true only if both value and type are the same. == is loose equality: if the types differ, it first converts them (type coercion) and then compares. Loose equality leads to surprising results, so most teams use === everywhere. A common exception is value == null, which checks for both null and undefined in one go.",
+    "example": "0 == ''        // true  (both become 0)\n0 === ''       // false (number vs string)\nnull == undefined   // true\nnull === undefined  // false"
+  },
+  {
+    "id": "js-05",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is type coercion? What is the difference between implicit and explicit coercion?",
+    "answer": "Type coercion means converting a value from one type to another. Explicit coercion is when you do it on purpose, like Number('42') or String(7). Implicit coercion is when JavaScript does it for you behind the scenes, for example in ==, the + operator, or an if condition. Implicit coercion is the source of many bugs, so it is safer to convert explicitly, e.g. parse query params with Number() before using them.",
+    "example": "Number('42')   // 42 (explicit)\n'3' * '2'      // 6  (implicit)\nif ('') {}     // '' is falsy, block skipped\n[] + {}        // '[object Object]'"
+  },
+  {
+    "id": "js-06",
+    "topic": "js",
+    "level": "basic",
+    "question": "What does typeof do, and what is the famous typeof null quirk?",
+    "answer": "typeof returns a string naming the type of a value, like 'number', 'string' or 'function'. The quirk is that typeof null returns 'object', even though null is a primitive. This is a bug from the first version of JavaScript that was never fixed to avoid breaking old websites. Also, typeof [] is 'object', so use Array.isArray() for arrays and value === null for null.",
+    "example": "typeof 42         // 'number'\ntypeof undefined  // 'undefined'\ntypeof null       // 'object'  (quirk)\ntypeof []         // 'object'\nArray.isArray([]) // true"
+  },
+  {
+    "id": "js-07",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is the difference between var, let and const?",
+    "answer": "var is function-scoped, can be re-declared, and is hoisted with the value undefined. let and const are block-scoped (they live only inside the nearest { }), cannot be re-declared in the same scope, and are in the temporal dead zone until their line runs. const also cannot be reassigned, but if it holds an object you can still change the object's properties. Modern code uses const by default, let when you must reassign, and avoids var.",
+    "example": "if (true) { var a = 1; let b = 2; }\nconsole.log(a); // 1\nconsole.log(b); // ReferenceError\nconst user = { name: 'A' };\nuser.name = 'B';   // allowed\n// user = {};      // TypeError"
+  },
+  {
+    "id": "js-08",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is scope in JavaScript? Name the main kinds.",
+    "answer": "Scope decides where a variable can be seen and used. Global scope is visible everywhere. Function scope is visible only inside a function. Block scope (from let and const) is visible only inside a pair of { }, such as an if or a loop. JavaScript uses lexical scope, which means inner code can read variables from the outer code it is written inside, but not the other way round.",
+    "example": "const g = 'global';\nfunction f() {\n  const local = 'f only';\n  if (true) { const block = 'if only'; }\n  console.log(g, local); // ok\n}\n// console.log(local);   // ReferenceError"
+  },
+  {
+    "id": "js-09",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is hoisting?",
+    "answer": "Hoisting is JavaScript's behaviour of registering declarations before the code runs, as if they were moved to the top of their scope. Function declarations are fully hoisted, so you can call them before the line they are written on. var declarations are hoisted but set to undefined until assigned. let, const and class are also hoisted but cannot be used before their line (temporal dead zone).",
+    "example": "sayHi();            // works\nfunction sayHi() { console.log('hi'); }\n\nconsole.log(n);     // undefined, not an error\nvar n = 5;"
+  },
+  {
+    "id": "js-10",
+    "topic": "js",
+    "level": "basic",
+    "question": "How are arrow functions different from regular functions?",
+    "answer": "Arrow functions are a shorter way to write functions, like (a, b) => a + b. The biggest difference is that they do not have their own this; they use the this of the surrounding code. They also have no arguments object and cannot be used as constructors with new. This makes them great for callbacks inside methods, but a bad choice for object methods that need this.",
+    "example": "const obj = {\n  name: 'Box',\n  regular() { return this.name; },  // 'Box'\n  arrow: () => this?.name           // not 'Box'\n};\nconst add = (a, b) => a + b;"
+  },
+  {
+    "id": "js-11",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is the difference between the spread operator and rest parameters? They both use ...",
+    "answer": "Both use three dots, but they do opposite jobs. Spread expands an array or object into separate items, for example to copy or merge them. Rest collects many separate items into one array (or object), for example to accept any number of function arguments. A simple rule: on the right side of = or in a function call it is spread; in a parameter list or on the left of a destructuring it is rest.",
+    "example": "const merged = [...[1, 2], ...[3]];   // spread -> [1,2,3]\nconst copy = { ...user, age: 30 };      // spread\nfunction sum(...nums) {                 // rest\n  return nums.reduce((a, b) => a + b, 0);\n}"
+  },
+  {
+    "id": "js-12",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is destructuring?",
+    "answer": "Destructuring is a short syntax to pull values out of arrays or objects into separate variables. Object destructuring picks properties by name, array destructuring picks items by position. You can also rename variables and give default values. It makes code shorter and is used everywhere, for example to read fields from req.body or from React props.",
+    "example": "const { name, age = 18 } = user;\nconst [first, second] = [10, 20];\nconst { id: userId } = user;  // rename\nfunction greet({ name }) { return 'Hi ' + name; }"
+  },
+  {
+    "id": "js-13",
+    "topic": "js",
+    "level": "basic",
+    "question": "What do optional chaining (?.) and nullish coalescing (??) do?",
+    "answer": "Optional chaining ?. lets you read a deep property safely: if the part before ?. is null or undefined, the whole expression returns undefined instead of throwing an error. Nullish coalescing ?? gives a fallback value only when the left side is null or undefined. This is different from ||, which also replaces valid falsy values like 0 or ''. Together they make handling API data with missing fields much cleaner.",
+    "example": "const city = user?.address?.city;   // no crash if address missing\nconst limit = req.query.limit ?? 10;\n0 || 10   // 10 (0 is lost)\n0 ?? 10   // 0  (0 is kept)"
+  },
+  {
+    "id": "js-14",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is JSON, and what do JSON.stringify and JSON.parse do?",
+    "answer": "JSON (JavaScript Object Notation) is a text format for sending and storing data. It looks like a JS object, but keys must use double quotes and it cannot hold functions, undefined or Dates as real types. JSON.stringify turns a JS value into a JSON string, and JSON.parse turns a JSON string back into a JS value. It is the standard format for REST APIs, and JSON.parse throws on invalid input, so wrap it in try/catch.",
+    "example": "const s = JSON.stringify({ a: 1, f() {} }); // '{\"a\":1}'\nconst obj = JSON.parse('{\"a\":1}');          // { a: 1 }\nJSON.stringify({ d: new Date(0) });          // date becomes a string"
+  },
+  {
+    "id": "js-15",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is a higher-order function?",
+    "answer": "A higher-order function is a function that takes another function as an argument, returns a function, or both. This is possible because in JavaScript functions are first-class values, meaning you can store them in variables and pass them around like any other value. Array methods like map, filter and forEach, and Express middleware, are everyday examples. They let you reuse logic by passing in only the part that changes.",
+    "example": "function repeat(n, fn) {\n  for (let i = 0; i < n; i++) fn(i);\n}\nrepeat(3, i => console.log(i));\nconst multiplier = k => x => x * k; // returns a function"
+  },
+  {
+    "id": "js-16",
+    "topic": "js",
+    "level": "basic",
+    "question": "What do map, filter and reduce do?",
+    "answer": "They are array methods that each take a callback and return a new value without changing the original array. map transforms every item and returns a new array of the same length. filter keeps only items for which the callback returns true. reduce combines all items into a single value, such as a total or an object, using an accumulator. They replace many manual for loops and make the intent clearer.",
+    "example": "const nums = [1, 2, 3, 4];\nnums.map(n => n * 2);          // [2,4,6,8]\nnums.filter(n => n % 2 === 0); // [2,4]\nnums.reduce((sum, n) => sum + n, 0); // 10"
+  },
+  {
+    "id": "js-17",
+    "topic": "js",
+    "level": "basic",
+    "question": "What is the DRY principle? Give a JavaScript example.",
+    "answer": "DRY stands for Don't Repeat Yourself. It means every piece of knowledge or logic should live in one place, so a change only needs to be made once. In JS this often means pulling repeated code into a function, a shared constant, or a utility module. But do not over-apply it: merging two things that only look similar can create a confusing abstraction, so wait until the repetition is real.",
+    "example": "// Repeated: price * 1.18 in five files\nconst TAX_RATE = 0.18;\nfunction withTax(price) {\n  return price * (1 + TAX_RATE);\n}"
+  },
+  {
+    "id": "js-18",
+    "topic": "js",
+    "level": "basic",
+    "question": "What do KISS and YAGNI mean?",
+    "answer": "KISS means Keep It Simple, Stupid: prefer the simplest solution that works, because simple code is easier to read, test and fix. YAGNI means You Aren't Gonna Need It: do not build features or flexibility until there is a real need for them. For example, do not write a generic plugin system when you only have one use case today. Both principles fight over-engineering and keep codebases small.",
+    "example": ""
+  },
+  {
+    "id": "js-19",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is the temporal dead zone (TDZ)?",
+    "answer": "The TDZ is the time between the start of a scope and the line where a let, const or class is declared. The variable already exists (it is hoisted), but touching it in this zone throws a ReferenceError. This is different from var, which would just give undefined. The TDZ exists to catch bugs where you use a variable before giving it a value.",
+    "example": "{\n  // TDZ for 'x' starts here\n  console.log(x); // ReferenceError\n  let x = 1;      // TDZ ends here\n}"
+  },
+  {
+    "id": "js-20",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is a closure?",
+    "answer": "A closure is a function that remembers the variables from the place where it was created, even after that outer function has finished running. It happens because JavaScript uses lexical scope and keeps those variables alive while the inner function can still use them. Closures are used for private state, factory functions, event handlers and memoization. Every callback that uses an outer variable is a closure.",
+    "example": "function counter() {\n  let count = 0;          // private\n  return () => ++count;\n}\nconst next = counter();\nnext(); // 1\nnext(); // 2"
+  },
+  {
+    "id": "js-21",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "How is the value of 'this' decided in JavaScript?",
+    "answer": "In a regular function, this depends on how the function is called, not where it is written. Called as obj.method(), this is obj. Called as a plain function, this is undefined in strict mode (or the global object otherwise). With new, this is the new object, and call/apply/bind set it explicitly. Arrow functions are the exception: they take this from the surrounding code.",
+    "example": "const user = { name: 'A', hi() { return this.name; } };\nuser.hi();          // 'A'\nconst fn = user.hi;\nfn();               // undefined or error: lost 'this'"
+  },
+  {
+    "id": "js-22",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is the difference between call, apply and bind?",
+    "answer": "All three let you choose what this will be inside a function. call runs the function right away and takes arguments one by one. apply also runs it right away but takes arguments as an array. bind does not run the function; it returns a new function with this (and optionally some arguments) fixed permanently. bind is useful when passing a method as a callback, so it does not lose its this.",
+    "example": "function greet(greeting) { return greeting + ' ' + this.name; }\nconst u = { name: 'Ana' };\ngreet.call(u, 'Hi');      // 'Hi Ana'\ngreet.apply(u, ['Hey']);  // 'Hey Ana'\nconst g = greet.bind(u);\ng('Yo');                  // 'Yo Ana'"
+  },
+  {
+    "id": "js-23",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is a callback, and what is 'callback hell'?",
+    "answer": "A callback is a function you pass to another function so it can be called later, for example when a file finishes reading or a timer ends. Callbacks were the original way to handle async work in Node.js, often with the error-first style (err, data). Callback hell is when many async steps are nested inside each other, creating deeply indented code that is hard to read and to handle errors in. Promises and async/await were introduced largely to fix this.",
+    "example": "getUser(id, (err, user) => {\n  getOrders(user, (err, orders) => {\n    getItems(orders, (err, items) => {\n      // deeper and deeper...\n    });\n  });\n});"
+  },
+  {
+    "id": "js-24",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is a Promise and what are its states?",
+    "answer": "A Promise is an object that represents a value that will be ready in the future, such as the result of an HTTP request. It has three states: pending (still working), fulfilled (finished with a value) and rejected (failed with an error). Once it is fulfilled or rejected it is settled and never changes again. You react to it with .then(), .catch() and .finally(), and you can chain them to avoid nested callbacks.",
+    "example": "fetch('/api/user')\n  .then(res => res.json())\n  .then(user => console.log(user))\n  .catch(err => console.error(err))\n  .finally(() => console.log('done'));"
+  },
+  {
+    "id": "js-25",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is async/await and how does it relate to Promises?",
+    "answer": "async/await is a nicer syntax on top of Promises that lets async code read like normal step-by-step code. An async function always returns a Promise. Inside it, await pauses that function until the Promise settles, without blocking the rest of the program. Errors are handled with ordinary try/catch. Remember that awaiting things one after another runs them in sequence; use Promise.all to run independent tasks in parallel.",
+    "example": "async function load(id) {\n  const user = await getUser(id);\n  const [orders, cart] = await Promise.all([\n    getOrders(id), getCart(id)\n  ]);\n  return { user, orders, cart };\n}"
+  },
+  {
+    "id": "js-26",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "How do you handle errors in synchronous and asynchronous JavaScript?",
+    "answer": "For synchronous code you use try/catch/finally, and you can throw your own Error objects. For Promises you use .catch(), and with async/await you wrap await calls in try/catch. A common trap is an unhandled rejection: a Promise that fails with nobody catching it, which can crash a Node.js process. Also, a try/catch around a callback-based or un-awaited async call will not catch errors that happen later.",
+    "example": "async function save(data) {\n  try {\n    await db.insert(data);\n  } catch (err) {\n    logger.error(err);\n    throw new Error('Save failed');\n  }\n}"
+  },
+  {
+    "id": "js-27",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is immutability and why is it useful?",
+    "answer": "Immutability means not changing data after it is created; instead you create a new copy with the change. In JS, primitives are already immutable, but objects and arrays are mutable by default. Working immutably (with spread, map, filter, or Object.freeze) makes code easier to reason about, because no other part of the program can change your data behind your back. React and Redux rely on it to detect changes by comparing references.",
+    "example": "const state = { count: 1 };\nconst next = { ...state, count: 2 }; // new object\nconst list2 = [...list, newItem];      // instead of push\nObject.freeze(state);                  // shallow lock"
+  },
+  {
+    "id": "js-28",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is the difference between a shallow copy and a deep copy?",
+    "answer": "A shallow copy creates a new top-level object, but nested objects inside it are still shared with the original. Spread ({...obj}), Object.assign and Array.slice make shallow copies. A deep copy duplicates every level, so the copy is fully independent. In modern JS use structuredClone(obj) for deep copies; JSON.parse(JSON.stringify(obj)) also works but loses Dates, functions and undefined.",
+    "example": "const a = { user: { name: 'A' } };\nconst shallow = { ...a };\nshallow.user.name = 'B';   // a.user.name is 'B' too\nconst deep = structuredClone(a);\ndeep.user.name = 'C';      // a is unaffected"
+  },
+  {
+    "id": "js-29",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is a pure function, and what are side effects?",
+    "answer": "A pure function always returns the same output for the same input and does not change anything outside itself. A side effect is anything a function does besides returning a value: changing a global variable, mutating an argument, writing to a database, logging or making an HTTP call. Pure functions are easy to test and reuse. Real apps need side effects, so the goal is to keep them few and in clear places.",
+    "example": "const add = (a, b) => a + b;   // pure\nlet total = 0;\nfunction addToTotal(x) {      // impure: changes outside state\n  total += x;\n}"
+  },
+  {
+    "id": "js-30",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is a prototype and what is the prototype chain?",
+    "answer": "Every JavaScript object has a hidden link to another object called its prototype. When you read a property that the object does not have, JavaScript looks at its prototype, then the prototype's prototype, and so on until it reaches null. This lookup path is the prototype chain. It is how arrays get methods like map: they come from Array.prototype, which all arrays share instead of each array storing its own copy.",
+    "example": "const arr = [1, 2];\nObject.getPrototypeOf(arr) === Array.prototype; // true\narr.hasOwnProperty('map');   // false\ntypeof arr.map;              // 'function' (found via chain)"
+  },
+  {
+    "id": "js-31",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is prototypal inheritance, and how is a JavaScript class related to it?",
+    "answer": "Prototypal inheritance means objects inherit directly from other objects through the prototype chain, instead of from class blueprints like in Java. The class keyword (ES2015) is mostly syntactic sugar: under the hood, methods are still placed on a prototype object, and extends links one prototype to another. Classes give cleaner syntax for constructors, methods, extends, super, static members and private #fields. Knowing this helps you understand why methods are shared and how this works inside them.",
+    "example": "class Animal {\n  constructor(name) { this.name = name; }\n  speak() { return this.name + ' makes a sound'; }\n}\nclass Dog extends Animal {\n  speak() { return this.name + ' barks'; }\n}\ntypeof Animal; // 'function'"
+  },
+  {
+    "id": "js-32",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What are getters and setters?",
+    "answer": "Getters and setters are special methods that run when you read or write a property, while the code using them still looks like normal property access. A getter (get) computes a value on the fly, and a setter (set) can validate or transform a value before saving it. They are useful for derived values and for protecting internal data. Keep them light, because hidden heavy work behind a simple property read surprises other developers.",
+    "example": "class User {\n  #age = 0;\n  get age() { return this.#age; }\n  set age(v) {\n    if (v < 0) throw new Error('Invalid age');\n    this.#age = v;\n  }\n}"
+  },
+  {
+    "id": "js-33",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is strict mode?",
+    "answer": "Strict mode is an opt-in, safer version of JavaScript turned on with 'use strict' at the top of a file or function. It turns silent mistakes into errors, for example assigning to an undeclared variable throws instead of creating a global. It also makes this undefined in plain function calls and forbids some confusing syntax. ES modules and class bodies are always in strict mode automatically.",
+    "example": "'use strict';\nfunction f() {\n  total = 5;   // ReferenceError: total is not defined\n}\n// without strict mode, 'total' becomes a global"
+  },
+  {
+    "id": "js-34",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What are event bubbling and event capturing in the DOM?",
+    "answer": "When you click an element, the event travels through the DOM in phases. First is the capturing phase, going down from window to the target element. Then the target phase, and then the bubbling phase, going back up from the target to window. By default addEventListener listens in the bubbling phase; pass { capture: true } to listen while it goes down. event.stopPropagation() stops the event from travelling further.",
+    "example": "parent.addEventListener('click', () => console.log('parent'));\nchild.addEventListener('click', () => console.log('child'));\n// click child -> 'child' then 'parent' (bubbling)\nparent.addEventListener('click', fn, { capture: true });"
+  },
+  {
+    "id": "js-35",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is event delegation?",
+    "answer": "Event delegation means adding one event listener to a parent element instead of one listener on every child. It works because of bubbling: a click on a child bubbles up to the parent, where event.target tells you which child was clicked. This saves memory and also works for children added later, like rows added to a list dynamically. It is a common pattern for lists, tables and menus.",
+    "example": "list.addEventListener('click', (e) => {\n  const item = e.target.closest('li');\n  if (!item) return;\n  console.log('Clicked', item.dataset.id);\n});"
+  },
+  {
+    "id": "js-36",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "When should you use a Map instead of a plain Object?",
+    "answer": "Both store key-value pairs, but a Map is built for that job. Map keys can be any type (objects, functions, numbers), while object keys become strings or symbols. Map keeps insertion order, has a .size property, is directly iterable and is faster for frequent adds and deletes. A plain object is better for fixed, known structures like a config or a JSON record, because it works with JSON and destructuring.",
+    "example": "const m = new Map();\nconst keyObj = { id: 1 };\nm.set(keyObj, 'data');\nm.get(keyObj);   // 'data'\nm.size;          // 1\nconst o = {}; o[keyObj] = 1; // key becomes '[object Object]'"
+  },
+  {
+    "id": "js-37",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is a Set and when is it useful?",
+    "answer": "A Set is a collection of unique values: adding the same value twice keeps only one. It checks uniqueness with strict equality (with NaN treated as equal to itself), so two different objects with the same content are both kept. Checking membership with set.has() is fast, unlike array.includes(), which scans the whole array. A common use is removing duplicates from an array or tracking which IDs you have already seen.",
+    "example": "const ids = [1, 2, 2, 3, 1];\nconst unique = [...new Set(ids)]; // [1, 2, 3]\nconst seen = new Set();\nseen.add('a');\nseen.has('a'); // true"
+  },
+  {
+    "id": "js-38",
+    "topic": "js",
+    "level": "intermediate",
+    "question": "What is the difference between CommonJS and ES modules?",
+    "answer": "They are two module systems for splitting code into files. CommonJS is Node.js's original system: it uses require() and module.exports, and loads modules synchronously at runtime. ES modules (ESM) are the official JavaScript standard: they use import and export, are loaded and analysed before the code runs, support top-level await and work in browsers. Because ESM imports are static, bundlers can remove unused code (tree shaking).",
+    "example": "// CommonJS\nconst fs = require('fs');\nmodule.exports = { add };\n\n// ES modules\nimport fs from 'fs';\nexport function add(a, b) { return a + b; }"
+  },
+  {
+    "id": "js-39",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is the event loop, and how does it relate to the call stack?",
+    "answer": "JavaScript runs on a single thread with one call stack, where function calls are pushed and popped. Slow work like timers, network and file I/O is handed to the browser or Node.js, and when it finishes its callback is put in a queue. The event loop keeps checking: when the call stack is empty, it takes the next callback from the queues and pushes it onto the stack. This is how JS stays non-blocking with only one thread, and why a long loop freezes everything.",
+    "example": "console.log('1');\nsetTimeout(() => console.log('3'), 0);\nconsole.log('2');\n// prints 1, 2, 3: the timeout waits for an empty stack"
+  },
+  {
+    "id": "js-40",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is the difference between microtasks and macrotasks?",
+    "answer": "They are two kinds of queues the event loop uses. Macrotasks (tasks) include setTimeout, setInterval, I/O and UI events. Microtasks include Promise callbacks (.then, await continuations) and queueMicrotask. After each macrotask, the event loop empties the whole microtask queue before moving on. That is why a resolved Promise's .then runs before a setTimeout of 0 ms.",
+    "example": "setTimeout(() => console.log('timeout'), 0);\nPromise.resolve().then(() => console.log('promise'));\nconsole.log('sync');\n// sync, promise, timeout"
+  },
+  {
+    "id": "js-41",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is currying?",
+    "answer": "Currying turns a function that takes several arguments into a chain of functions that each take one argument. So add(a, b) becomes add(a)(b). It relies on closures to remember earlier arguments. It is useful for creating specialised functions from general ones, like a logger preset with a level, and it is common in functional programming libraries.",
+    "example": "const add = a => b => a + b;\nconst add10 = add(10);\nadd10(5);  // 15\nconst log = level => msg => console.log(`[${level}] ${msg}`);\nconst warn = log('WARN');"
+  },
+  {
+    "id": "js-42",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is the difference between debounce and throttle?",
+    "answer": "Both limit how often a function runs when an event fires very rapidly. Debounce waits until the events stop for a set time, then runs once; for example, search only after the user stops typing for 300 ms. Throttle runs at most once per time window no matter how many events happen; for example, handle scroll at most every 200 ms. Use debounce when you care about the final value, throttle when you need regular updates during the activity.",
+    "example": "function debounce(fn, ms) {\n  let t;\n  return (...args) => {\n    clearTimeout(t);\n    t = setTimeout(() => fn(...args), ms);\n  };\n}\ninput.oninput = debounce(search, 300);"
+  },
+  {
+    "id": "js-43",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is memoization?",
+    "answer": "Memoization is a caching technique: a function stores the results of previous calls and returns the saved result when it is called again with the same arguments. It trades memory for speed, so it suits pure, expensive functions called often with repeated inputs. It only works safely with pure functions, because the cached answer must stay correct. React's useMemo and many recursive algorithms use this idea.",
+    "example": "function memoize(fn) {\n  const cache = new Map();\n  return (n) => {\n    if (!cache.has(n)) cache.set(n, fn(n));\n    return cache.get(n);\n  };\n}"
+  },
+  {
+    "id": "js-44",
+    "topic": "js",
+    "level": "advanced",
+    "question": "How does garbage collection work in JavaScript, and what causes memory leaks?",
+    "answer": "JavaScript frees memory automatically using garbage collection, mainly with a mark-and-sweep approach: starting from roots like global variables and the current call stack, it marks everything still reachable and frees the rest. A memory leak happens when you keep a reference to something you no longer need, so it stays reachable. Common causes are forgotten timers and event listeners, growing global caches, and closures holding large objects. In a long-running Node.js server, leaks slowly raise memory until it crashes.",
+    "example": "const cache = {};\nfunction handle(req) {\n  cache[req.id] = req;   // never removed -> leak\n}\nsetInterval(poll, 1000); // leak if never cleared"
+  },
+  {
+    "id": "js-45",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is a WeakMap and how is it different from a Map?",
+    "answer": "A WeakMap is like a Map, but its keys must be objects and are held weakly. This means if nothing else references the key object, it can be garbage collected along with its value. Because entries can disappear at any time, a WeakMap is not iterable and has no size. It is ideal for attaching extra data or caches to objects (like DOM nodes) without causing memory leaks.",
+    "example": "const meta = new WeakMap();\nlet el = document.querySelector('#btn');\nmeta.set(el, { clicks: 0 });\nel = null; // entry can now be garbage collected"
+  },
+  {
+    "id": "js-46",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is a Symbol in JavaScript?",
+    "answer": "A Symbol is a primitive type that creates a unique value every time, even if two symbols have the same description. It is mainly used as an object key that cannot clash with other keys, which is handy when adding properties to objects you do not own. Symbol keys are skipped by for...in, Object.keys and JSON.stringify. JavaScript also has built-in 'well-known' symbols, like Symbol.iterator, that let you customise language behaviour.",
+    "example": "const id = Symbol('id');\nSymbol('id') === Symbol('id'); // false\nconst user = { name: 'A', [id]: 123 };\nObject.keys(user);   // ['name']\nuser[id];            // 123"
+  },
+  {
+    "id": "js-47",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What are iterators and generators?",
+    "answer": "An iterator is an object with a next() method that returns { value, done }, giving items one at a time. An object is iterable if it has a Symbol.iterator method, which is what for...of and spread use. A generator is a special function written with function* that can pause at each yield and resume later, and it creates an iterator for you. Generators are good for lazy sequences, such as reading large data page by page without loading everything.",
+    "example": "function* idGen() {\n  let id = 1;\n  while (true) yield id++;\n}\nconst ids = idGen();\nids.next().value; // 1\nids.next().value; // 2"
+  },
+  {
+    "id": "js-48",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is a Proxy?",
+    "answer": "A Proxy wraps an object and lets you intercept basic operations on it, such as reading, writing or deleting properties. You define these interceptors, called traps, in a handler object like get and set. Proxies are used for validation, logging, default values and reactivity; Vue 3's reactive system is built on them. They add a small performance cost and hidden behaviour, so use them carefully.",
+    "example": "const user = new Proxy({}, {\n  set(target, key, value) {\n    if (key === 'age' && value < 0) throw new Error('Bad age');\n    target[key] = value;\n    return true;\n  }\n});\nuser.age = 30; // ok"
+  },
+  {
+    "id": "js-49",
+    "topic": "js",
+    "level": "advanced",
+    "question": "What is TypeScript, and how is it different from JavaScript?",
+    "answer": "TypeScript is a superset of JavaScript: all valid JS is valid TS, plus you can add static type annotations. The TypeScript compiler checks those types before the code runs and then outputs plain JavaScript. This catches mistakes like typos in property names or wrong argument types early, and gives better autocomplete and safer refactoring in big codebases. The cost is a build step and some extra code to write.",
+    "example": "// JavaScript\nfunction area(w, h) { return w * h; }\narea('5', 2); // runs, gives 10 via coercion\n\n// TypeScript\nfunction area(w: number, h: number): number { return w * h; }\narea('5', 2); // compile error"
+  },
+  {
+    "id": "js-50",
+    "topic": "js",
+    "level": "advanced",
+    "question": "Do TypeScript types exist at runtime? What does that mean for validating API input?",
+    "answer": "No. TypeScript types are erased when the code is compiled, so the running JavaScript has no idea about them. This means a type annotation on req.body only describes what you hope arrives; it does not check what actually arrives from a client or a database. To be truly safe, you must validate external data at runtime with checks or a schema library such as Zod or Joi. A good mental model: TypeScript protects you from your own code, runtime validation protects you from the outside world.",
+    "example": "type User = { name: string; age: number };\nconst body = req.body as User; // no runtime check!\n// body.age could still be 'abc'\n\nif (typeof body.age !== 'number') throw new Error('Invalid age');"
+  }
+]

@@ -1,0 +1,402 @@
+[
+  {
+    "id": "arch-01",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What does DRY (Don't Repeat Yourself) really mean?",
+    "answer": "DRY means every piece of knowledge (a business rule, a formula, a config value) should live in one place only. It is about knowledge, not about lines of code that happen to look alike. If the tax rule is copied into three files, a change means three edits and one will be missed. Trade-off: merging code that only looks the same but changes for different reasons creates a wrong abstraction, which is worse than a little duplication.",
+    "example": "// before: rule copied in 2 routes\nconst total = price * 1.18;\n// after: one source of truth\nconst withTax = (p) => p * TAX_RATE;\nconst total = withTax(price);"
+  },
+  {
+    "id": "arch-02",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is KISS (Keep It Simple, Stupid) and why does it matter?",
+    "answer": "KISS says choose the simplest design that solves today's problem correctly. Simple code is easier to read, test, debug and hand over to a teammate. Clever one-liners, deep class trees or extra layers add mental cost on every future read. Example: a plain function with an if/else is often better than a plugin system nobody asked for.",
+    "example": ""
+  },
+  {
+    "id": "arch-03",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is YAGNI (You Aren't Gonna Need It)?",
+    "answer": "YAGNI means do not build features or flexibility until there is a real need for them. Guessed future needs are often wrong, and the unused code still has to be read, tested and maintained. Example: do not add multi-currency support to a checkout that only sells in one currency 'just in case'. It does not mean ignoring good structure; it means not writing speculative features.",
+    "example": ""
+  },
+  {
+    "id": "arch-04",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is separation of concerns?",
+    "answer": "Separation of concerns means splitting a program so each part handles one kind of job, such as HTTP handling, business rules or database access. Each part can then change without breaking the others. In an Express app, the route should not contain SQL and email-sending logic all mixed together. This makes code easier to test, reuse and reason about.",
+    "example": "routes/user.js     -> HTTP in/out\nservices/user.js   -> business rules\nrepos/user.js      -> DB queries"
+  },
+  {
+    "id": "arch-05",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is the difference between coupling and cohesion?",
+    "answer": "Coupling is how much one module depends on the inner details of another; cohesion is how closely the things inside one module belong together. The goal is low coupling and high cohesion. Low coupling means you can change one module without a chain of edits elsewhere. High cohesion means a module like 'billing' holds billing logic only, not random helpers for emails and logging.",
+    "example": ""
+  },
+  {
+    "id": "arch-06",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What does SOLID stand for, and what is the Single Responsibility Principle (S)?",
+    "answer": "SOLID is five object-oriented design principles: Single responsibility, Open/closed, Liskov substitution, Interface segregation, Dependency inversion. SRP says a module should have only one reason to change, meaning it serves one actor or concern. A UserService that validates input, saves to Mongo, sends emails and builds PDFs has many reasons to change. Splitting it means a change to email templates cannot break saving users.",
+    "example": ""
+  },
+  {
+    "id": "arch-07",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is the Open/Closed Principle (O in SOLID)?",
+    "answer": "Software should be open for extension but closed for modification: you add new behaviour by adding new code, not by editing working code. This lowers the risk of breaking things that already work. Example: instead of a growing switch over payment types, each payment method is its own object with a pay() method, and a new method is just a new object. Do not over-apply it; only add extension points where change is actually expected.",
+    "example": "const payers = { card: payCard, upi: payUpi };\n// add wallet without touching checkout():\npayers.wallet = payWallet;\nfunction checkout(type, amt) { return payers[type](amt); }"
+  },
+  {
+    "id": "arch-08",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is the Liskov Substitution Principle (L in SOLID)?",
+    "answer": "If B is a subtype of A, you should be able to use B anywhere A is expected without breaking the program. A subtype must keep the promises of its parent: same inputs accepted, same kind of outputs, no surprise exceptions. The classic broken example is Square extends Rectangle, where setting width also changes height and surprises callers. In JS it also applies to duck typing: any object passed as a 'logger' must really behave like a logger.",
+    "example": ""
+  },
+  {
+    "id": "arch-09",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What are the Interface Segregation (I) and Dependency Inversion (D) principles?",
+    "answer": "ISP: clients should not be forced to depend on methods they do not use, so prefer small focused interfaces over one big one. DIP: high-level business code should depend on abstractions, not on concrete low-level details like a specific database driver. Together they let you swap parts easily. Example: an OrderService depends on an 'orderRepo' with save() and findById(), not directly on Mongoose, so tests can pass a fake repo.",
+    "example": "interface OrderRepo { save(o): Promise<void> }\nclass OrderService {\n  constructor(private repo: OrderRepo) {}\n}"
+  },
+  {
+    "id": "arch-10",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What does 'composition over inheritance' mean?",
+    "answer": "It means build behaviour by combining small objects or functions instead of creating deep class hierarchies. Inheritance creates tight coupling: a change in the parent can break every child, and you get stuck when an object needs features from two branches. With composition you pick only the pieces you need. In JS this is natural: pass functions in, or assemble objects from small capability objects.",
+    "example": "const canLog = (o) => ({ log: (m) => console.log(o.name, m) });\nconst canSave = (o) => ({ save: () => db.put(o) });\nconst user = { name: 'asha' };\nObject.assign(user, canLog(user), canSave(user));"
+  },
+  {
+    "id": "arch-11",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is layered architecture (controller / service / repository)?",
+    "answer": "Layered architecture splits the app into layers where each layer only calls the one below it. The controller handles HTTP (parse request, send response), the service holds business rules, and the repository talks to the database. Benefits: clear places for code, easier testing, and you can change the DB without touching business logic. Trade-off: for tiny apps it can feel like boilerplate.",
+    "example": "router.post('/orders', ctrl.create)\nctrl.create  -> service.placeOrder(dto)\nservice      -> repo.save(order)\nrepo         -> Order.create(...) // Mongoose"
+  },
+  {
+    "id": "arch-12",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is MVC (Model-View-Controller)?",
+    "answer": "MVC splits an app into three roles. The Model holds data and business rules, the View shows data to the user, and the Controller receives input, calls the model and picks the view. It separates UI from logic so each can change on its own. In a classic Express app with templates: routes act as controllers, Mongoose schemas as models, and EJS/Pug files as views. In a JSON API, the 'view' is basically the JSON response.",
+    "example": ""
+  },
+  {
+    "id": "arch-13",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What does RESTful actually mean?",
+    "answer": "REST (Representational State Transfer) is an architectural style for APIs, defined by Roy Fielding. Key ideas: everything is a resource with a URL, you act on it with standard HTTP methods (GET, POST, PUT, PATCH, DELETE), each request is stateless and self-contained, responses can be cached, and clients get representations such as JSON. A RESTful API uses nouns for URLs and lets HTTP methods and status codes carry meaning, instead of URLs like /getUser or /deleteOrder.",
+    "example": "GET    /users/42      -> 200 user\nPOST   /users         -> 201 created\nPATCH  /users/42      -> 200 updated\nDELETE /users/42      -> 204 no content"
+  },
+  {
+    "id": "arch-14",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What does it mean for a server to be stateless, and why does it help scaling?",
+    "answer": "A stateless server keeps no client session data in its own memory between requests; each request carries everything needed, such as a JWT or session ID. Any server instance can then handle any request, so you can add or remove instances freely behind a load balancer. If you store sessions in Node process memory, a user hitting a different instance appears logged out. The fix is to move state into a shared store like Redis or the database.",
+    "example": ""
+  },
+  {
+    "id": "arch-15",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is idempotency, and which HTTP methods are idempotent?",
+    "answer": "An operation is idempotent if doing it once or many times leaves the system in the same final state. GET, PUT and DELETE are idempotent by definition; POST is not, and PATCH is not guaranteed. It matters because networks fail and clients retry: a retried 'charge card' POST could charge twice. A common fix is an Idempotency-Key header that the server stores, so repeated requests with the same key return the first result.",
+    "example": "POST /payments\nIdempotency-Key: 7f3a-...\n// server: if key seen -> return saved response\n//         else process + store result by key"
+  },
+  {
+    "id": "arch-16",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is the difference between synchronous and asynchronous communication between services?",
+    "answer": "In synchronous communication the caller sends a request and waits for the answer, like an HTTP call from service A to service B. In asynchronous communication the caller sends a message (often to a queue) and moves on; the receiver handles it later. Sync is simpler and gives an immediate answer, but couples availability: if B is down, A fails too. Async decouples services and absorbs traffic spikes, but adds complexity and eventual consistency.",
+    "example": ""
+  },
+  {
+    "id": "arch-17",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is the difference between vertical and horizontal scaling?",
+    "answer": "Vertical scaling (scale up) means giving one machine more CPU, RAM or disk. Horizontal scaling (scale out) means adding more machines and spreading load across them. Vertical is simple but has a hard ceiling and the box stays a single point of failure. Horizontal can grow much further and improves resilience, but needs stateless apps, a load balancer and care with shared data. In Node, even the cluster module or PM2 using all CPU cores is a small form of scaling out.",
+    "example": ""
+  },
+  {
+    "id": "arch-18",
+    "topic": "architecture",
+    "level": "basic",
+    "question": "What is the difference between latency and throughput?",
+    "answer": "Latency is how long one request takes from start to finish, for example 120 ms. Throughput is how many requests the system completes per unit of time, for example 2,000 requests per second. They are related but different: a highway can carry many cars (high throughput) even if each trip is long (high latency). Batching usually raises throughput but increases latency per item, so you tune based on what users need.",
+    "example": ""
+  },
+  {
+    "id": "arch-19",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is dependency injection (DI), and how does it look in Node?",
+    "answer": "Dependency injection means a module receives the things it needs (database, logger, mailer) from outside instead of creating or importing them itself. It is a practical way to apply the Dependency Inversion Principle. The big win is testability: in tests you inject fakes instead of real services. In Node you can do it by hand with constructor or function parameters; frameworks like NestJS use a DI container to wire things automatically.",
+    "example": "function makeUserService({ userRepo, mailer }) {\n  return { async register(u) {\n    await userRepo.save(u); await mailer.welcome(u);\n  }};\n}\n// test: makeUserService({ userRepo: fakeRepo, mailer: fakeMailer })"
+  },
+  {
+    "id": "arch-20",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What are the Singleton and Factory patterns, and how do they appear in Node?",
+    "answer": "Singleton ensures only one instance of something exists, like one DB connection pool. In Node, a module that exports an instance is effectively a singleton because require/import caches modules. Downside: hidden global state that makes testing harder. Factory is a function that creates objects for you and hides which concrete type is made, for example createLogger(env) returning a console logger in dev and a JSON logger in production.",
+    "example": "// db.js (singleton via module cache)\nmodule.exports = new Pool(config);\n// factory\nfunction createStorage(kind) {\n  return kind === 's3' ? new S3Store() : new DiskStore();\n}"
+  },
+  {
+    "id": "arch-21",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the Observer pattern, and where do you see it in Node?",
+    "answer": "In the Observer pattern, a subject keeps a list of listeners and notifies them when something happens, without knowing what they do. This decouples the thing that emits an event from the things that react to it. Node's EventEmitter is exactly this: streams, HTTP servers and sockets all emit events. Watch out for memory leaks from listeners that are never removed.",
+    "example": "const { EventEmitter } = require('events');\nconst orders = new EventEmitter();\norders.on('placed', (o) => sendEmail(o));\norders.on('placed', (o) => updateStats(o));\norders.emit('placed', order);"
+  },
+  {
+    "id": "arch-22",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the Strategy pattern?",
+    "answer": "The Strategy pattern defines a family of interchangeable algorithms behind the same interface and picks one at runtime. The calling code does not change when you add a new strategy, which follows the Open/Closed Principle. Example: different pricing rules, compression methods or Passport.js login strategies (local, Google, JWT). In JS, strategies are often just functions stored in an object.",
+    "example": "const shipping = {\n  standard: (w) => 50 + w * 2,\n  express:  (w) => 120 + w * 3,\n};\nconst cost = shipping[order.method](order.weight);"
+  },
+  {
+    "id": "arch-23",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the Adapter pattern?",
+    "answer": "An Adapter wraps something with an incompatible interface so it matches the interface your code expects. It lets you plug in third-party libraries or legacy APIs without spreading their quirks across your code. Example: you write an adapter for Twilio and another for a different SMS provider, both exposing send(to, text). Switching vendors then means writing a new adapter, not changing every caller.",
+    "example": "class TwilioSms {\n  constructor(client) { this.c = client; }\n  send(to, text) {\n    return this.c.messages.create({ to, body: text });\n  }\n}"
+  },
+  {
+    "id": "arch-24",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the middleware / chain of responsibility pattern?",
+    "answer": "Chain of responsibility passes a request along a chain of handlers; each one can handle it, change it, or pass it on to the next. Express and Koa middleware is this pattern: logging, auth, body parsing and validation run in order, each calling next(). It keeps cross-cutting concerns out of route handlers. Order matters: an auth middleware placed after the route will never protect it.",
+    "example": "app.use(logger);\napp.use(express.json());\napp.use((req, res, next) => {\n  if (!req.headers.authorization) return res.sendStatus(401);\n  next();\n});\napp.get('/me', handler);"
+  },
+  {
+    "id": "arch-25",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the Repository pattern?",
+    "answer": "A repository is an object that acts like an in-memory collection of domain objects and hides how data is actually stored. Business code calls methods like findById or save instead of writing Mongoose or SQL queries directly. This keeps the service layer independent of the database and makes testing easy with an in-memory fake. Trade-off: a thin repository over a powerful ORM can become pointless boilerplate, so keep methods meaningful.",
+    "example": "class UserRepo {\n  findByEmail(email) { return User.findOne({ email }); }\n  save(user) { return User.create(user); }\n}"
+  },
+  {
+    "id": "arch-26",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "Compare a monolith, microservices and a modular monolith.",
+    "answer": "A monolith is one deployable app containing all features; it is simple to build, test and deploy but can become tangled as it grows. Microservices split the system into small independently deployable services, each owning its data; teams move independently, but you pay with network calls, distributed failures and harder debugging. A modular monolith is one deployable with strict internal module boundaries, giving much of the structure of microservices without the operational cost. Many teams start modular and extract services only when needed.",
+    "example": ""
+  },
+  {
+    "id": "arch-27",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is an API gateway, and what does it do?",
+    "answer": "An API gateway is a single entry point that sits in front of many backend services. It routes each request to the right service and handles shared concerns such as authentication, rate limiting, TLS, logging and sometimes response aggregation. Clients then talk to one URL instead of knowing every internal service. Risks: it can become a bottleneck or single point of failure, so it must be scaled and kept thin. Examples: Kong, AWS API Gateway, NGINX.",
+    "example": "client -> [API Gateway: auth, rate limit]\n            |-> /users   -> user-service\n            |-> /orders  -> order-service\n            |-> /calls   -> call-service"
+  },
+  {
+    "id": "arch-28",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "How do REST, GraphQL and gRPC differ, and when would you choose each?",
+    "answer": "REST uses resources and HTTP methods, usually JSON; it is simple, cache-friendly and universal. GraphQL uses one endpoint where the client asks for exactly the fields it needs, which avoids over-fetching and suits complex frontends, but caching and query cost control are harder. gRPC uses HTTP/2 and Protocol Buffers with typed contracts; it is fast and supports streaming, so it fits internal service-to-service calls, but browsers need a proxy to use it. Choose by client type and performance needs.",
+    "example": ""
+  },
+  {
+    "id": "arch-29",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is a message queue, and how is it different from pub/sub?",
+    "answer": "A message queue holds messages until a consumer takes them; each message is normally processed by one consumer, which spreads work among workers (for example BullMQ or RabbitMQ queues for sending emails). In pub/sub, a publisher sends an event to a topic and every subscriber gets its own copy, so many services can react to the same event. Both decouple producers from consumers and smooth traffic spikes. Kafka can do both styles using consumer groups.",
+    "example": "Queue:   producer -> [q] -> one of worker1/worker2\nPub/sub: publisher -> topic 'order.placed'\n           -> email-svc (copy)\n           -> stats-svc (copy)"
+  },
+  {
+    "id": "arch-30",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "Explain cache-aside versus write-through caching.",
+    "answer": "Cache-aside (lazy loading): the app checks the cache first; on a miss it reads the database, stores the result in the cache, then returns it. Only requested data gets cached, but the first request is slow and data can go stale. Write-through: every write goes to the cache and the database together, so the cache is always fresh, but writes are slower and you may cache data nobody reads. Cache-aside with Redis is the most common pattern in Node apps.",
+    "example": "async function getUser(id) {\n  const hit = await redis.get(`user:${id}`);\n  if (hit) return JSON.parse(hit);\n  const u = await db.users.findById(id);\n  await redis.set(`user:${id}`, JSON.stringify(u), 'EX', 300);\n  return u;\n}"
+  },
+  {
+    "id": "arch-31",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is cache invalidation, and how does TTL help?",
+    "answer": "Cache invalidation means removing or updating cached data when the source data changes, so users do not see stale values. Common approaches: delete the cache key when you update the database, or publish an event that tells caches to drop it. TTL (time to live) gives each entry an expiry time, so even if you forget to invalidate, stale data disappears after a while. Short TTL means fresher data but more database load; long TTL means the reverse.",
+    "example": "await db.users.update(id, data);\nawait redis.del(`user:${id}`); // invalidate\n// plus safety net: set(key, val, 'EX', 300)"
+  },
+  {
+    "id": "arch-32",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is a CDN, and what should you put on it?",
+    "answer": "A CDN (Content Delivery Network) is a network of servers spread around the world that cache your content close to users. A user in Mumbai is served from a nearby edge server instead of your origin in the US, which cuts latency and reduces load on your servers. It is ideal for static files like JS bundles, images, videos and fonts, and can also cache public API responses. You control it with Cache-Control headers and use versioned file names to bust old caches.",
+    "example": ""
+  },
+  {
+    "id": "arch-33",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What are common load balancing algorithms?",
+    "answer": "A load balancer spreads incoming requests across several servers. Round robin sends requests to each server in turn; weighted round robin gives bigger servers more. Least connections sends to the server with the fewest active connections, which suits long or uneven requests like WebSockets. IP hash or consistent hashing sends the same client to the same server (sticky), useful for caches. Load balancers also run health checks and stop sending traffic to dead servers.",
+    "example": ""
+  },
+  {
+    "id": "arch-34",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the difference between containers and virtual machines?",
+    "answer": "A virtual machine emulates a full computer with its own guest operating system kernel on top of a hypervisor, so it is heavy (GBs) and slow to boot. A container packages the app with its dependencies but shares the host's kernel, isolated with OS features (namespaces and cgroups), so it is light (MBs) and starts in seconds. Containers like Docker give 'works on my machine' consistency for a Node app. VMs give stronger isolation; in the cloud, containers often run inside VMs.",
+    "example": "FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --omit=dev\nCOPY . .\nCMD [\"node\", \"server.js\"]"
+  },
+  {
+    "id": "arch-35",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is the Twelve-Factor App methodology? Name a few key factors.",
+    "answer": "Twelve-Factor is a set of 12 practices for building cloud-ready services that are easy to deploy and scale. Key factors: keep config in environment variables, not in code; treat backing services like databases as attached resources by URL; run the app as stateless processes; scale out by running more processes; keep dev, staging and prod as similar as possible; write logs to stdout as a stream; and have fast startup and graceful shutdown. Using process.env and dotenv in Node is a direct example.",
+    "example": "// config from env, not hard-coded\nconst db = process.env.DATABASE_URL;\nconsole.log(JSON.stringify({ msg: 'started' })); // logs to stdout\nprocess.on('SIGTERM', () => server.close());"
+  },
+  {
+    "id": "arch-36",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is technical debt, and how should a team handle it?",
+    "answer": "Technical debt is the future cost of taking shortcuts now, such as quick hacks, missing tests or an outdated design. Like money debt, it is not always bad: shipping fast to meet a deadline can be the right call, but it collects 'interest' as every later change becomes slower and riskier. Handle it by making it visible (tickets, TODOs with owners), paying it down steadily alongside feature work, and refactoring the areas you touch often first.",
+    "example": ""
+  },
+  {
+    "id": "arch-37",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What are the three pillars of observability: logs, metrics and traces?",
+    "answer": "Logs are timestamped records of individual events, best written as structured JSON with fields like requestId. Metrics are numbers over time, such as request rate, error rate and p95 latency, which are cheap to store and great for dashboards and alerts. Traces follow one request across many services, showing where time was spent in each hop. Together they let you ask new questions about a live system; OpenTelemetry is the common standard for collecting all three.",
+    "example": "logger.info({ reqId, userId, route: '/orders', ms: 84 }, 'order created');\n// metric: http_requests_total{status=\"500\"}\n// trace: gateway 5ms -> order-svc 40ms -> db 30ms"
+  },
+  {
+    "id": "arch-38",
+    "topic": "architecture",
+    "level": "intermediate",
+    "question": "What is serverless architecture, and what are its trade-offs?",
+    "answer": "Serverless means you deploy functions or services and the cloud provider runs, scales and patches the servers for you, charging per request or execution time (for example AWS Lambda). Benefits: no server management, automatic scaling to zero and up, and low cost for spiky or low traffic. Downsides: cold-start latency, execution time limits, vendor lock-in, harder local debugging, and care needed with DB connections because many function instances can exhaust a connection pool.",
+    "example": ""
+  },
+  {
+    "id": "arch-39",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What are clean architecture and hexagonal (ports and adapters) architecture?",
+    "answer": "Both put business logic (the domain) at the centre and keep frameworks, databases and UIs at the edges. The core rule is that dependencies point inward: the domain knows nothing about Express or MongoDB. In hexagonal terms, the core defines ports (interfaces like PaymentGateway) and the outside world plugs in adapters (Stripe adapter, REST controller, test fake). This makes the core easy to test and lets you swap infrastructure, at the cost of more files and indirection.",
+    "example": "[HTTP adapter] -> port: PlaceOrder  ->  DOMAIN\nDOMAIN -> port: OrderRepo     <- [Mongo adapter]\nDOMAIN -> port: PaymentGateway <- [Stripe adapter]"
+  },
+  {
+    "id": "arch-40",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What is event-driven architecture, and what are its pros and cons?",
+    "answer": "In event-driven architecture, services communicate by publishing events that describe facts that happened, like 'OrderPlaced', and other services react to them. Producers do not know who consumes, so you can add new consumers without touching the producer. It gives loose coupling, scalability and resilience to slow consumers. Downsides: the overall flow is harder to follow and debug, data becomes eventually consistent, and you must handle duplicate and out-of-order events.",
+    "example": ""
+  },
+  {
+    "id": "arch-41",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What are event sourcing and CQRS, and how do they relate?",
+    "answer": "Event sourcing stores every change as an immutable event (Deposited 100, Withdrew 30) instead of only the current state; current state is rebuilt by replaying events. You get a full audit trail and can rebuild views, but schemas and replays get complex. CQRS (Command Query Responsibility Segregation) uses separate models for writes and reads, so each can be optimised. They are often used together: commands append events, and projections build read-optimised views from them.",
+    "example": "events: [Opened, Deposited(100), Withdrew(30)]\nbalance = events.reduce(apply, 0) // 70\nwrite side: append event\nread side: projection -> 'balances' table"
+  },
+  {
+    "id": "arch-42",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What are database replication and sharding at the architecture level?",
+    "answer": "Replication copies the same data to several nodes. A common setup is one primary that takes writes and replicas that serve reads, which increases read capacity and availability; replicas may lag slightly behind. Sharding splits data across nodes by a shard key, for example by userId, so each node holds only part of the data, which scales writes and storage. A bad shard key creates hot spots, and cross-shard queries and transactions become hard. MongoDB supports both with replica sets and sharded clusters.",
+    "example": ""
+  },
+  {
+    "id": "arch-43",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What does the CAP theorem say?",
+    "answer": "CAP says that a distributed data system, during a network partition (P), must choose between Consistency (every read sees the latest write or gets an error) and Availability (every request gets a non-error response, possibly stale). Since partitions in real networks cannot be avoided, the real choice is C or A while the partition lasts. A banking ledger may choose consistency and reject requests; a social feed may choose availability and show slightly old data. When there is no partition, a system can offer both.",
+    "example": ""
+  },
+  {
+    "id": "arch-44",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What is the difference between strong consistency and eventual consistency?",
+    "answer": "Strong consistency means that once a write succeeds, every later read from anywhere sees it. Eventual consistency means replicas may return old data for a short time, but if writes stop, all replicas will eventually agree. Strong consistency is easier to reason about but costs latency and availability, because nodes must coordinate. Eventual consistency is faster and more available but the app must tolerate stale reads, for example a 'like' count that updates a second later. Read-your-own-writes is a useful middle ground.",
+    "example": ""
+  },
+  {
+    "id": "arch-45",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "How does the token bucket rate limiting algorithm work?",
+    "answer": "A bucket holds up to N tokens and is refilled at a fixed rate, for example 10 tokens per second. Each request takes one token; if the bucket is empty the request is rejected (HTTP 429) or delayed. It allows short bursts up to the bucket size while enforcing an average rate. Other algorithms: fixed window counter (simple but bursty at window edges), sliding window (smoother), and leaky bucket (constant output rate). In a multi-instance Node app, keep the counters in Redis so all instances share them.",
+    "example": "refill: tokens = min(cap, tokens + rate * elapsedSec)\nif (tokens >= 1) { tokens -= 1; allow(); }\nelse res.status(429).set('Retry-After', '1').end();"
+  },
+  {
+    "id": "arch-46",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What is the circuit breaker pattern?",
+    "answer": "A circuit breaker wraps calls to a remote service and stops calling it when it keeps failing, so your service fails fast instead of piling up waiting requests. It has three states: Closed (calls pass through and failures are counted), Open (calls fail immediately or return a fallback for a cool-down period), and Half-open (a few trial calls are allowed; success closes it, failure opens it again). It prevents cascading failures across services. In Node, the opossum library implements it.",
+    "example": "CLOSED --too many failures--> OPEN\nOPEN   --timeout expires----> HALF_OPEN\nHALF_OPEN --trial ok--> CLOSED\nHALF_OPEN --trial fails--> OPEN"
+  },
+  {
+    "id": "arch-47",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "Why use retries with exponential backoff and jitter?",
+    "answer": "Retries handle temporary failures such as timeouts or 503 errors. Exponential backoff waits longer after each failure (for example 100 ms, 200 ms, 400 ms) so a struggling service gets time to recover. Jitter adds randomness to each wait so thousands of clients do not all retry at the same moment (the thundering herd). Always cap the number of retries, retry only idempotent or idempotency-keyed operations, and do not retry errors like 400 that will never succeed.",
+    "example": "for (let i = 0; i < 5; i++) {\n  try { return await call(); }\n  catch (e) { if (!isRetryable(e)) throw e; }\n  const base = 100 * 2 ** i;\n  await sleep(Math.random() * base); // full jitter\n}\nthrow new Error('gave up');"
+  },
+  {
+    "id": "arch-48",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What is the difference between an SLI, an SLO and an SLA?",
+    "answer": "An SLI (Service Level Indicator) is a measured number, such as the percentage of requests served successfully under 300 ms. An SLO (Service Level Objective) is the internal target for that number, such as 99.9% over 30 days. An SLA (Service Level Agreement) is a contract with customers that promises a level and sets penalties, such as credits, if it is missed; it is usually looser than the SLO. The gap between 100% and the SLO is the error budget: 99.9% allows about 43 minutes of downtime a month.",
+    "example": ""
+  },
+  {
+    "id": "arch-49",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What is a single point of failure, and how does redundancy remove it?",
+    "answer": "A single point of failure (SPOF) is any one component whose failure brings the whole system down, such as one database server, one load balancer or one region. Redundancy removes it by running extra copies so another takes over automatically: multiple app instances behind a load balancer, database replicas with failover, and deployment across availability zones. Redundancy only helps if failover is automatic and tested. Also look for hidden SPOFs like a single DNS provider or one engineer who knows the deploy.",
+    "example": ""
+  },
+  {
+    "id": "arch-50",
+    "topic": "architecture",
+    "level": "advanced",
+    "question": "What is back-of-the-envelope estimation, and how do you do one?",
+    "answer": "It is a quick rough calculation to check whether a design can handle the expected load before building it. Start from users and behaviour, convert to requests per second and storage, then compare with what one server or database can handle. Use round numbers: a day is about 100,000 seconds. Example: 1 million daily users making 10 requests each is 10 million a day, roughly 100 requests per second on average, maybe 300 at peak. The goal is the right order of magnitude, not precision.",
+    "example": "1M users * 10 req/day = 10M req/day\n10M / ~100k sec/day  = ~100 req/s avg\npeak ~3x             = ~300 req/s\n1 KB per record * 10M/day = ~10 GB/day"
+  }
+]

@@ -5,6 +5,7 @@ const {
   findLearnedIdsService,
 } = require("../Service/dayService");
 const { tasksForDate, PLAN_UPDATED_ON } = require("../../utils/plan");
+const { syncReviewsForDay } = require("./reviewBusiness");
 const {
   DATE_REGEX,
   MAX_CUSTOM_TASKS,
@@ -136,6 +137,7 @@ const updateDayBusiness = async (dbName, date, payload = {}) => {
   };
 
   const saved = await upsertDayService(dbName, date, update);
+  await syncReviewsForDay(dbName, date, baseTasks, saved.tasks);
   return shapeDay(date, saved, saved.tasks);
 };
 

@@ -9,3 +9,15 @@ module.exports = {
   MAX_CUSTOM_TASKS,
   MAX_NOTE_LENGTH,
 };
+
+// Login limits: this many wrong passcodes from one device/network...
+const LOGIN_MAX_FAILS = 5;
+// ...inside this window locks login for the rest of the window
+const LOGIN_WINDOW_MINUTES = 15;
+
+// Spaced repetition: days until the next review after each "Easy"
+const REVIEW_INTERVALS = [1, 3, 7, 21, 60];
+
+module.exports.LOGIN_MAX_FAILS = LOGIN_MAX_FAILS;
+module.exports.LOGIN_WINDOW_MINUTES = LOGIN_WINDOW_MINUTES;
+module.exports.REVIEW_INTERVALS = REVIEW_INTERVALS;

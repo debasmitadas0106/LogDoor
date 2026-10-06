@@ -1,6 +1,11 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const { TOKEN_EXPIRY } = require("../../middleware/constants");
+const { TOKEN_EXPIRY, LOGIN_MAX_FAILS, LOGIN_WINDOW_MINUTES } = require("../../middleware/constants");
+const {
+  findRecentFailsService,
+  addFailService,
+  clearFailsService,
+} = require("../Service/loginAttemptService");
 const {
   findUserService,
   createUserService,
@@ -52,12 +57,32 @@ const findAccount = async (passcode, passcodeHash) => {
   return null;
 };
 
-const loginBusiness = async ({ passcode } = {}) => {
+// Stop someone guessing passcodes over and over from the same place
+const assertNotLocked = async (ip) => {
+  const since = new Date(Date.now() - LOGIN_WINDOW_MINUTES * 60 * 1000);
+  const fails = await findRecentFailsService(ip, since);
+  if (fails.length >= LOGIN_MAX_FAILS) {
+    const unlockAt = new Date(fails[0].createdAt).getTime() + LOGIN_WINDOW_MINUTES * 60 * 1000;
+    const minutes = Math.max(1, Math.ceil((unlockAt - Date.now()) / 60000));
+    throw Object.assign(httpError(429, `Too many wrong tries. Try again in ${minutes} minute${minutes > 1 ? "s" : ""}.`), {
+      retryAfter: minutes * 60,
+    });
+  }
+  return fails.length;
+};
+
+const loginBusiness = async ({ passcode } = {}, ip = "unknown") => {
   if (!process.env.JWT_SECRET) throw httpError(500, "Server is missing JWT_SECRET");
   if (typeof passcode !== "string" || !passcode.trim()) throw httpError(400, "Enter your passcode");
 
+  const failsSoFar = await assertNotLocked(ip);
   let user = await findAccount(passcode, hashPasscode(passcode));
-  if (!user) throw httpError(401, "Wrong passcode");
+  if (!user) {
+    await addFailService(ip);
+    const left = LOGIN_MAX_FAILS - failsSoFar - 1;
+    throw httpError(401, left > 0 ? `Wrong passcode. ${left} tr${left > 1 ? "ies" : "y"} left.` : "Wrong passcode.");
+  }
+  if (failsSoFar) await clearFailsService(ip);
   if (user.active === false) throw httpError(403, "This account is turned off");
 
   const set = { lastLoginAt: new Date() };

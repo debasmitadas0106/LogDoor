@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Study" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Study Tracker</title>
   <meta name="theme-color" content="#0f1222" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236d5efc'/%3E%3Cpath d='M9 17l4.5 4.5L23 11' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
@@ -33,14 +39,20 @@
         <span class="logo small"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
         <span class="brand-text">Study Tracker<span id="userName" class="user-name"></span></span>
       </div>
+      <div class="top-actions">
+      <button id="bellBtn" class="icon-btn" title="Evening reminder" aria-label="Evening reminder">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+      </button>
       <button id="logoutBtn" class="icon-btn" title="Log out" aria-label="Log out">
         <svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4" /></svg>
       </button>
+      </div>
     </header>
 
     <div class="tabs" role="tablist">
       <button class="tab is-active" data-view="today" role="tab">Today</button>
       <button class="tab" data-view="library" role="tab">Library</button>
+      <button class="tab" data-view="problems" role="tab">Problems</button>
       <button class="tab" data-view="books" role="tab">Books</button>
     </div>
 
@@ -88,6 +100,15 @@
       </div>
       <input id="outingToggle" type="checkbox" class="switch" />
     </label>
+
+    <section id="reviewCard" class="card review hidden">
+      <div class="row-between">
+        <h2 class="section-title" style="margin:0">Review</h2>
+        <span id="reviewMeta" class="muted small"></span>
+      </div>
+      <p id="reviewHint" class="muted small review-hint"></p>
+      <div id="reviewList" class="review-list"></div>
+    </section>
 
     <section>
       <h2 class="section-title">Today's tasks</h2>
@@ -147,6 +168,55 @@
       <button id="libMore" class="more-btn hidden">Show more</button>
     </div>
 
+    <div id="problemsView" class="view hidden">
+      <section class="card books-hero">
+        <div>
+          <div class="lib-title">Problems log</div>
+          <div class="muted small">Write down what tricked you. That's where the learning is.</div>
+        </div>
+        <div class="books-stats">
+          <div class="stat s-todo"><b id="pbTotal">0</b><span>solved</span></div>
+          <div class="stat s-reading"><b id="pbWeek">0</b><span>this week</span></div>
+          <div class="stat s-revisit"><b id="pbRevisit">0</b><span>revisit</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="pbFormTitle" class="section-title">Log a problem</h2>
+        <form id="problemForm" class="book-form">
+          <input id="pbTitle" class="span-2" placeholder="Problem name, e.g. Two Sum" maxlength="150" required />
+          <input id="pbLink" class="span-2" type="url" placeholder="Link (optional)" maxlength="500" />
+          <input id="pbTopic" list="topicList" placeholder="Topic, e.g. Arrays" maxlength="40" />
+          <select id="pbDifficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <textarea id="pbTricked" class="span-2" rows="3" maxlength="1000" placeholder="What tricked me? (the edge case, the wrong first idea, the bug…)"></textarea>
+          <input id="pbDate" type="date" required />
+          <label class="check-label"><input id="pbRevisit" type="checkbox" /> Revisit later</label>
+          <button class="btn-primary" type="submit" id="pbSubmit">Save problem</button>
+          <button class="btn-ghost hidden" type="button" id="pbCancel">Cancel edit</button>
+        </form>
+        <datalist id="topicList"></datalist>
+      </section>
+
+      <section class="card lib-head">
+        <div class="lib-filters">
+          <input id="pbSearch" type="search" placeholder="Search problems or notes…" />
+          <select id="pbFilterTopic"></select>
+          <select id="pbFilterMode">
+            <option value="all">All</option>
+            <option value="revisit">To revisit</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </section>
+      <div id="problemList" class="problem-list"></div>
+    </div>
+
     <div id="booksView" class="view hidden">
       <section class="card books-hero">
         <div>
@@ -186,6 +256,27 @@
 
     <footer class="muted small footer">Consistency beats intensity.</footer>
   </main>
+
+  <!-- Reminder settings -->
+  <div id="reminderSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-card">
+      <div class="row-between">
+        <h2 id="sheetTitle" class="lib-title" style="margin:0">Evening reminder</h2>
+        <button id="sheetClose" class="icon-btn" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+      </div>
+      <p class="muted small">A notification at your chosen time, only if tasks or reviews are left for the day.</p>
+      <div id="iosHint" class="ios-hint hidden">On iPhone, reminders work only from the app on your Home Screen. Open it from there, then turn this on.</div>
+      <label class="time-row">
+        <span>Remind me at</span>
+        <input id="reminderTime" type="time" value="20:30" />
+      </label>
+      <div id="reminderStatus" class="muted small"></div>
+      <div class="sheet-actions">
+        <button id="reminderToggle" class="btn-primary">Turn on</button>
+        <button id="reminderTest" class="btn-ghost hidden">Send a test</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast"></div>
   <script src="app.js"></script>

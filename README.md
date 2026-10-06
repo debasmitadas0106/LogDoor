@@ -29,6 +29,13 @@ utils/connectionSetup.js Cached MongoDB connection
 |---|---|---|
 | POST | `/api/login` | Passcode in, JWT out (the token carries your database name) |
 | GET | `/api/me` | Your name |
+| GET | `/api/reviews?date=` | Items due for review on your local date |
+| POST | `/api/reviews/:itemId` | Answer a review: `{ result: "easy" \| "hard", date }` |
+| GET / POST | `/api/problems` | List / log solved problems |
+| PATCH / DELETE | `/api/problems/:id` | Edit (e.g. revisit flag) / remove a problem |
+| GET | `/api/push/key` | Public key the browser needs for notifications |
+| GET / POST / DELETE | `/api/push/subscription` | Reminder status / turn on or change time / turn off |
+| POST | `/api/push/test` | Send yourself a test notification |
 | GET | `/api/days/:date` | One day (plan tasks if nothing saved yet) |
 | PUT | `/api/days/:date` | Save that day's progress, note, outing flag |
 | GET | `/api/days?from=&to=` | Daily summaries for the streak and heatmap |
@@ -73,6 +80,23 @@ utils/connectionSetup.js Cached MongoDB connection
 The app gives you the next items you haven't ticked yet, so anything you
 don't finish rolls over to the next day. Tick an item once you can explain
 it in your own words. The Library tab lets you browse and search everything.
+
+## Review, problems, reminders, login limits
+
+- **Review (spaced repetition):** every library item you tick comes back on
+  the Today page after 1 day. *Easy* pushes it further (3 → 7 → 21 → 60
+  days, then it's mastered); *Hard* brings it back tomorrow. Intervals live
+  in `middleware/constants.js` (`REVIEW_INTERVALS`).
+- **Problems log:** the Problems tab (or "+ Log a problem" on Today's
+  practice task) saves each problem with its link, topic, difficulty and
+  *what tricked me*. Logging one also adds 1 to that day's practice counter.
+- **Evening reminder:** tap the bell. Netlify runs
+  `netlify/functions/reminders.js` every 15 minutes and sends a
+  notification at your chosen time, only if tasks or reviews are left.
+  On iPhone it works only from the Home Screen app (iOS 16.4+).
+  Needs `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT`.
+- **Login limits:** 5 wrong passcodes from the same network locks login
+  there for 15 minutes (`LOGIN_MAX_FAILS`, `LOGIN_WINDOW_MINUTES`).
 
 ## Accounts (one database per person)
 

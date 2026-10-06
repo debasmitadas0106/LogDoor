@@ -49,6 +49,9 @@ const state = {
   open: new Set(),     // expanded items
   revealed: new Set(), // system design items with the reference approach shown
   shelf: { genres: [], books: [] },
+  reviews: { due: [], upcoming: 0, mastered: 0, intervals: [1, 3, 7, 21, 60] },
+  problems: [],
+  editingProblem: null,
   genreFilter: "all",
 };
 
@@ -172,13 +175,15 @@ function itemBody(it, prefix) {
     <div class="meta"><span class="badge ${it.level}">${it.level}</span></div>`;
 }
 
-function renderItem(id, { done, taskIndex = null }) {
+function renderItem(id, { done, taskIndex = null, review = false }) {
   const it = byId[id];
   const prefix = prefixOf(id);
   const color = TRACKS[prefix]?.color || "var(--accent)";
   if (!it) return `<div class="item"><div class="empty">Loading ${escapeHtml(id)}…</div></div>`;
   const open = state.open.has(id);
-  const check = taskIndex === null
+  const check = review
+    ? `<span class="mini-check" style="border-style:dashed" title="Review">${svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')}</span>`
+    : taskIndex === null
     ? `<span class="mini-check" title="${done ? "Learned" : "Not learned yet"}">${CHECK}</span>`
     : `<button class="mini-check" data-act="item-check" data-t="${taskIndex}" data-id="${id}" aria-label="Mark learned">${CHECK}</button>`;
   return `<div class="item ${done ? "is-done" : ""} ${open ? "is-open" : ""}" style="--c:${color}">
@@ -235,12 +240,16 @@ function renderTasks() {
     }
     if (t.kind === "count") {
       const pips = Array.from({ length: t.target }, (_, n) => `<i class="${n < t.count ? "on" : ""}"></i>`).join("");
-      return `<li class="${cls}" style="--c: var(--c-${color})">${head}<div class="pips">${pips}</div></div>
+      const isPractice = t.key === "problem";
+      const logged = isPractice ? state.problems.filter((p) => p.date === day.date).map((p) => p.title) : [];
+      const loggedLine = logged.length ? `<div class="task-hint">Logged: ${escapeHtml(logged.join(", "))}</div>` : "";
+      const logBtn = isPractice ? `<button class="log-btn" data-act="log-problem">+ Log a problem you solved</button>` : "";
+      return `<li class="${cls}${isPractice ? " has-log" : ""}" style="--c: var(--c-${color})">${head}${loggedLine}<div class="pips">${pips}</div></div>
         <div class="counter">
           <button data-act="dec" data-i="${i}" aria-label="Decrease">${svg('<path d="M5 12h14"/>')}</button>
           <div class="count-val">${t.count}<small>/${t.target}</small></div>
           <button data-act="inc" data-i="${i}" aria-label="Increase">${svg('<path d="M12 5v14M5 12h14"/>')}</button>
-        </div></li>`;
+        </div>${logBtn}</li>`;
     }
     const remove = t.custom ? `<button class="remove" data-act="remove" data-i="${i}" aria-label="Remove task">${svg('<path d="M6 6l12 12M18 6L6 18"/>')}</button>` : "";
     return `<li class="${cls}" style="--c: var(--c-${color})">${head}</div>
@@ -483,6 +492,326 @@ $("addGenreForm").addEventListener("submit", async (e) => {
   } catch (err) { toast(err.message); }
 });
 
+// ---------- Review (spaced repetition) ----------
+const daysLabel = (n) => (n === 1 ? "tomorrow" : `in ${n} days`);
+
+async function loadReviews() {
+  if (state.date !== todayKey()) return renderReviews();
+  try {
+    state.reviews = await api("GET", `/reviews?date=${todayKey()}`);
+    await loadTracksFor(state.reviews.due.map((r) => r.itemId));
+  } catch (e) { toast(e.message); }
+  renderReviews();
+}
+
+function renderReviews() {
+  const { due, upcoming, mastered, intervals } = state.reviews;
+  const show = state.date === todayKey() && (due.length || upcoming || mastered);
+  $("reviewCard").classList.toggle("hidden", !show);
+  if (!show) return;
+  const batch = due.slice(0, 10);
+  $("reviewMeta").textContent = due.length ? `${due.length} due today` : `${upcoming} coming up · ${mastered} mastered`;
+  $("reviewHint").textContent = due.length
+    ? "Answer from memory first, then open it to check yourself."
+    : "";
+  if (!due.length) {
+    $("reviewList").innerHTML = `<div class="caught-up">${svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}All caught up for today.</div>`;
+    return;
+  }
+  $("reviewList").innerHTML = batch.map((r) => {
+    const next = intervals[r.stage + 1];
+    const easyLabel = next ? `Easy · ${daysLabel(next)}` : "Easy · mastered!";
+    const dots = intervals.map((_, n) => `<i class="${n < r.stage ? "on" : ""}"></i>`).join("");
+    return `<div class="review-item">
+      ${renderItem(r.itemId, { done: false, review: true })}
+      <div class="review-actions">
+        <button class="btn-hard" data-act="review" data-result="hard" data-id="${r.itemId}">Hard · tomorrow</button>
+        <button class="btn-easy" data-act="review" data-result="easy" data-id="${r.itemId}">${easyLabel}</button>
+      </div>
+      <div class="muted small" style="padding:0 12px 10px 46px">Memory<span class="stage-dots">${dots}</span></div>
+    </div>`;
+  }).join("") + (due.length > batch.length ? `<div class="muted small">+${due.length - batch.length} more after these</div>` : "");
+}
+
+$("reviewList").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  if (btn.dataset.act === "item-open") { toggleOpen(id); return renderReviews(); }
+  if (btn.dataset.act === "reveal") { state.revealed.add(id); return renderReviews(); }
+  if (btn.dataset.act !== "review") return;
+  btn.disabled = true;
+  try {
+    const res = await api("POST", `/reviews/${id}`, { result: btn.dataset.result, date: todayKey() });
+    state.reviews.due = state.reviews.due.filter((r) => r.itemId !== id);
+    if (res.mastered) { state.reviews.mastered++; toast("Mastered! Great memory."); }
+    else { state.reviews.upcoming++; toast(btn.dataset.result === "easy" ? "Nice. See you later." : "Back tomorrow."); }
+    state.open.delete(id);
+    renderReviews();
+  } catch (err) { btn.disabled = false; toast(err.message); }
+});
+
+// ---------- Problems log ----------
+const DEFAULT_TOPICS = ["Arrays", "Strings", "Hashing", "Two pointers", "Sliding window", "Stack", "Queue", "Linked list",
+  "Binary search", "Recursion", "Trees", "Graphs", "Heap", "Dynamic programming", "Greedy", "Sorting", "Math", "SQL", "Bits"];
+const pb = { search: "", topic: "all", mode: "all" };
+
+async function loadProblems() {
+  try {
+    state.problems = await api("GET", "/problems");
+    if (state.view === "problems") renderProblems();
+    if (state.day) renderTasks(); // refresh "Logged: ..." on the practice task
+  } catch (e) { toast(e.message); }
+}
+
+function formatDay(key) {
+  if (key === todayKey()) return "Today";
+  if (key === addDays(todayKey(), -1)) return "Yesterday";
+  return fromKey(key).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+}
+
+function renderProblems() {
+  const list = state.problems;
+  const today = todayKey();
+  const monday = addDays(today, -((fromKey(today).getDay() + 6) % 7));
+  $("pbTotal").textContent = list.length;
+  $("pbWeek").textContent = list.filter((p) => p.date >= monday).length;
+  $("pbRevisit").textContent = list.filter((p) => p.revisit).length;
+
+  const topics = [...new Set(list.map((p) => p.topic).filter(Boolean))].sort();
+  $("topicList").innerHTML = [...new Set([...topics, ...DEFAULT_TOPICS])].map((t) => `<option value="${escapeHtml(t)}">`).join("");
+  $("pbFilterTopic").innerHTML = `<option value="all">All topics</option>` + topics.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  if (!topics.includes(pb.topic)) pb.topic = "all";
+  $("pbFilterTopic").value = pb.topic;
+  if (!$("pbDate").value) $("pbDate").value = today;
+
+  const q = pb.search.trim().toLowerCase();
+  const shown = list.filter((p) =>
+    (pb.topic === "all" || p.topic === pb.topic) &&
+    (pb.mode === "all" || (pb.mode === "revisit" ? p.revisit : p.difficulty === pb.mode)) &&
+    (!q || [p.title, p.topic, p.tricked].join(" ").toLowerCase().includes(q)));
+
+  if (!shown.length) {
+    $("problemList").innerHTML = `<div class="card empty">${list.length ? "Nothing matches your filters." : "No problems yet. Solve one and log it above!"}</div>`;
+    return;
+  }
+  let lastDay = "";
+  $("problemList").innerHTML = shown.map((p) => {
+    const label = p.date !== lastDay ? `<div class="day-label">${formatDay(p.date)}</div>` : "";
+    lastDay = p.date;
+    const title = p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.title)}</a>` : escapeHtml(p.title);
+    return `${label}<div class="problem">
+      <div class="problem-top">
+        <div class="problem-title">${title}</div>
+        <div class="problem-actions">
+          <button class="flag ${p.revisit ? "on" : ""}" data-act="revisit" data-id="${p._id}" title="${p.revisit ? "Marked to revisit" : "Revisit later"}">${svg('<path d="M5 21V4h11l-1.5 4L16 12H5"/>')}</button>
+          <button class="flag" data-act="edit" data-id="${p._id}" title="Edit">${svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')}</button>
+          <button class="remove" data-act="delete" data-id="${p._id}" aria-label="Delete">${svg('<path d="M6 6l12 12M18 6L6 18"/>')}</button>
+        </div>
+      </div>
+      <div class="problem-meta">
+        <span class="badge ${p.difficulty}">${p.difficulty}</span>
+        ${p.topic ? `<span class="badge">${escapeHtml(p.topic)}</span>` : ""}
+      </div>
+      ${p.tricked ? `<div class="tricked"><b>What tricked me</b>${escapeHtml(p.tricked)}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function resetProblemForm() {
+  state.editingProblem = null;
+  $("problemForm").reset();
+  $("pbDate").value = todayKey();
+  $("pbFormTitle").textContent = "Log a problem";
+  $("pbSubmit").textContent = "Save problem";
+  $("pbCancel").classList.add("hidden");
+}
+
+function startLogProblem(date) {
+  location.hash = "problems";
+  resetProblemForm();
+  $("pbDate").value = date;
+  setTimeout(() => { $("problemForm").scrollIntoView({ behavior: "smooth", block: "center" }); $("pbTitle").focus(); }, 150);
+}
+
+$("problemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = {
+    title: $("pbTitle").value, link: $("pbLink").value, topic: $("pbTopic").value,
+    difficulty: $("pbDifficulty").value, tricked: $("pbTricked").value,
+    date: $("pbDate").value, revisit: $("pbRevisit").checked,
+  };
+  try {
+    if (state.editingProblem) {
+      const saved = await api("PATCH", `/problems/${state.editingProblem}`, body);
+      state.problems = state.problems.map((p) => (p._id === saved._id ? saved : p));
+      toast("Problem updated");
+    } else {
+      const saved = await api("POST", "/problems", body);
+      state.problems.unshift(saved);
+      state.problems.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+      // Logging a problem also counts it on that day's practice task
+      const practice = state.day?.date === saved.date && state.day.tasks.find((t) => t.key === "problem");
+      if (practice) { practice.count = Math.min(practice.count + 1, 20); renderTasks(); scheduleSave(); }
+      toast("Problem logged. Nice work!");
+    }
+    resetProblemForm();
+    renderProblems();
+  } catch (err) { toast(err.message); }
+});
+$("pbCancel").addEventListener("click", () => { resetProblemForm(); });
+
+$("problemList").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const p = state.problems.find((x) => x._id === id);
+  try {
+    if (btn.dataset.act === "revisit") {
+      p.revisit = !p.revisit;
+      renderProblems();
+      await api("PATCH", `/problems/${id}`, { revisit: p.revisit });
+    }
+    if (btn.dataset.act === "edit") {
+      state.editingProblem = id;
+      $("pbTitle").value = p.title; $("pbLink").value = p.link || ""; $("pbTopic").value = p.topic || "";
+      $("pbDifficulty").value = p.difficulty; $("pbTricked").value = p.tricked || "";
+      $("pbDate").value = p.date; $("pbRevisit").checked = !!p.revisit;
+      $("pbFormTitle").textContent = "Edit problem";
+      $("pbSubmit").textContent = "Save changes";
+      $("pbCancel").classList.remove("hidden");
+      $("problemForm").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    if (btn.dataset.act === "delete") {
+      await api("DELETE", `/problems/${id}`);
+      state.problems = state.problems.filter((x) => x._id !== id);
+      if (state.editingProblem === id) resetProblemForm();
+      renderProblems();
+      toast("Problem removed");
+    }
+  } catch (err) { toast(err.message); loadProblems(); }
+});
+
+let pbSearchTimer;
+$("pbSearch").addEventListener("input", (e) => {
+  clearTimeout(pbSearchTimer);
+  pbSearchTimer = setTimeout(() => { pb.search = e.target.value; renderProblems(); }, 200);
+});
+$("pbFilterTopic").addEventListener("change", (e) => { pb.topic = e.target.value; renderProblems(); });
+$("pbFilterMode").addEventListener("change", (e) => { pb.mode = e.target.value; renderProblems(); });
+
+// ---------- Evening reminder (web push) ----------
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const pushSupported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+
+// The browser wants the key as raw bytes, the server sends it as base64url text
+const keyToBytes = (base64) => {
+  const raw = atob((base64 + "=".repeat((4 - (base64.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+};
+
+const swReady = () => Promise.race([
+  navigator.serviceWorker.ready,
+  new Promise((_, reject) => setTimeout(() => reject(new Error("App service worker isn't ready. Reload and try again.")), 5000)),
+]);
+const currentSubscription = async () => (await swReady()).pushManager.getSubscription();
+
+const reminder = { enabled: false };
+function renderReminder(statusText = "") {
+  $("reminderToggle").textContent = reminder.enabled ? "Turn off" : "Turn on";
+  $("reminderToggle").classList.toggle("off", reminder.enabled);
+  $("reminderTest").classList.toggle("hidden", !reminder.enabled);
+  $("bellBtn").classList.toggle("on", reminder.enabled);
+  $("reminderStatus").textContent = statusText || (reminder.enabled ? `On · every day at ${$("reminderTime").value}` : "Off");
+}
+
+async function refreshBell() {
+  if (!pushSupported) return;
+  try {
+    const sub = await currentSubscription();
+    if (!sub) return;
+    const res = await api("GET", `/push/subscription?endpoint=${encodeURIComponent(sub.endpoint)}`);
+    reminder.enabled = res.enabled;
+    if (res.time) $("reminderTime").value = res.time;
+    renderReminder();
+  } catch {}
+}
+
+function openReminderSheet() {
+  $("reminderSheet").classList.remove("hidden");
+  const blockedOnIOS = isIOS && !isStandalone;
+  $("iosHint").classList.toggle("hidden", !blockedOnIOS);
+  $("reminderToggle").disabled = !pushSupported || blockedOnIOS;
+  if (!pushSupported && !blockedOnIOS) return renderReminder("This browser doesn't support notifications.");
+  renderReminder();
+  refreshBell();
+}
+const closeReminderSheet = () => $("reminderSheet").classList.add("hidden");
+
+async function saveReminder(sub) {
+  await api("POST", "/push/subscription", {
+    subscription: sub.toJSON(),
+    time: $("reminderTime").value || "20:30",
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+}
+
+$("reminderToggle").addEventListener("click", async () => {
+  const btn = $("reminderToggle");
+  btn.disabled = true;
+  try {
+    if (reminder.enabled) {
+      const sub = await currentSubscription();
+      if (sub) {
+        await api("DELETE", "/push/subscription", { endpoint: sub.endpoint });
+        await sub.unsubscribe();
+      }
+      reminder.enabled = false;
+      renderReminder();
+      toast("Reminder turned off");
+    } else {
+      // Must be called straight from a tap, or iPhone ignores it
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return renderReminder("Notifications are blocked. Allow them for this app in your phone's settings.");
+      const { publicKey } = await api("GET", "/push/key");
+      const reg = await swReady();
+      const sub = (await reg.pushManager.getSubscription()) ||
+        (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(publicKey) }));
+      await saveReminder(sub);
+      reminder.enabled = true;
+      renderReminder();
+      toast("Reminder on");
+    }
+  } catch (err) {
+    renderReminder(err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("reminderTime").addEventListener("change", async () => {
+  if (!reminder.enabled) return renderReminder();
+  try {
+    const sub = await currentSubscription();
+    if (sub) await saveReminder(sub);
+    renderReminder();
+    toast("Reminder time saved");
+  } catch (err) { renderReminder(err.message); }
+});
+
+$("reminderTest").addEventListener("click", async () => {
+  try {
+    await api("POST", "/push/test");
+    renderReminder("Test sent. It should arrive in a few seconds.");
+  } catch (err) { renderReminder(err.message); }
+});
+
+$("bellBtn").addEventListener("click", openReminderSheet);
+$("sheetClose").addEventListener("click", closeReminderSheet);
+$("reminderSheet").addEventListener("click", (e) => { if (e.target.id === "reminderSheet") closeReminderSheet(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeReminderSheet(); });
+
 // ---------- Loading ----------
 async function loadDay(date) {
   await saveNow(); // don't lose unsaved changes when switching days
@@ -494,6 +823,7 @@ async function loadDay(date) {
     state.day = day;
     renderTasks();
   } catch (e) { toast(e.message); }
+  loadReviews();
 }
 
 async function loadHistory() {
@@ -505,10 +835,12 @@ async function loadHistory() {
   } catch (e) { toast(e.message); }
 }
 
-const VIEWS = ["today", "library", "books"];
+const VIEWS = ["today", "library", "problems", "books"];
 async function showView(view) {
   if (!VIEWS.includes(view)) view = "today";
   state.view = view;
+  $("problemsView").classList.toggle("hidden", view !== "problems");
+  if (view === "problems") { renderProblems(); loadProblems(); }
   $("booksView").classList.toggle("hidden", view !== "books");
   if (view === "books") { renderBooks(); loadBooks(); }
   document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("is-active", b.dataset.view === view));
@@ -533,6 +865,7 @@ $("taskList").addEventListener("click", (e) => {
   const act = btn.dataset.act;
 
   if (act === "item-open") { toggleOpen(btn.dataset.id); return renderTasks(); }
+  if (act === "log-problem") return startLogProblem(state.date);
   if (act === "reveal") { state.revealed.add(btn.dataset.id); return renderTasks(); }
   if (act === "item-check") {
     const item = state.day.tasks[Number(btn.dataset.t)].items.find((x) => x.id === btn.dataset.id);
@@ -698,7 +1031,14 @@ function start() {
   showView(location.hash.slice(1));
   loadDay(todayKey()).then(loadHistory);
   loadBooks();
+  loadProblems();
+  refreshBell();
 }
 
 if (state.token) start();
 else showLogin();
+
+// Lets phones install the site as an app ("Add to Home Screen")
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
